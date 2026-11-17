@@ -8,7 +8,7 @@ import { Upload, FileText, ChevronRight, ChevronDown, Check, CheckCircle2, Alert
    ============================================================ */
 
 const CONTRACT_TEXT = "PROVIDER PARTICIPATION AGREEMENT\n\nCascadia Mutual Health (\"Payer\") and Ridgeline Physical Therapy Group (\"Provider\")\n\nEffective Date: January 1, 2025\nTerm: through December 31, 2027\n\n1. PARTIES AND FACILITIES\n1.1 This Agreement covers outpatient physical therapy services rendered at Provider facilities in Hartford CT, Stamford CT, Springfield MA, and Worcester MA.\n1.2 Payer entities covered by this Agreement are Cascadia Commercial and Cascadia Medicare Advantage.\n\n4. COMPENSATION\n4.1 Choice PPO (Cascadia Commercial). Provider shall be paid 78% of the Cascadia Outpatient Therapy Fee Schedule (Exhibit B) per unit of service, at all Provider facilities in CT and MA.\n4.2 Select HMO (Cascadia Commercial). Provider shall be paid a flat rate of $64.00 per visit, regardless of units billed, up to four units per visit. This rate applies at Provider facilities in CT only.\n4.3 Annual Escalator. On January 1 of each year beginning January 1, 2026, the rates in Sections 4.1 and 4.2 shall increase by 2.5%.\n4.4 Senior Plus (Cascadia Medicare Advantage). Provider shall be paid 95% of the current Medicare Physician Fee Schedule (Exhibit C) per unit of service, at all Provider facilities in CT and MA. Section 4.3 does not apply to Senior Plus.\n\n5. LICENSE AND STATE REQUIREMENTS\n5.1 Services furnished by a physical therapist assistant (PTA) and billed with modifier CQ shall be paid at 85% of the applicable rate.\n5.2 In Massachusetts, every claim line must identify the supervising licensed physical therapist as rendering provider. Lines without this identifier are not payable.\n\n6. UTILIZATION\n6.1 Select HMO members are covered for 30 visits per plan year. Authorization is required beginning with visit 13.\n\n9. DISPUTES\n9.1 Provider may dispute any payment that differs from the rates in this Agreement.\n9.2 Payment disputes must be submitted in writing within 180 days of the remittance date.\n\nEXHIBIT B. CASCADIA OUTPATIENT THERAPY FEE SCHEDULE (2025)\nCPT 97110 Therapeutic exercise, per 15 minutes: $42.00\nCPT 97140 Manual therapy, per 15 minutes: $39.50\nCPT 97530 Therapeutic activities, per 15 minutes: $48.00\nCPT 97112 Neuromuscular re-education, per 15 minutes: $46.00\nCPT 97161 Physical therapy evaluation, low complexity: $138.00\n\nEXHIBIT C. MEDICARE PHYSICIAN FEE SCHEDULE REFERENCE (national amounts)\nCPT 97110: $29.50\nCPT 97140: $27.80\nCPT 97530: $34.10\nCPT 97112: $33.40\nCPT 97161: $98.20";
-const SAMPLE_PDF_NW = "JVBERi0xLjQKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgKG9wZW5zb3VyY2UpCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUiAvRjMgNCAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL0Jhc2VGb250IC9IZWx2ZXRpY2EgL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcgL05hbWUgL0YxIC9TdWJ0eXBlIC9UeXBlMSAvVHlwZSAvRm9udAo+PgplbmRvYmoKMyAwIG9iago8PAovQmFzZUZvbnQgL1RpbWVzLUJvbGQgL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcgL05hbWUgL0YyIC9TdWJ0eXBlIC9UeXBlMSAvVHlwZSAvRm9udAo+PgplbmRvYmoKNCAwIG9iago8PAovQmFzZUZvbnQgL1RpbWVzLVJvbWFuIC9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nIC9OYW1lIC9GMyAvU3VidHlwZSAvVHlwZTEgL1R5cGUgL0ZvbnQKPj4KZW5kb2JqCjUgMCBvYmoKPDwKL0NvbnRlbnRzIDEwIDAgUiAvTWVkaWFCb3ggWyAwIDAgNjEyIDc5MiBdIC9QYXJlbnQgOSAwIFIgL1Jlc291cmNlcyA8PAovRm9udCAxIDAgUiAvUHJvY1NldCBbIC9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDIC9JbWFnZUkgXQo+PiAvUm90YXRlIDAgL1RyYW5zIDw8Cgo+PiAKICAvVHlwZSAvUGFnZQo+PgplbmRvYmoKNiAwIG9iago8PAovQ29udGVudHMgMTEgMCBSIC9NZWRpYUJveCBbIDAgMCA2MTIgNzkyIF0gL1BhcmVudCA5IDAgUiAvUmVzb3VyY2VzIDw8Ci9Gb250IDEgMCBSIC9Qcm9jU2V0IFsgL1BERiAvVGV4dCAvSW1hZ2VCIC9JbWFnZUMgL0ltYWdlSSBdCj4+IC9Sb3RhdGUgMCAvVHJhbnMgPDwKCj4+IAogIC9UeXBlIC9QYWdlCj4+CmVuZG9iago3IDAgb2JqCjw8Ci9QYWdlTW9kZSAvVXNlTm9uZSAvUGFnZXMgOSAwIFIgL1R5cGUgL0NhdGFsb2cKPj4KZW5kb2JqCjggMCBvYmoKPDwKL0F1dGhvciAoXChhbm9ueW1vdXNcKSkgL0NyZWF0aW9uRGF0ZSAoRDoyMDI2MTExNzIxNTkxNyswMCcwMCcpIC9DcmVhdG9yIChcKHVuc3BlY2lmaWVkXCkpIC9LZXl3b3JkcyAoKSAvTW9kRGF0ZSAoRDoyMDI2MTExNzIxNTkxNyswMCcwMCcpIC9Qcm9kdWNlciAoUmVwb3J0TGFiIFBERiBMaWJyYXJ5IC0gXChvcGVuc291cmNlXCkpIAogIC9TdWJqZWN0IChcKHVuc3BlY2lmaWVkXCkpIC9UaXRsZSAoXChhbm9ueW1vdXNcKSkgL1RyYXBwZWQgL0ZhbHNlCj4+CmVuZG9iago5IDAgb2JqCjw8Ci9Db3VudCAyIC9LaWRzIFsgNSAwIFIgNiAwIFIgXSAvVHlwZSAvUGFnZXMKPj4KZW5kb2JqCjEwIDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDExMTQKPj4Kc3RyZWFtCkdhdD1qP1o0W1cnWkp1JC40dHI5ODtHRycuRVNqa2svQ05lMCllZFJmbW9iTE4ncGVnQUJMX3NCQTA5QC0iWSVpVl9YMD1eaWo3TnBZPVhkXUYiWk0/YzlbVkhbcV8lcHVyUnJLTDFoKCN0PXFARzdaLSdUPEg/I2NDNS0hLERuRz8yOiNULV0uNyxVU291Iz5aSCQ2IU9LbUptO1I2VnVeIVVAR180UW8iWTFLL25uKzBccEphKiYrKiYkO19uZVJEJytTZCgtSSEtYDhyZVJjQGVMLmclZjJwIzJWKChVYnEqOWMnLzJXZnVRXi0iPFVRP0FrYiN0XE89STJedVZzPzlXZW9MSEdkcCQ1VGdJPl44PzQrZV8/KnEiMT1VQFs5J2cmZWw/PCw3ZC9sOihxQTlMXSlhZTg/aCR1LElMZjUkSD1TPlRPMTNSIWxRbiktUTNbUW85QWxJIXMtXzJEVywvRShARCVXbTlobUt0TSEvOj5kcFJeZCpkOylIWDtHaVEwcioxbmo6Jzw/WUI/bDo+QVg+W2kwRj8nRjNkLVVgaWZmSDIyVHJTWlsjJFdBdSFrayhCP3FRPlYqMD4rSzY2WkY/a0twPF4uaVhUNT0oQW4zPHNrcnNqI1kjUUwtcVJQaDt0TThJOWdvOidJaUlwMXBGOEooWD8vNThxRiRbZyJUK2tAczZSPj5CJUZEUlxgR09GMDRialA1dSp0KiFpOi5mL2w1ZkU0XTtUajVrSFFiWkBHPWVcSFNNXkhuSD84XFFlY05zQ1tcTGxRRlg4WmMqcEdtOjtDLFE+OmQlbW4xYCcnST09KU1yckYzTG5JNUsuJ0F0ZFJeXHBtZG5CckosJjRxKVskdEk9dXJCaUdSU147QT8lVmk7L20hQ0c+UUUxT1ooSjpjP11LO0VpK0JLXG5fUmxUa2B0XGwzLyIiaVBXKTdCU0kyaWE7J2srSDBqaWJNXS40TmZEKjBtKFhXb2k3dEZUXT9ZKER0VzpvcDAwUWpaOCcwY2YuYzI+WnBlJnJWYStsbUleTytNcHJxckA1NFVbO1F1biMjXXFmJDlUN0koUipnQGNxUnQiNlhKPDJXK09RXyFDLGtPNnEsaVE7JFdzMSFFKUk2LHFYNFF1QktGOEU1Vi1dPjc9QWdZXkZLY2VBKW9LaFUhTyMpZjUtWFBLP3BMOGw6MGM2VHNkNzIjSCVWO2csOTdOaCgkXTJiIjtxcm0pQnFnb0Y4LWhGdEdULl5bJDNraUQ8ISxcMmBcdTprZyM3IToyOU1vPCNULFY0IiI1YUQ2SFJOaEkyPlRuJFRrLkxtUiIkUi9NMDc3PmlSIipsb1JdKEROWmEwOyRRRVtLQVxOTzBNcyRtIk4kVWtDWXFZQHU0c2pMJylPc0JHK1xjJm4rPmxpOk1LOV5YIXNiSFNPPjsydUZmPi5tUm8hZk82ISFpWUJUbSxiQD1rUDAhVmdgUmJsfj5lbmRzdHJlYW0KZW5kb2JqCjExIDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDQyNgo+PgpzdHJlYW0KR2F0PlBoYlYqQyYtcV8hcj4iMnArMkkqcW0yKltMVGVoY1k5UGdGTV1JXW1PYyxPX2cmSDclIjcqVDJyX3BZPlQwJVteMkhOWnRwV2N0JDgsRE0qcSFuZ3M3K1AxX09EQG5WYGg0Uzk/K0ZsXUtGZ0AkMUZmXWdGb0pRS0VqRl8kVE1aJGcsMzdSLlw6WktRMV9AVzAnY0s4c0AzMTQodE5iOFhqKTxsMmBaS009SWhLJ0NWNiZVMTZsamA9UmQvQDpTVkk4PmkkL0AxYiIvOHVXZVVqaWhANW9DOF5mSTEjMlBPKjQ2Z1I0V0FMWXAvJkkjMkI8MG9SYSFuNEpaIU04JGBpKipXYGVsQGwiZVcsJ2FbO1hkZFhXPTxUQ1g2Xy80bEsiTlYzN1FoJjZwdUNHKFE8JWtPNWw3J2lnQi88UVY5dS44WWhBWilpMkVBQTJxOi88YTZUaE4wY1NIcFlMIlFdaEIvIUZoT29lXjlOQSs1aEZROF09SClqK09rSFhDNE1KQnNsK2c8ZDB0ZjAkRWdeJVAlITVjYSFOQEAhaSNmIzU8XX4+ZW5kc3RyZWFtCmVuZG9iagp4cmVmCjAgMTIKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDYxIDAwMDAwIG4gCjAwMDAwMDAxMTIgMDAwMDAgbiAKMDAwMDAwMDIxOSAwMDAwMCBuIAowMDAwMDAwMzI3IDAwMDAwIG4gCjAwMDAwMDA0MzYgMDAwMDAgbiAKMDAwMDAwMDYzMCAwMDAwMCBuIAowMDAwMDAwODI0IDAwMDAwIG4gCjAwMDAwMDA4OTIgMDAwMDAgbiAKMDAwMDAwMTE3MiAwMDAwMCBuIAowMDAwMDAxMjM3IDAwMDAwIG4gCjAwMDAwMDI0NDMgMDAwMDAgbiAKdHJhaWxlcgo8PAovSUQgCls8ZDBlNDYxOTkwM2FiY2M0MzExN2MzN2RhNmI4NTc1YmQ+PGQwZTQ2MTk5MDNhYmNjNDMxMTdjMzdkYTZiODU3NWJkPl0KJSBSZXBvcnRMYWIgZ2VuZXJhdGVkIFBERiBkb2N1bWVudCAtLSBkaWdlc3QgKG9wZW5zb3VyY2UpCgovSW5mbyA4IDAgUgovUm9vdCA3IDAgUgovU2l6ZSAxMgo+PgpzdGFydHhyZWYKMjk2MAolJUVPRgo=";
+const SAMPLE_PDF_NW = "JVBERi0xLjQKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgKG9wZW5zb3VyY2UpCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUiAvRjMgNCAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL0Jhc2VGb250IC9IZWx2ZXRpY2EgL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcgL05hbWUgL0YxIC9TdWJ0eXBlIC9UeXBlMSAvVHlwZSAvRm9udAo+PgplbmRvYmoKMyAwIG9iago8PAovQmFzZUZvbnQgL1RpbWVzLUJvbGQgL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcgL05hbWUgL0YyIC9TdWJ0eXBlIC9UeXBlMSAvVHlwZSAvRm9udAo+PgplbmRvYmoKNCAwIG9iago8PAovQmFzZUZvbnQgL1RpbWVzLVJvbWFuIC9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nIC9OYW1lIC9GMyAvU3VidHlwZSAvVHlwZTEgL1R5cGUgL0ZvbnQKPj4KZW5kb2JqCjUgMCBvYmoKPDwKL0NvbnRlbnRzIDEwIDAgUiAvTWVkaWFCb3ggWyAwIDAgNjEyIDc5MiBdIC9QYXJlbnQgOSAwIFIgL1Jlc291cmNlcyA8PAovRm9udCAxIDAgUiAvUHJvY1NldCBbIC9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDIC9JbWFnZUkgXQo+PiAvUm90YXRlIDAgL1RyYW5zIDw8Cgo+PiAKICAvVHlwZSAvUGFnZQo+PgplbmRvYmoKNiAwIG9iago8PAovQ29udGVudHMgMTEgMCBSIC9NZWRpYUJveCBbIDAgMCA2MTIgNzkyIF0gL1BhcmVudCA5IDAgUiAvUmVzb3VyY2VzIDw8Ci9Gb250IDEgMCBSIC9Qcm9jU2V0IFsgL1BERiAvVGV4dCAvSW1hZ2VCIC9JbWFnZUMgL0ltYWdlSSBdCj4+IC9Sb3RhdGUgMCAvVHJhbnMgPDwKCj4+IAogIC9UeXBlIC9QYWdlCj4+CmVuZG9iago3IDAgb2JqCjw8Ci9QYWdlTW9kZSAvVXNlTm9uZSAvUGFnZXMgOSAwIFIgL1R5cGUgL0NhdGFsb2cKPj4KZW5kb2JqCjggMCBvYmoKPDwKL0F1dGhvciAoXChhbm9ueW1vdXNcKSkgL0NyZWF0aW9uRGF0ZSAoRDoyMDI2MTExNzIyNTQ0NyswMCcwMCcpIC9DcmVhdG9yIChcKHVuc3BlY2lmaWVkXCkpIC9LZXl3b3JkcyAoKSAvTW9kRGF0ZSAoRDoyMDI2MTExNzIyNTQ0NyswMCcwMCcpIC9Qcm9kdWNlciAoUmVwb3J0TGFiIFBERiBMaWJyYXJ5IC0gXChvcGVuc291cmNlXCkpIAogIC9TdWJqZWN0IChcKHVuc3BlY2lmaWVkXCkpIC9UaXRsZSAoXChhbm9ueW1vdXNcKSkgL1RyYXBwZWQgL0ZhbHNlCj4+CmVuZG9iago5IDAgb2JqCjw8Ci9Db3VudCAyIC9LaWRzIFsgNSAwIFIgNiAwIFIgXSAvVHlwZSAvUGFnZXMKPj4KZW5kb2JqCjEwIDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDExMTEKPj4Kc3RyZWFtCkdhdD1qP1o0W1cnWkp1JC40dHI5ODtHSiguRVNqbGsvQ05lL2NKW1E9YjM7I04ncGVnQUJIMklWczoySy0iWSY8Vl5kTDJeaWo3TnBZPVhkXUYiWk0/YzlXKjQrS1ApcSMqdGlLTDIxMCNtTEZLRzdfX3BUPEg/K2NDNUNTYHRXSTNDUyYvOFtUQnR0NFJGdFlHX2BuLStARWFLVjAzQy9IXDleWktLbUwrPmQpYCVJcVI1RCU/bCMlLiUzWWFwYmciaTYyVzgyRyc1KjJJWkxdKGw2QkMvYS9fU1VWXlo6OXEqOWMlL0A6a0soU3JuX1VRP3ImYEU/Vmk9Oz1OSFZzQEQ3PGNkcyFkcWBAZGdLTENXPzNuWV1RLksxYlhGTjpuTVg+MihWb2ljQyg5JGRIO1JgT2pVZjJWMl0hVkBrYkknaUNgWTBSLCoyXnNMXCsiVEFlM01qam9rO3UuXyZMLyU9Tm89YC9YUk80aDwlZkg9bm5TaDI8cTRXTmxOMS1MLFplSFNgOCtPRTklXnAhQSd1P19mR1xkOUdVUkIhKTtwI2olWEg3NU8+RjxgZ3M1cCFKL2ZyZkpAKSwsNStRMEs5L1dTX15SRkNlXj1XXnIrXm1kWlZqKGwpLWVRITFwQ24+QSIpMltXaW45XSNFZHMkYlEnL047ck5aXVUoRmlnUStcY0dadDpcTkU8WU4hQ1I0JUhrL1FVTjAqPCw5MyJWJGU/TEBlNl8hUTBWTUFEW1E0QmpIN1dXckVXbkwqRF5wWi1JN0dzJCZRNVciLlg7QiFMZV9jJ0M2KzQ2RVs0OXUkJjgiOmU7VyRNQEpBb0wtRyYjKElrOEw8YyxcQmJpYzFFVXJlIy9MSytQN0ZOMyc0ImRxOUdEK1hbRk80OCFpOCIjPzdYZSdkJ2E5PUIqcWFRKVgzPWlWK25eKDA9WmhOJiI+SjcuRixMLD0zKGczWW9nOyYxZSg7V3IqWmY6aXQ6ZFVfImtNaztpcUFjSGkia08zZ3RpVyplaTZZcDRWO3JFbCk1a29ldG9tSzhwTj9fcjhkK2xza2s/LUY8TmY5cCtbVlphdTNtaEM3RmhdaTFgXUkvajREZiUlWUpnTVFqP1IrT0UuUiNBM1MuQkJqNmhmOztOYGNxN0cjPUVqb3JnPlpqZF5FWENVZEZOIy87ZGM/SD11Q1VXZDdXKElIN2dPOGEqXVdgTl47PjVnZnIrPSVVIWlVU0E0YCRPMVBsY2dHQmVULGc0PkdfJ100Zyw+cCg/N1BJWzdsTUpfVHM8Lm9RI09jcERoWEUtJ0s/QVhJU3NXaDNFUHRLVCpLXlBIWUxqMkNFY10nXyplYjwmNGMmc01tRTo6PjxJdGNsX1dIdCx0JztIWWlqbiwmOFJVTlM0UGRjRC0vTTgpQ0FcLVxJNElQSz9sX1AoZD1RMTwsS1FqVyFvIjg5Q2xEcWFgdUhHSnVgaFBcXCdtfj5lbmRzdHJlYW0KZW5kb2JqCjExIDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDUwOQo+PgpzdHJlYW0KR2F0VW8/I1MxRydTYylSLylDWXEyP1kwTj9WUG4hNilJWTYyUkpiTUJmRWpnVUlQJi1ObWhrRipdSzxgNXBEKy05PjNBSDUwbWBSMTtVQVZcbTpXO1EsKV4kIWRQPyRUWUxqVmhCPEpwbWg3YSk6MUhcdWE+VmVBZ1hZckpNKjQ9KFA5UGgyOkBXZC1NMnNHRlAjIiRbWC8zVktfLnBYcTJdbkJlXChFNiJaR2w0TWtAQ2d1aC1PRFNJIlFaYCxedXR1OlMhNS1lRE1fKSM+bXUjNDZpaXNBcDpHWSosMyE1TSo1WF1QcW88LGQnLFxeYW4lZjEpI1FKZTllJWlkJyJKUThmJUhYIVVFb1ZjWzhbVS0tMEJJN2Ela2guJE1hVTZKXF04JVhENSdDVlhvJyFVRWRldTdiZF0tVS1sXEZwSWxLSjplI0hSO1tDSSQjOFApbk5JUUJmLnJLSzhbWiwqXTlMSkQlYzxIXFM8RUZTWGY6Y1c0V0I0OS4sLERpazdgZl1baSdVUFAtXWIiOUxUSltJXyU0XFkmaXV0ZyctaUFUR00iSTZOQXBIYGMscilWN0RqVytvPV9wJ0gxQ29eZmQnanVqUk5dRUFyXGl1SWYtViknXihMWWFmN0pQM05lZFRQcmZxKF8sJmBGXlVbZUQhdGBAM3Fafj5lbmRzdHJlYW0KZW5kb2JqCnhyZWYKMCAxMgowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwNjEgMDAwMDAgbiAKMDAwMDAwMDExMiAwMDAwMCBuIAowMDAwMDAwMjE5IDAwMDAwIG4gCjAwMDAwMDAzMjcgMDAwMDAgbiAKMDAwMDAwMDQzNiAwMDAwMCBuIAowMDAwMDAwNjMwIDAwMDAwIG4gCjAwMDAwMDA4MjQgMDAwMDAgbiAKMDAwMDAwMDg5MiAwMDAwMCBuIAowMDAwMDAxMTcyIDAwMDAwIG4gCjAwMDAwMDEyMzcgMDAwMDAgbiAKMDAwMDAwMjQ0MCAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9JRCAKWzwyYWY5YTdjYWZhZDc4M2NjMzkxMTRhYzRjODIyMDQwZj48MmFmOWE3Y2FmYWQ3ODNjYzM5MTE0YWM0YzgyMjA0MGY+XQolIFJlcG9ydExhYiBnZW5lcmF0ZWQgUERGIGRvY3VtZW50IC0tIGRpZ2VzdCAob3BlbnNvdXJjZSkKCi9JbmZvIDggMCBSCi9Sb290IDcgMCBSCi9TaXplIDEyCj4+CnN0YXJ0eHJlZgozMDQwCiUlRU9GCg==";
 const SAMPLE_PDF_HB = "JVBERi0xLjQKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgKG9wZW5zb3VyY2UpCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUiAvRjMgNCAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL0Jhc2VGb250IC9IZWx2ZXRpY2EgL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcgL05hbWUgL0YxIC9TdWJ0eXBlIC9UeXBlMSAvVHlwZSAvRm9udAo+PgplbmRvYmoKMyAwIG9iago8PAovQmFzZUZvbnQgL1RpbWVzLUJvbGQgL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcgL05hbWUgL0YyIC9TdWJ0eXBlIC9UeXBlMSAvVHlwZSAvRm9udAo+PgplbmRvYmoKNCAwIG9iago8PAovQmFzZUZvbnQgL1RpbWVzLVJvbWFuIC9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nIC9OYW1lIC9GMyAvU3VidHlwZSAvVHlwZTEgL1R5cGUgL0ZvbnQKPj4KZW5kb2JqCjUgMCBvYmoKPDwKL0NvbnRlbnRzIDEwIDAgUiAvTWVkaWFCb3ggWyAwIDAgNjEyIDc5MiBdIC9QYXJlbnQgOSAwIFIgL1Jlc291cmNlcyA8PAovRm9udCAxIDAgUiAvUHJvY1NldCBbIC9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDIC9JbWFnZUkgXQo+PiAvUm90YXRlIDAgL1RyYW5zIDw8Cgo+PiAKICAvVHlwZSAvUGFnZQo+PgplbmRvYmoKNiAwIG9iago8PAovQ29udGVudHMgMTEgMCBSIC9NZWRpYUJveCBbIDAgMCA2MTIgNzkyIF0gL1BhcmVudCA5IDAgUiAvUmVzb3VyY2VzIDw8Ci9Gb250IDEgMCBSIC9Qcm9jU2V0IFsgL1BERiAvVGV4dCAvSW1hZ2VCIC9JbWFnZUMgL0ltYWdlSSBdCj4+IC9Sb3RhdGUgMCAvVHJhbnMgPDwKCj4+IAogIC9UeXBlIC9QYWdlCj4+CmVuZG9iago3IDAgb2JqCjw8Ci9QYWdlTW9kZSAvVXNlTm9uZSAvUGFnZXMgOSAwIFIgL1R5cGUgL0NhdGFsb2cKPj4KZW5kb2JqCjggMCBvYmoKPDwKL0F1dGhvciAoXChhbm9ueW1vdXNcKSkgL0NyZWF0aW9uRGF0ZSAoRDoyMDI2MTExNzIxNTkxNyswMCcwMCcpIC9DcmVhdG9yIChcKHVuc3BlY2lmaWVkXCkpIC9LZXl3b3JkcyAoKSAvTW9kRGF0ZSAoRDoyMDI2MTExNzIxNTkxNyswMCcwMCcpIC9Qcm9kdWNlciAoUmVwb3J0TGFiIFBERiBMaWJyYXJ5IC0gXChvcGVuc291cmNlXCkpIAogIC9TdWJqZWN0IChcKHVuc3BlY2lmaWVkXCkpIC9UaXRsZSAoXChhbm9ueW1vdXNcKSkgL1RyYXBwZWQgL0ZhbHNlCj4+CmVuZG9iago5IDAgb2JqCjw8Ci9Db3VudCAyIC9LaWRzIFsgNSAwIFIgNiAwIFIgXSAvVHlwZSAvUGFnZXMKPj4KZW5kb2JqCjEwIDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDEwNTIKPj4Kc3RyZWFtCkdhdD0pPkU+NzUnUmxaXW5Zb0VfbCJcRF1nYlMrNSlxWyghLGEyIWU2V1xeK0oyO0VSLThkK3BxV21tQzlWdE5RQmRaNGs1altQImskcyxQPyooZVIoJT9GKV5dJVlMMCUpPj1uK11HV09lYGUjMCVmNCprblYoJzk3dUtgViNSPVwwNSk4TldZP1laVy86cnVnKyc3QENQNVgsJGdHdG9hNW8oNShcOztQQGk7RENbbjJPKEZJT0QxaigmbVM+ZVdRJCs0PENDcVJcMjBodWQ4Xy4nQGsxNUNPJ3AoY01ERWJsX0g9X25dYG5JKWtuY1hnJ1Y5I2VVaGAxXjJIOCleVFRZY14tPDldRyguXGs/JFJrYTAhU1M3NEZNO10nKCcjbklmT1oxdUVHI1g2WHJcOlhKY0BrNUNlcFNPIVNgKWt1N2JTa2dOX0RGSjB1PzZDUi1EdCdAIVFLbyVJOlVoJnMqKDtUTTRiKC5Fa2lyVU42JmI3P2AkLGxGU14/a1RBJWM4LilkaltbN3VkQl1XXkFWSEg1K1Q+QXElJ103W05edVosMTw4YUgmQFI8bGJKQlNkVWdtKCYyWko5JHRIKEdnKz8vakNIJEw7L3NTRDc/Mz1CSlo7ZSdgYkBfNmpQVTZfMyswb2M9XDwySTg5RyZgM05uXlJrJTFaNzdbXmQmSjhrTChxTCU3LCNPQ1UmMTBMR2AkaTg/QXE4bVNJXEw1NmdfOTNJOCFeIUhILkhqKF1mPCgyP1JhZVN0QCQ7PExEYkVBUlwicCVePV5jKUc7Uk5rUHFtI2YwTlIzJD9NLEFqJUArPUo2aUg6OkxILmQzX0NYcDRIZlY5YlEvRHRBOiVpNGhFMk5QKSE8ckpbZFomXSJZcixbQzZmR24hUGFKbjpmS3ItdWdGbDptbT5FQSNRTyksNUxlJ0pWLGsoRWMpOU86b3UvPGZPVVtPZkUxXURiKEhdXC1zQEw5cCMmUXNXQEFqVGEqXjdeUUpMZEloKmZEL1hgVE4/NiZWPz8wMStXKjVAOjE6Tk1wbDFIL241dSldNko9TGkuOzJqPCxwbVxoYkpodWNiLXMnNEFUU0koSmNrNF1nM0YqcjQ7N2RoaDJGaUdaajkyK2tQci5RN0cvLS1LY2xbQGZTYCxuJ2krJ0AuP01rYj1NanI4TFVALkBWUyxCdV44RDw3PjIrPVkvZjcpSiozaXMwKT4lblhmXTBPLWEpS04qYGVZLXRaKzpnUHEubHVCVlBga1lWPFEyV2lsQmNDLTdfXT9PVXJpIkVaMjFqWGhBSkk0K0I5JWdwRy07SVJ1VTcuJVlnIUdXR0c4UWFbJ0l0O1JfQlVTJGlxLWdKYDI4MWRza15XN3EvIWUjalcyYDUwRm07KmZyI34+ZW5kc3RyZWFtCmVuZG9iagoxMSAwIG9iago8PAovRmlsdGVyIFsgL0FTQ0lJODVEZWNvZGUgL0ZsYXRlRGVjb2RlIF0gL0xlbmd0aCAzNzYKPj4Kc3RyZWFtCkdhdD1lYj4sci8mNFE/aE1TITlEK3UjRUFPK3BybyMuNz46LHJIKCtEQmBTaDstdTsmN0s6KT5LUmc6XzZvOzFjVVteTGYyU2xkaWVMaWJxSkUsZFA1VF1cTmFDZF4zJ0llNWkqO1orX3E/Wi02JWJtUlpwJTRfYE8zcjA3NGdWQ0I0VjFVQl8pXDlzKGxtKG1ka2g0X04wQSlJT0M9SDgtR3NATDZDLitfSlMiIik5ZXQpJGdCRSczXkhALGpEOlJUZ3I+UnFqRjJTWlEkYmhjYmhiLWx0IVZuMVA6a2NSIT8+PmswLlc5O20xJGNIMiFeWT0+XmlxTlZbakdJV1g/O01jRkokT3NrWyltVypWQVdAY1VGZkNXYDY6Ji48bG1BUmhdYVNsZlwiXTA5K2gqOUhoVkBmP2oobF4pMyEhQzpDPFwmO3FHYUslUCJEJkpGNixBImdpZTJhQUdUW0pBcCg6ZGxaQ0hIYz08IXA5XS5aR2Qrfj5lbmRzdHJlYW0KZW5kb2JqCnhyZWYKMCAxMgowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwNjEgMDAwMDAgbiAKMDAwMDAwMDExMiAwMDAwMCBuIAowMDAwMDAwMjE5IDAwMDAwIG4gCjAwMDAwMDAzMjcgMDAwMDAgbiAKMDAwMDAwMDQzNiAwMDAwMCBuIAowMDAwMDAwNjMwIDAwMDAwIG4gCjAwMDAwMDA4MjQgMDAwMDAgbiAKMDAwMDAwMDg5MiAwMDAwMCBuIAowMDAwMDAxMTcyIDAwMDAwIG4gCjAwMDAwMDEyMzcgMDAwMDAgbiAKMDAwMDAwMjM4MSAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9JRCAKWzw2YmJiY2EwOTZlN2U5OWQ0NjgyMGY3YTMyMzNkZDA5MT48NmJiYmNhMDk2ZTdlOTlkNDY4MjBmN2EzMjMzZGQwOTE+XQolIFJlcG9ydExhYiBnZW5lcmF0ZWQgUERGIGRvY3VtZW50IC0tIGRpZ2VzdCAob3BlbnNvdXJjZSkKCi9JbmZvIDggMCBSCi9Sb290IDcgMCBSCi9TaXplIDEyCj4+CnN0YXJ0eHJlZgoyODQ4CiUlRU9GCg==";
 const SAMPLE_PDF_B64 = "JVBERi0xLjQKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgKG9wZW5zb3VyY2UpCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUiAvRjMgNCAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL0Jhc2VGb250IC9IZWx2ZXRpY2EgL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcgL05hbWUgL0YxIC9TdWJ0eXBlIC9UeXBlMSAvVHlwZSAvRm9udAo+PgplbmRvYmoKMyAwIG9iago8PAovQmFzZUZvbnQgL1RpbWVzLUJvbGQgL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcgL05hbWUgL0YyIC9TdWJ0eXBlIC9UeXBlMSAvVHlwZSAvRm9udAo+PgplbmRvYmoKNCAwIG9iago8PAovQmFzZUZvbnQgL1RpbWVzLVJvbWFuIC9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nIC9OYW1lIC9GMyAvU3VidHlwZSAvVHlwZTEgL1R5cGUgL0ZvbnQKPj4KZW5kb2JqCjUgMCBvYmoKPDwKL0NvbnRlbnRzIDExIDAgUiAvTWVkaWFCb3ggWyAwIDAgNjEyIDc5MiBdIC9QYXJlbnQgMTAgMCBSIC9SZXNvdXJjZXMgPDwKL0ZvbnQgMSAwIFIgL1Byb2NTZXQgWyAvUERGIC9UZXh0IC9JbWFnZUIgL0ltYWdlQyAvSW1hZ2VJIF0KPj4gL1JvdGF0ZSAwIC9UcmFucyA8PAoKPj4gCiAgL1R5cGUgL1BhZ2UKPj4KZW5kb2JqCjYgMCBvYmoKPDwKL0NvbnRlbnRzIDEyIDAgUiAvTWVkaWFCb3ggWyAwIDAgNjEyIDc5MiBdIC9QYXJlbnQgMTAgMCBSIC9SZXNvdXJjZXMgPDwKL0ZvbnQgMSAwIFIgL1Byb2NTZXQgWyAvUERGIC9UZXh0IC9JbWFnZUIgL0ltYWdlQyAvSW1hZ2VJIF0KPj4gL1JvdGF0ZSAwIC9UcmFucyA8PAoKPj4gCiAgL1R5cGUgL1BhZ2UKPj4KZW5kb2JqCjcgMCBvYmoKPDwKL0NvbnRlbnRzIDEzIDAgUiAvTWVkaWFCb3ggWyAwIDAgNjEyIDc5MiBdIC9QYXJlbnQgMTAgMCBSIC9SZXNvdXJjZXMgPDwKL0ZvbnQgMSAwIFIgL1Byb2NTZXQgWyAvUERGIC9UZXh0IC9JbWFnZUIgL0ltYWdlQyAvSW1hZ2VJIF0KPj4gL1JvdGF0ZSAwIC9UcmFucyA8PAoKPj4gCiAgL1R5cGUgL1BhZ2UKPj4KZW5kb2JqCjggMCBvYmoKPDwKL1BhZ2VNb2RlIC9Vc2VOb25lIC9QYWdlcyAxMCAwIFIgL1R5cGUgL0NhdGFsb2cKPj4KZW5kb2JqCjkgMCBvYmoKPDwKL0F1dGhvciAoXChhbm9ueW1vdXNcKSkgL0NyZWF0aW9uRGF0ZSAoRDoyMDI2MTExNjIyMzQ1NyswMCcwMCcpIC9DcmVhdG9yIChcKHVuc3BlY2lmaWVkXCkpIC9LZXl3b3JkcyAoKSAvTW9kRGF0ZSAoRDoyMDI2MTExNjIyMzQ1NyswMCcwMCcpIC9Qcm9kdWNlciAoUmVwb3J0TGFiIFBERiBMaWJyYXJ5IC0gXChvcGVuc291cmNlXCkpIAogIC9TdWJqZWN0IChcKHVuc3BlY2lmaWVkXCkpIC9UaXRsZSAoXChhbm9ueW1vdXNcKSkgL1RyYXBwZWQgL0ZhbHNlCj4+CmVuZG9iagoxMCAwIG9iago8PAovQ291bnQgMyAvS2lkcyBbIDUgMCBSIDYgMCBSIDcgMCBSIF0gL1R5cGUgL1BhZ2VzCj4+CmVuZG9iagoxMSAwIG9iago8PAovRmlsdGVyIFsgL0FTQ0lJODVEZWNvZGUgL0ZsYXRlRGVjb2RlIF0gL0xlbmd0aCAxNDU0Cj4+CnN0cmVhbQpHYXRVMkA7aG8xJkgvMi0wZm8hJ1YiLkE5Mk5FNEMzLzphRGBBK1ZoLm9sRE5MO2RzNCRiJE1YXSJidGNNbnF1RkUoVlRRTTZQWyRII01UUSkkMzInJkclaikhNThVKmdHSyJANlAnPjs+QFJxVl8kZVEmU1dWcyVRVyc5cUNqWyw4KWstNlZtTDUvPTJVVl9bJSY7SD8tOUAkJGxQUGc/clhxVjxtXVRdQS8/WldDcSFMMUZiU1J1NC82NnVRSVUuPFdkXm9sPitTWm4tP2Y9cSkhamdlRWtCUjUwO28tWHEtYCFyS0VGJTAlI1ZrTl8/LlxuQldmVF0/X1FrWEFSX2ZOL0JwbGNzcSQzTjVSL0hHdSFFO0lrazBdM2M+VlBaMktBbiZnKSdobyhpVyo9cz81O1VRYmtGNFRCLFZKVGBCMGxycHNKVHVgSHVVS19OT0AqPmdcXl9MPlN1L1cmdCV0SjNDOTFoQz04ZFwqIi1kYldcQ14rUT9aLj0iSW44UTpWcURxKERSODNPO2luQz9NbnNiImJqNyJaXEc/Jj8/Uy1bZlE2ayRFaTRcaWNfIjtIaDM7Z14uYChnJCgraWlQXS1mbzosOCtpOypwWj1SOGY4TEFPL3RsXkY6J2lQWGUuai1NS1c1JDckOmAjOFI9bFRodSc1MXVwKytVQytNRThqOiJgWkFgaUJfKXJSTVZQTW8wVG9gT0dAYTxDLVFMO1Ewbl10SExyIj5iVj8pbk0wR2guNWRZSlJgYWE8KHQjPylpSTg4QEFiVnEyPms3KTczWytjYS9TUE88WV5VYztTcWwjVXRxPGBUcCE/LlNAOV5yVC1oZTwmPHJcb1BXMzwvWFdgLV4zQCVATm1qS0pJWklPTFcwTVhrajJIWj5ZTCFoQTg5cWtQOi1xYmA5aUtcIi1uKC0xbW1rSC9YZT9ERFgmYGFfRGlPJ2YxQnM9JkA4VzpGYmlTZWVuMT88UCRpM2tTWXEoQTkpIiZma0pRQUdoZXVfOWdSQ1RKbUxoU1xvTy1tcDhWQD8yR1c4TTpgRyRaVDguMkZTYWkmJSo2LT1eZ04xYDVzbG5UKXUzLE1BKyItdFEkOHBHO21YW1FJOGUxXVRBcjE1QGltalJKJCFdTiteOCN1P0knZVYoVGhYZFoubVVrYURiU0Mrck4pTSdEbCpeTGpxSzkxLmdfK0w0Wz8pKGpjOV0zXmI3IWEjXSNXLjhQVkVZcTgkIylOIWlmK3VqXFBSaElDb1BqLFhmblI1UllzdXRXZ04za2dOI0xPVURybjpzJiZPS2QkcXQuJChhZlpkbjJiPDYvckMjM15TbEVBa3EpK0AzcWJZVC0nVCIqbWdGN2Y2ViEsSXNbdDdbOCFWUjA/V2ZCT2RBTysjOypENEo5cmBRQjNqOE5OPTQrJjohVSQlRnRsTEpvPzpuJyJFKi82ZzpNaTpYTmJxPTQhSk5ncUtDaEgpSWJlUmNuTCtAM14jZFlhNUloOTtLLm9OMVA8RTNQJEIvLzkmVyJJRk0mU1hFMCUmI2g2WlVBaXU0NkYmXWAhQEA9SjVdI247b2dhYnBybzRYbjpVRUNkUVFoJDFSSlBRImtdUSJHMENHODo3RyNRUGdMO1FNRyIhI1NKUCIsJixiKTQ0RFlXdDZPKyQibXEhMFZ0YktkLkFhQltvYWpnJEJdS2VvPks1UCVcWENJN3BZKnBAcnU5IV9EUy1cYTJeJCovKTxtJkxdb3FUJylNLUJEVVFJS0xcPCYxNDlXME5yVW5ZODkjcylJTEBOQzczS2ZmZDtdMnNlRWU2QGQpSDpTP1tEcyg0cUxDSXQkZXUqUlA1SltlPjhPWzBaWXBSOzQmK2IzL2E1YFAtNEd1NTVDcF5kI0QoQFxBXE9ZS1IwP1pNTlcwUmZZZk9dN0ltQHFXcF1+PmVuZHN0cmVhbQplbmRvYmoKMTIgMCBvYmoKPDwKL0ZpbHRlciBbIC9BU0NJSTg1RGVjb2RlIC9GbGF0ZURlY29kZSBdIC9MZW5ndGggMjgyCj4+CnN0cmVhbQpHYXQ9YjV1NUJQJSMrMEsoJTk0J1BeODpuKl5QQWtMSj5vNWFCIzJBLkkhLy45YD1dRlYqYTFZIUVsa2xrTkFiKGN0TGZoOkI+XHVcOWZPSylUST1kb2BqT2YwO2M8W1pvQi5PZlhAb048R1ExdW9wKjg9OlFrXFs5dDpNVlNGVEszRFZDUGA6VycrITMkSG9cU142SXIoY0csS2dGNyhVYUxgME0zNipKY1YnMmVTODYuXmY3cFVNXjtrS0c4XTNgPSRedF1ePktAWHMxbT0tZ21aIVU8Q11Tbk9WXzMnbCNBKzFcdCdwPEEnaWFcJU09L0g4VzI8YUNrMHQ7LjIvbGlvZVhLcT9RVXRfPTA6bmReZScyISRtfj5lbmRzdHJlYW0KZW5kb2JqCjEzIDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDU2NAo+PgpzdHJlYW0KR2F0VW9iQVEmZyY0UT9tTUhQJlsnSjJbTVVgU0A2MSg9VV4+aCpHOiMwOTgxUiJVLzdYc0JuN2hqNzYoKCtwIjY6ZElAKV8uYDhRYmU0LmBJOlc2ayd1My9RamJhJjMrPFErZmAnQFhbT0woUThvJSJcM2koKEx1W1BeMXVnO2ZXW05WbzQqSzw0RFJxRT8yRkIkQTZnRmgxKmkvLmEpcy9yPnAvJHQhcGAoPF1abixmbUNHYG47ckZLUmRANig8YDB0IUkmVUIuRE5MKSE7UWBYYHJZN2pJRSsjQkdKVUxiKF82bGlASkMrbEEua1ZlJi5KLCRbSj0tcz81SzhAPCpTUV1JPWYuSUxYbylMVkg7UmlwcVM7cGZTUkd0QS40NE8zajI3YTY5aW08OiZvTU5pYmViQlJnUXNFaiN1SGxZRmZzQDxIaTBraU9NXDhaVk5haktvSWopO2pqZEJBX29iUzUtJyQvakxvSHI7X1wxZyhgbmddMEt0J1NsLVNcU21wU0lFa0c8SSEuQFhbQDF0Qjw+MD1qQU0pV0k9QiUxYnQhSiNmMGlfTlslX1BwIVJQYjs+J2Ihal9MZC9rc2M9Ri5CIy09R2EwNCxYXDxrT1prR1UxJDxpNFIoRGJBLkg9c01dYTstWlUkKT9zVTwzREIhPylYUidZNSQyYWk6W28pKUI4RUVAXlBDREJqNyJuLjlYa0drYU4kQ19gWlU7Nz9WR1k4MmlGRGluQz1SS34+ZW5kc3RyZWFtCmVuZG9iagp4cmVmCjAgMTQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDYxIDAwMDAwIG4gCjAwMDAwMDAxMTIgMDAwMDAgbiAKMDAwMDAwMDIxOSAwMDAwMCBuIAowMDAwMDAwMzI3IDAwMDAwIG4gCjAwMDAwMDA0MzYgMDAwMDAgbiAKMDAwMDAwMDYzMSAwMDAwMCBuIAowMDAwMDAwODI2IDAwMDAwIG4gCjAwMDAwMDEwMjEgMDAwMDAgbiAKMDAwMDAwMTA5MCAwMDAwMCBuIAowMDAwMDAxMzcwIDAwMDAwIG4gCjAwMDAwMDE0NDIgMDAwMDAgbiAKMDAwMDAwMjk4OCAwMDAwMCBuIAowMDAwMDAzMzYxIDAwMDAwIG4gCnRyYWlsZXIKPDwKL0lEIApbPGQyZjk0MDJlNTA5MGYzMDhlMzg2NDRhZmRlODNmMmRkPjxkMmY5NDAyZTUwOTBmMzA4ZTM4NjQ0YWZkZTgzZjJkZD5dCiUgUmVwb3J0TGFiIGdlbmVyYXRlZCBQREYgZG9jdW1lbnQgLS0gZGlnZXN0IChvcGVuc291cmNlKQoKL0luZm8gOSAwIFIKL1Jvb3QgOCAwIFIKL1NpemUgMTQKPj4Kc3RhcnR4cmVmCjQwMTYKJSVFT0YK";
 
@@ -37,6 +37,7 @@ const METHOD = { percent_of_fee_schedule: "% of fee schedule", per_visit: "Per v
 const NUMBERS = { cascadia: "CTR-2025-0147", summit: "CTR-2024-0112", keystone: "CTR-2025-0063" };
 function buildContract({ contract, plans, feeSchedules, terms }, extra = {}) {
   const c = { ...contract, ...extra };
+  c.feeSchedules = feeSchedules || {};
   c.number = c.number || NUMBERS[c.id] || "CTR-" + String(c.effectiveStart || "2026").slice(0, 4) + "-0000";
   c.rows = plans.flatMap((p) => {
     const fs = (feeSchedules && feeSchedules[p.feeSchedule]) || {};
@@ -100,7 +101,7 @@ function calcUnit(row, contract, dos, on, cq) {
   let v;
   if (row.method === "percent_of_fee_schedule") {
     if (row.base == null) { steps.push({ k: "miss", label: `${row.discount}% of ${row.basis || "a fee schedule"}`, note: "That fee schedule is not in this contract", value: null }); return { steps, amount: null }; }
-    steps.push({ k: "fs", label: `Fee schedule, CPT ${row.cpt}`, note: "Contract exhibit", value: row.base });
+    steps.push({ k: "fs", label: `Fee schedule, CPT ${row.cpt}`, note: row.basisResolved ? "Loaded schedule: " + row.basisResolved : "Contract exhibit", value: row.base });
     v = r2((row.base * row.discount) / 100);
     steps.push({ k: "disc", label: `Contracted rate, ${row.discount}% of fee schedule`, note: `${fmt(row.base)} x ${row.discount}%`, value: v });
   } else if (row.method === "percent_of_billed_charges") {
@@ -819,6 +820,7 @@ function AddContractFlow({ mode = "pdf", onCancel, onPublish, setAiHook }) {
       if (!pageTexts) { pageTexts = []; for (let i = 0; i < fullText.length; i += 3500) pageTexts.push(fullText.slice(i, i + 3500)); }
       const isSample = /cascadia mutual health/i.test(fullText) && /exhibit b/i.test(fullText);
       const out = isSample ? await readSpecialized(id, fullText, it, t0) : await readGeneric(id, pageTexts, it);
+      out.contract.pages = vw && vw.kind === "pdf" ? vw.index.pages.length : null;
       patch(id, { status: "done", result: { contract: out.contract, kind: out.kind, liveA: out.liveA, liveB: out.liveB, ms: Date.now() - t0 }, stage: 99 });
     } catch (e) {
       patch(id, { status: "error", error: String((e && e.message) || e) });
@@ -1131,6 +1133,52 @@ const COLS = [["payer", "Payer"], ["group", "Payer group"], ["ptype", "Plan type
 const RIGHT = { fs: 1, rate: 1, exp: 1 };
 const toneOf = (g) => (g === "Commercial" ? "teal" : g === "Medicare" ? "navy" : g === "Medicaid" ? "plum" : "grey");
 const Cut = ({ children, w = 240 }) => <span className="cut" style={{ maxWidth: w }} title={typeof children === "string" ? children : undefined}>{children}</span>;
+function formulaOf(r, c, calc) {
+  if (calc.amount == null) return "";
+  const parts = [];
+  calc.steps.forEach((s) => {
+    if (s.k === "fs") parts.push(fmt(s.value));
+    else if (s.k === "disc") parts.push(r.discount + "%");
+    else if (s.k === "flat" || s.k === "unit") parts.push(fmt(s.value));
+    else if (s.k === "esc" && s.active) parts.push((1 + c.escalatorPct / 100).toFixed(3));
+    else if (s.k === "pta" && s.active) parts.push(c.ptaPct + "%");
+  });
+  return parts.length < 2 ? "" : parts.join(" \u00d7 ") + " = " + fmt(calc.amount);
+}
+/* Hover card on the Expected allowed amount: shows how the number was built (Allison's comment on the PM doc) */
+function CalcHover({ r, c, on }) {
+  const [pos, setPos] = useState(null);
+  const ref = useRef(null);
+  const calc = calcUnit(r, c, TODAY, on, false);
+  const show = () => {
+    const el = ref.current; if (!el) return;
+    const b = el.getBoundingClientRect(); const W = 330;
+    const below = window.innerHeight - b.bottom > 330;
+    setPos({ left: Math.max(8, Math.min(window.innerWidth - W - 8, b.right - W)), top: below ? b.bottom + 6 : "auto", bottom: below ? "auto" : window.innerHeight - b.top + 6 });
+  };
+  const note = r.method === "per_visit" ? "Paid once per visit, whatever the number of units." : calc.amount == null ? "" : ["case_rate", "per_diem", "per_code", "other"].includes(r.method) ? "Paid as written in the contract." : "Per claim line: this amount \u00d7 the units billed.";
+  return (
+    <span className="hovr" ref={ref} tabIndex={0} onMouseEnter={show} onMouseLeave={() => setPos(null)} onFocus={show} onBlur={() => setPos(null)}>
+      {calc.amount == null ? <span className="muted">n/a</span> : <span className="b">{fmt(calc.amount)}<span className="sub">{unitSuffix(r)}</span></span>}
+      {pos && (
+        <span className="calc-pop" role="tooltip" style={{ left: pos.left, top: pos.top, bottom: pos.bottom }} onClick={(e) => e.stopPropagation()}>
+          <span className="cp-h">How this was calculated</span>
+          {formulaOf(r, c, calc) && <span className="cp-f">{formulaOf(r, c, calc)}</span>}
+          {calc.steps.map((s, i) => (
+            <span key={i} className={"cp-row" + (s.rule && !s.active ? " off" : "")}>
+              <span className="cp-l"><span className="b">{s.label}</span><span className="muted">{s.note}</span></span>
+              {s.rule && <Chip tone={s.active ? "moss" : "grey"}>{s.active ? "Rule on" : "Rule off"}</Chip>}
+              <span className="cp-v">{fmt(s.value)}</span>
+            </span>
+          ))}
+          <span className="cp-t"><span>Expected allowed</span><span>{fmt(calc.amount)}</span></span>
+          {note && <span className="cp-n">{note}</span>}
+          <span className="cp-n">Select the row to try other service dates or a PTA.</span>
+        </span>
+      )}
+    </span>
+  );
+}
 const CELLS = {
   payer: (r) => r.payer,
   group: (r) => <Chip tone={toneOf(r.payerGroup)}>{r.payerGroup}</Chip>,
@@ -1138,7 +1186,7 @@ const CELLS = {
   cpt: (r) => <Cut w={170}>{r.cpt}</Cut>, method: (r) => METHOD[r.method] || r.method,
   fs: (r) => (r.base != null ? fmt(r.base) : r.basis ? <Cut w={190}>{r.basis}</Cut> : "n/a"),
   rate: (r) => (r.flat != null ? fmt(r.flat) : r.discount != null ? r.discount + "%" : "n/a"),
-  exp: (r, c, on) => { const a = calcUnit(r, c, TODAY, on, false).amount; return a == null ? <span className="muted">n/a</span> : <span className="b">{fmt(a)}<span className="sub">{unitSuffix(r)}</span></span>; },
+  exp: (r, c, on) => <CalcHover r={r} c={c} on={on} />,
   fac: (r) => r.facility, state: (r) => r.state, units: (r) => r.units, appt: (r) => r.apptType,
   year: (r) => (r.year ? "Year " + r.year : "n/a"),
   start: (r) => <span className="nowrap">{fmtDate(r.start) || "n/a"}</span>, end: (r) => <span className="nowrap">{fmtDate(r.end) || "n/a"}</span>,
@@ -1155,8 +1203,367 @@ function usePop(open, close) {
   return ref;
 }
 
+/* ============================================================
+   Fee schedules: loading a schedule by itself, with its own QA
+   ============================================================ */
+const normName = (s) => String(s || "").toLowerCase().replace(/\.(csv|txt|tsv)$/i, "").replace(/[_-]+/g, " ").replace(/\b(19|20)\d\d\b/g, " ").replace(/\b(the|fee|schedules?|csv)\b/g, " ").replace(/[^a-z ]/g, " ").replace(/\s+/g, " ").trim();
+const sameSched = (a, b) => { const x = normName(a), y = normName(b); return !!x && !!y && (x.includes(y) || y.includes(x)); };
+const nameFromFile = (n) => String(n || "").replace(/\.(csv|txt|tsv)$/i, "").replace(/[_]+/g, " ").replace(/\s+/g, " ").trim();
+const yearDate = (s) => { const m = String(s || "").match(/\b((?:19|20)\d\d)\b/); return m ? m[1] + "-01-01" : ""; };
+function parseCsv(text) {
+  const src = String(text || "").replace(/^\uFEFF/, "");
+  const first = src.split(/\r?\n/)[0] || "";
+  const delim = [",", "\t", ";", "|"].map((d) => [d, first.split(d).length - 1]).sort((a, b) => b[1] - a[1])[0][0];
+  const rows = []; let row = [], cell = "", q = false;
+  for (let i = 0; i < src.length; i++) {
+    const ch = src[i];
+    if (q) { if (ch === '"' && src[i + 1] === '"') { cell += '"'; i++; } else if (ch === '"') q = false; else cell += ch; }
+    else if (ch === '"') q = true;
+    else if (ch === delim) { row.push(cell); cell = ""; }
+    else if (ch === "\n" || ch === "\r") { if (ch === "\r" && src[i + 1] === "\n") i++; row.push(cell); rows.push(row); row = []; cell = ""; }
+    else cell += ch;
+  }
+  if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter((r) => r.some((c) => String(c).trim()));
+}
+const normHdr = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+function parseFeeCsv(text) {
+  const rows = parseCsv(text);
+  if (rows.length < 2) return { error: "The file has no data rows." };
+  const hdr = rows[0];
+  const find = (re, skip = []) => hdr.findIndex((h, i) => !skip.includes(i) && re.test(normHdr(h)));
+  const cpt = find(/^(cpt|hcpcs|procedure|proc|code)\b|cpt code|procedure code|service code/);
+  const amt = find(/allowed|amount|rate|fee|price|payment|reimb/, [cpt]);
+  const desc = find(/desc|service name|^service$|^name$/, [cpt, amt]);
+  const date = find(/effective|eff date|start/, [cpt, amt, desc]);
+  if (cpt < 0 || amt < 0) return { error: `Could not find ${cpt < 0 ? "a CPT code column" : "an amount column"}. The columns in this file are: ${hdr.join(", ")}.` };
+  const items = rows.slice(1).map((r, i) => {
+    const raw = String(r[amt] == null ? "" : r[amt]).trim();
+    const amount = raw === "" ? NaN : Number(raw.replace(/[$,\s]/g, ""));
+    return { n: i + 2, cpt: String(r[cpt] || "").trim().toUpperCase(), desc: desc >= 0 ? String(r[desc] || "").trim() : "", raw, amount, date: date >= 0 ? String(r[date] || "").trim() : "" };
+  });
+  return { header: hdr, map: { cpt, amt, desc, date }, items, dateGuess: (items.find((x) => /^\d{4}-\d{2}-\d{2}$/.test(x.date)) || {}).date || "" };
+}
+function findPrevSchedule(name, eff, existing) {
+  const same = (existing || []).filter((s) => s.name !== name && sameSched(s.name, name) && (!eff || !s.effective || s.effective < eff));
+  return same.sort((a, b) => (b.effective || "").localeCompare(a.effective || ""))[0] || null;
+}
+/* QA for a fee schedule load. Every finding is either a check or a suggested action with an optional fix. */
+function qaFee(parsed, name, eff, existing) {
+  const items = parsed.items, checks = [], actions = [], flags = {};
+  const flag = (i, tag) => { (flags[i] = flags[i] || []).push(tag); };
+  const prev = findPrevSchedule(name, eff, existing);
+  const validCode = (c) => /^([0-9]{5}|[A-Z][0-9]{4})$/.test(c);
+  const hdr = parsed.header, m = parsed.map;
+  checks.push({ id: "cols", label: "Column mapping", detail: `CPT is "${hdr[m.cpt]}", amount is "${hdr[m.amt]}"${m.desc >= 0 ? `, description is "${hdr[m.desc]}"` : ""}${m.date >= 0 ? `, effective date is "${hdr[m.date]}"` : ""}`, ok: true, rows: [] });
+  const bad = items.map((x, i) => (!validCode(x.cpt) || !(x.amount > 0) ? i : -1)).filter((i) => i >= 0);
+  bad.forEach((i) => flag(i, !validCode(items[i].cpt) ? "Invalid code" : "Unreadable amount"));
+  if (bad.length) actions.push({ id: "bad", label: `${bad.length} row${bad.length > 1 ? "s" : ""} could not be read`, detail: `Rows ${bad.map((i) => items[i].n).join(", ")} have a code that is not a CPT or HCPCS code, or an amount that is not a positive number. Leave them out of the schedule.`, rows: bad, drop: bad, label2: "Exclude" });
+  else checks.push({ id: "valid", label: "Codes and amounts", detail: `All ${items.length} rows have a valid code and a positive amount`, ok: true, rows: [] });
+  const good = items.map((x, i) => i).filter((i) => !bad.includes(i));
+  // duplicates
+  const byCode = {}; good.forEach((i) => { (byCode[items[i].cpt] = byCode[items[i].cpt] || []).push(i); });
+  const dups = Object.entries(byCode).filter(([, ix]) => ix.length > 1);
+  dups.forEach(([code, ix]) => {
+    ix.forEach((i) => flag(i, "Duplicate"));
+    const amts = [...new Set(ix.map((i) => items[i].amount))];
+    const pv = prev && prev.amounts[code] != null ? prev.amounts[code] : null;
+    const keep = amts.length === 1 ? ix[0] : ix.slice().sort((a, b) => (pv != null ? Math.abs(items[a].amount - pv) - Math.abs(items[b].amount - pv) : items[a].amount - items[b].amount))[0];
+    const drop = ix.filter((i) => i !== keep);
+    actions.push({ id: "dup-" + code, label: amts.length === 1 ? `CPT ${code} appears ${ix.length} times with the same amount` : `CPT ${code} appears ${ix.length} times with different amounts`, detail: amts.length === 1 ? `Keep one row and remove the repeats.` : `${amts.map((a) => fmt(a)).join(" and ")}. Keep ${fmt(items[keep].amount)}${pv != null ? `, which is closest to the earlier ${fmt(pv)}` : ", the lower amount"}, and exclude the other.`, rows: ix, drop });
+  });
+  if (!dups.length) checks.push({ id: "dups", label: "Duplicates", detail: "Every CPT code appears once", ok: true, rows: [] });
+  // charge master coverage
+  const unknown = good.filter((i) => CHARGE[items[i].cpt] == null);
+  unknown.forEach((i) => flag(i, "Not on charge master"));
+  if (unknown.length) actions.push({ id: "unk", label: `${unknown.length === 1 ? "CPT " + items[unknown[0]].cpt + " is" : unknown.length + " codes are"} not on the charge master`, detail: `${[...new Set(unknown.map((i) => items[i].cpt))].join(", ")} cannot be billed from this practice's charge master, so no claim would use ${unknown.length === 1 ? "it" : "them"}. Exclude ${unknown.length === 1 ? "it" : "them"}.`, rows: unknown, drop: unknown });
+  const have = new Set(good.map((i) => items[i].cpt));
+  const missing = Object.keys(CHARGE).filter((c) => !have.has(c));
+  if (missing.length) actions.push({ id: "miss", label: `${missing.length} charge master code${missing.length > 1 ? "s are" : " is"} missing`, detail: `${missing.join(", ")} ${missing.length > 1 ? "have" : "has"} no amount in this file. Publish anyway and expected allowed stays n/a for ${missing.length > 1 ? "them" : "it"} until ${missing.length > 1 ? "they are" : "it is"} added.`, rows: [] });
+  else checks.push({ id: "cov", label: "Charge master coverage", detail: `All ${Object.keys(CHARGE).length} charge master codes have an amount`, ok: true, rows: [] });
+  const out = new Set([...unknown, ...actions.filter((a) => a.id.startsWith("dup-")).flatMap((a) => a.drop || [])]);
+  const live = good.filter((i) => !out.has(i));
+  // amounts above billed charges
+  const over = live.filter((i) => CHARGE[items[i].cpt] != null && items[i].amount > CHARGE[items[i].cpt]);
+  over.forEach((i) => flag(i, "Above charge"));
+  if (over.length) actions.push({ id: "over", label: `${over.length} amount${over.length > 1 ? "s are" : " is"} above the billed charge`, detail: `${over.map((i) => `${items[i].cpt} is ${fmt(items[i].amount)} against a charge of ${fmt(CHARGE[items[i].cpt])}`).join("; ")}. A payer would not pay more than the charge. Confirm ${over.length > 1 ? "they are" : "it is"} correct.`, rows: over });
+  // change against the earlier version
+  if (prev) {
+    const moves = live.filter((i) => prev.amounts[items[i].cpt] != null).map((i) => ({ i, pv: prev.amounts[items[i].cpt], ch: (items[i].amount - prev.amounts[items[i].cpt]) / prev.amounts[items[i].cpt] }));
+    moves.forEach((x) => { items[x.i].prev = x.pv; items[x.i].change = x.ch; });
+    const odd = moves.filter((x) => Math.abs(x.ch) > 0.15);
+    const rest = moves.filter((x) => Math.abs(x.ch) <= 0.15);
+    const avg = rest.length ? rest.reduce((s, x) => s + x.ch, 0) / rest.length : 0;
+    odd.forEach((x) => flag(x.i, (x.ch > 0 ? "+" : "") + Math.round(x.ch * 100) + "%"));
+    odd.forEach((x) => actions.push({ id: "chg-" + items[x.i].cpt, label: `CPT ${items[x.i].cpt} ${x.ch > 0 ? "rose" : "fell"} ${Math.abs(Math.round(x.ch * 100))}%`, detail: `${fmt(x.pv)} in ${prev.name} and ${fmt(items[x.i].amount)} here. ${rest.length ? `The other ${rest.length} code${rest.length > 1 ? "s" : ""} moved ${(avg * 100).toFixed(1)}% on average. ` : ""}Confirm the new amount before it is used to calculate expected allowed.`, rows: [x.i] }));
+    checks.push({ id: "chg", label: "Change from the earlier version", detail: `${moves.length} codes compared with ${prev.name}. ${odd.length ? `${rest.length} moved ${(avg * 100).toFixed(1)}% on average and ${odd.length} moved more than 15%` : `Average change ${(avg * 100).toFixed(1)}%`}`, ok: true, rows: [] });
+  } else checks.push({ id: "chg", label: "Earlier version", detail: "No earlier version of this schedule is on file, so there is nothing to compare against", ok: true, rows: [] });
+  return { checks, actions, flags, prev, codes: have.size };
+}
+function unresolvedBases(contracts, schedules) {
+  const out = {};
+  contracts.forEach((c) => c.rows.forEach((r) => {
+    if (r.method !== "percent_of_fee_schedule" || r.base != null || !r.basis) return;
+    if ((schedules || []).some((s) => sameSched(s.name, r.basis))) return;
+    const nice = String(r.basis).replace(/^the\s+/i, "").replace(/^./, (ch) => ch.toUpperCase());
+    const o = out[nice] || (out[nice] = { basis: nice, numbers: [], rows: 0 });
+    if (!o.numbers.includes(c.number)) o.numbers.push(c.number); o.rows++;
+  }));
+  return Object.values(out);
+}
+/* a loaded schedule fills in rates that pointed at it: one row per CPT code when the contract gave no code */
+function resolveContracts(contracts, schedules) {
+  if (!schedules || !schedules.length) return contracts;
+  return contracts.map((c) => {
+    let changed = false;
+    const rows = c.rows.flatMap((r) => {
+      if (r.method !== "percent_of_fee_schedule" || r.base != null || !r.basis) return [r];
+      const s = schedules.find((x) => sameSched(x.name, r.basis));
+      if (!s) return [r];
+      changed = true;
+      if (/^\d{5}$/.test(r.cpt)) return s.amounts[r.cpt] != null ? [{ ...r, base: s.amounts[r.cpt], basisResolved: s.name }] : [r];
+      return Object.keys(s.amounts).map((cpt) => ({ ...r, id: r.id + "-" + cpt, cpt, svc: CPT[cpt] || cpt, base: s.amounts[cpt], basisResolved: s.name }));
+    });
+    return changed ? { ...c, rows } : c;
+  });
+}
+const FEE_TEMPLATE = "CPT Code,Description,Allowed Amount,Effective Date\n97110,Therapeutic exercise,0.00,2026-01-01\n97140,Manual therapy,0.00,2026-01-01\n";
+const NW_FEE_CSV = "CPT Code,Description,Allowed Amount,Effective Date\n97110,Therapeutic exercise,45.20,2025-07-01\n97140,Manual therapy,42.60,2025-07-01\n97530,Therapeutic activities,49.10,2025-07-01\n97112,Neuromuscular re-education,47.30,2025-07-01\n97161,PT evaluation low complexity,139.00,2025-07-01\n";
+const CASC_FEE_CSV = "CPT Code,Description,Allowed Amount,Effective Date\n97110,Therapeutic exercise,43.05,2026-01-01\n97140,Manual therapy,54.60,2026-01-01\n97112,Neuromuscular re-education,47.15,2026-01-01\n97161,PT evaluation low complexity,141.45,2026-01-01\n97110,Therapeutic exercise,430.50,2026-01-01\n97999,Unlisted physical medicine service,60.00,2026-01-01\n";
+const FEE_SAMPLES = [
+  { key: "nw", name: "Northwind_Standard_Fee_Schedule_2025.csv", text: NW_FEE_CSV, label: "Northwind Standard Fee Schedule", note: "clean file" },
+  { key: "casc", name: "Cascadia_Mutual_Health_Outpatient_Therapy_Fee_Schedule_2026.csv", text: CASC_FEE_CSV, label: "Cascadia 2026 update", note: "has problems" },
+];
+
+function FeeScheduleFlow({ hint, existing, contracts, schedules, onCancel, onPublish, setAiHook }) {
+  const [file, setFile] = useState(null);
+  const [name, setName] = useState("");
+  const [eff, setEff] = useState("");
+  const [accepted, setAccepted] = useState({});
+  const [focus, setFocus] = useState(null);
+  const [menu, setMenu] = useState(false);
+  const [open, setOpen] = useState(true);
+  const fileRef = useRef(null), menuRef = useRef(null), rowEls = useRef({});
+  useEffect(() => {
+    if (!menu) return;
+    const h = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setMenu(false); };
+    const k = (e) => { if (e.key === "Escape") setMenu(false); };
+    document.addEventListener("mousedown", h); document.addEventListener("keydown", k);
+    return () => { document.removeEventListener("mousedown", h); document.removeEventListener("keydown", k); };
+  }, [menu]);
+
+  const load = (f) => {
+    const parsed = parseFeeCsv(f.text);
+    setFile({ name: f.name, parsed });
+    setName(hint && parsed.items && !sameSched(nameFromFile(f.name), hint) ? hint : nameFromFile(f.name));
+    setEff(parsed.dateGuess || yearDate(f.name));
+    setAccepted({}); setFocus(null);
+  };
+  const onFile = (f) => { if (!f) return; const rd = new FileReader(); rd.onload = () => load({ name: f.name, text: String(rd.result) }); rd.readAsText(f); };
+  const parsed = file ? file.parsed : null;
+  const ok = !!parsed && !parsed.error;
+  const qa = useMemo(() => (ok ? qaFee(parsed, name, eff, existing) : null), [file, name, eff, existing]);
+  const dropped = new Set(qa ? qa.actions.filter((a) => accepted[a.id] && a.drop).flatMap((a) => a.drop) : []);
+  const pending = qa ? qa.actions.filter((a) => !accepted[a.id]).length : 0;
+  const finalItems = ok ? parsed.items.filter((x, i) => !dropped.has(i) && /^([0-9]{5}|[A-Z][0-9]{4})$/.test(x.cpt) && x.amount > 0) : [];
+  const amounts = {}; finalItems.forEach((x) => { amounts[x.cpt] = x.amount; });
+  const impact = ok ? contracts.flatMap((c) => c.rows.filter((r) => r.method === "percent_of_fee_schedule" && r.base == null && r.basis && sameSched(r.basis, name)).map(() => c.number)) : [];
+  const impactNums = [...new Set(impact)];
+  const canPublish = ok && pending === 0 && !!name.trim() && finalItems.length > 0;
+  const focusRows = focus ? new Set(focus.rows) : new Set();
+  useEffect(() => { if (focus && focus.rows.length && rowEls.current[focus.rows[0]] && rowEls.current[focus.rows[0]].scrollIntoView) rowEls.current[focus.rows[0]].scrollIntoView({ block: "center", behavior: "smooth" }); }, [focus]);
+
+  useEffect(() => {
+    if (!ok) { setAiHook({ context: "The user is loading a fee schedule on its own, as a CSV with CPT codes and allowed amounts. The loader checks the columns, code format, duplicates, coverage against the practice charge master, amounts above billed charges, and change from the earlier version of the same schedule. Each finding is a suggested action the user accepts before publishing. A published schedule fills in expected allowed for contract rates that point at it by name." + (hint ? ` Contracts currently refer to a schedule called ${hint} that is not loaded.` : ""), prompts: [{ q: "What columns does the file need?" }, { q: "What does the QA check?" }] }); return; }
+    setAiHook({ context: `Fee schedule being loaded: ${name}, effective ${eff || "unknown"}, ${parsed.items.length} rows read. Findings: ${qa.actions.map((a) => a.label + ". " + a.detail + (accepted[a.id] ? " (accepted)" : " (open)")).join(" | ") || "none"}. Checks passed: ${qa.checks.map((c) => c.label + ": " + c.detail).join(" | ")}. Earlier version: ${qa.prev ? qa.prev.name : "none"}. Contracts that would be filled in by publishing: ${impactNums.join(", ") || "none"}.`, prompts: [{ q: "Which items need my review?" }, { q: "Why were these rows flagged?" }, { q: "What changes when I publish?" }] });
+  }, [file, name, eff, pending]);
+
+  const header = (
+    <div className="fhead">
+      <div className="fbc"><span className="bc-cur">Add Fee Schedule</span></div>
+      <div className="fhead-r">
+        <div className="stepwrap" ref={menuRef}>
+          <button className="stepbtn" aria-haspopup="menu" aria-expanded={menu} onClick={() => setMenu(!menu)}>{file ? 2 : 1} of 2: {file ? "Review and publish" : "Upload"}<ChevronDown size={14} /></button>
+          {menu && (
+            <div className="menu stepmenu" role="menu">
+              {["Upload", "Review and publish"].map((n, i) => (
+                <button key={n} role="menuitem" className={"step-i" + ((file ? 1 : 0) === i ? " on" : "")} disabled={i === 1 && !file} onClick={() => { if (i === 0) { setFile(null); } setMenu(false); }}>
+                  <span className="stepnum">{i + 1}</span><span><span className="b">{n}</span><span className="sub">{i === 0 ? (file ? "Complete" : "In progress") : file ? (canPublish ? "Ready to publish" : pending + " to review") : "Pending"}</span></span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <span className="vdiv" />
+        <button className="cancel" onClick={onCancel}>Cancel</button>
+        {file && <button className="btn primary" disabled={!canPublish} title={canPublish ? "" : "Accept the suggested actions first"} onClick={() => onPublish({ id: "fs-" + slug(name) + "-" + Date.now(), name: name.trim(), effective: eff, amounts, file: file.name, rows: finalItems.length, loadedOn: TODAY, prev: qa.prev ? qa.prev.name : null })}>Publish fee schedule</button>}
+      </div>
+    </div>
+  );
+
+  if (!file) return (
+    <div className="flowwrap">
+      {header}
+      <div className="emptyfull" onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); onFile(e.dataTransfer.files[0]); }}>
+        <div className="emptyicon"><FileText size={28} /></div>
+        <div className="h2">Add a fee schedule</div>
+        <p className="muted emptycopy">Upload a CSV with a CPT code column and an allowed amount column. We check it against your charge master and the earlier version before you publish.</p>
+        {hint && <div className="banner amber nogap" style={{ maxWidth: 560 }}><Info size={16} /><span>Contracts refer to <b>{hint}</b>, which is not loaded yet. Name your file after it and expected allowed fills in.</span></div>}
+        <div className="dropbox">
+          <Upload size={22} />
+          <div className="b">Drop a fee schedule CSV here</div>
+          <div className="muted small">CSV, tab or semicolon separated. Columns are matched by name.</div>
+          <input ref={fileRef} type="file" accept=".csv,.tsv,.txt" hidden onChange={(e) => { onFile(e.target.files[0]); e.target.value = ""; }} />
+          <div className="row gap wrap"><button className="btn" onClick={() => fileRef.current.click()}>Choose a file</button>
+            {FEE_SAMPLES.map((s) => <button key={s.key} className={"btn" + (s.key === "nw" ? " primary" : "")} onClick={() => load(s)}>Use sample: {s.label} ({s.note})</button>)}</div>
+        </div>
+        <button className="link" onClick={() => { const blob = new Blob([FEE_TEMPLATE], { type: "text/csv" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "fee_schedule_template.csv"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000); }}>Download a CSV template</button>
+      </div>
+    </div>
+  );
+
+  if (parsed.error) return (
+    <div className="flowwrap">{header}
+      <div className="emptyfull"><div className="emptyicon bad"><AlertTriangle size={28} /></div><div className="h2">This file could not be read</div><p className="muted emptycopy">{file.name}: {parsed.error}</p><button className="btn" onClick={() => setFile(null)}>Try another file</button></div>
+    </div>
+  );
+
+  return (
+    <div className="flowwrap">
+      {header}
+      <div className="cbody">
+        <div className="cmid wide2">
+          <div className="chead">{name || "Fee schedule"}</div>
+          <div className="muted small csub">{file.name}, {parsed.items.length} rows</div>
+          <div className="card">
+            <div className="fgrid"><Fld label="Fee schedule name" value={name} onChange={setName} wide /><Fld label="Effective date" value={eff} onChange={setEff} /><Fld label="CPT codes in this load" value={String(qa.codes)} readOnly /></div>
+          </div>
+          <div className="aisum">
+            <div className="aisum-t">
+              <div className="b15">{pending ? `${pending} item${pending > 1 ? "s" : ""} need${pending > 1 ? "" : "s"} your review before you publish` : "Everything checks out. This fee schedule is ready to publish"}</div>
+              <div>Read {parsed.items.length} rows covering {qa.codes} CPT codes. {qa.prev ? `Compared with ${qa.prev.name}.` : "No earlier version of this schedule is on file."} Select anything below to see the rows it refers to.</div>
+            </div>
+            <div className="aisum-b">
+              <div className="sublabel">QA Review</div>
+              <div className="qalist">
+                {qa.checks.map((c) => (
+                  <div key={c.id} className="qacard"><CheckCircle2 size={16} className="okc" /><div className="lt"><div className="b15">{c.label}</div><div>{c.detail}</div></div></div>
+                ))}
+              </div>
+              {qa.actions.length > 0 && <div className="sublabel">Suggested Action</div>}
+              {qa.actions.map((a) => {
+                const acc = !!accepted[a.id];
+                return (
+                  <div key={a.id} className={"actcard" + (acc ? " done" : "") + (focus && focus.id === a.id ? " on" : "")}>
+                    <div className="actrow">
+                      <button className="b15 plainb lt" onClick={() => setFocus({ id: a.id, rows: a.rows, nonce: Date.now() })}>{a.label}</button>
+                      {acc ? <span className="tagc ok"><Check size={12} />Accepted</span> : <button className="btn outline" onClick={() => setAccepted({ ...accepted, [a.id]: true })}>{a.drop ? "Accept and exclude" : "Accept"}</button>}
+                    </div>
+                    <div className="b13">{a.detail}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <Disclosure title="What publishing changes" count={impactNums.length ? impactNums.length + " contract" + (impactNums.length > 1 ? "s" : "") : "No contracts yet"} open={open} onToggle={() => setOpen(!open)}>
+            <div className="b13 pad0">{impactNums.length ? `${impactNums.join(", ")} ${impactNums.length > 1 ? "have" : "has"} rates that point at ${name}. Publishing fills in one expected allowed amount per CPT code for them.` : "No contract rate points at this schedule by name, so nothing changes in expected allowed today. The schedule is stored and will be used when a contract refers to it."}</div>
+          </Disclosure>
+        </div>
+        <div className="cdoc fee-prev">
+          <div className="fp-h"><span className="b">Rows in the file</span><span className="muted">{finalItems.length} will be published</span></div>
+          <div className="fp-b">
+            <table className="tbl compact">
+              <thead><tr><th>Row</th><th>CPT</th><th>Description</th><th className="r">Amount</th><th className="r">Charge master</th><th className="r">Earlier</th><th className="r">Change</th><th>Status</th></tr></thead>
+              <tbody>
+                {parsed.items.map((x, i) => {
+                  const fl = (qa.flags[i] || []); const gone = dropped.has(i);
+                  return (
+                    <tr key={i} ref={(el) => { rowEls.current[i] = el; }} className={(gone ? "rm " : "") + (focusRows.has(i) ? "active" : "")}>
+                      <td>{x.n}</td><td className="b">{x.cpt || "n/a"}</td><td><Cut w={180}>{x.desc || (CPT[x.cpt] || "")}</Cut></td>
+                      <td className="r">{isNaN(x.amount) ? x.raw || "n/a" : fmt(x.amount)}</td><td className="r">{CHARGE[x.cpt] != null ? fmt(CHARGE[x.cpt]) : "n/a"}</td>
+                      <td className="r">{x.prev != null ? fmt(x.prev) : ""}</td><td className="r">{x.change != null ? (x.change > 0 ? "+" : "") + (x.change * 100).toFixed(1) + "%" : ""}</td>
+                      <td>{gone ? <Chip tone="grey">Excluded</Chip> : fl.length ? fl.map((f) => <Chip key={f} tone="amber">{f}</Chip>) : <Chip tone="moss">OK</Chip>}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* Table Header (Design System 3.0): heading, one view tab, then filter, configuration, action and an inline Filled search */
+function TableHeaderBar({ title, viewLabel, extra, filterOn, onFilter, config, action, q, setQ }) {
+  return (
+    <div className="th">
+      <div className="th-title">
+        <div className="th-h">{title}</div>
+        <div className="th-views"><div className="tabs"><button className="on">{viewLabel}</button></div>{extra}</div>
+      </div>
+      <div className="hact">
+        <button className={"tgl" + (filterOn ? " on" : "")} aria-label="Filters" aria-pressed={filterOn} onClick={onFilter}><ListFilter size={16} /></button>
+        {config}
+        {action}
+        <label className="sf"><input placeholder="Search" aria-label="Search" value={q} onChange={(e) => setQ(e.target.value)} /><Search size={16} /></label>
+      </div>
+    </div>
+  );
+}
+function FilterRow({ opts, filters, setFilters, onHide }) {
+  const [open, setOpen] = useState(false);
+  const ref = usePop(open, () => setOpen(false));
+  const labelOf = (k, v) => { const o = opts.find((x) => x[0] === k); const f = o && o[2].find((p) => p[0] === v); return f ? f[1] : v; };
+  const add = (k, v) => { if (!filters.some((f) => f.k === k && f.v === v)) setFilters([...filters, { k, v }]); setOpen(false); };
+  return (
+    <div className="frow">
+      <div className="popwrap" ref={ref}>
+        <button className="btn" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}><Plus size={14} />Filter</button>
+        {open && (
+          <div className="menu fmenu" role="menu">
+            {opts.map(([k, l, vals]) => (
+              <div key={k}><div className="menu-h">{l}</div>
+                {vals.map(([v, vl]) => <button key={v} role="menuitem" className="menu-i" onClick={() => add(k, v)}>{vl}</button>)}</div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="grow row gap wrap">{filters.map((f) => <span key={f.k + f.v} className="fchip">{labelOf(f.k, f.v)}<button aria-label={"Remove filter " + labelOf(f.k, f.v)} onClick={() => setFilters(filters.filter((x) => x !== f))}><X size={12} /></button></span>)}</div>
+      <button className="btn tert" onClick={onHide}><ChevronUp size={14} />Hide</button>
+    </div>
+  );
+}
+function ColumnsConfig({ defs, cols, setCols }) {
+  const [open, setOpen] = useState(false);
+  const ref = usePop(open, () => setOpen(false));
+  const shown = defs.filter(([k]) => cols[k]).length;
+  return (
+    <div className="popwrap" ref={ref}>
+      <button className={"tgl" + (open ? " on" : "")} aria-label="Table configuration" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(!open)}><Settings size={16} /></button>
+      {open && (
+        <div className="pop settings" role="dialog" aria-label="Table configuration">
+          <div className="cfg-h"><span className="b">Columns</span><span className="muted">{shown} of {defs.length} shown</span></div>
+          <div className="cfg-b">{defs.map(([k, l]) => <label key={k} className="crowc"><input type="checkbox" checked={cols[k]} disabled={cols[k] && shown === 1} onChange={(e) => setCols({ ...cols, [k]: e.target.checked })} />{l}</label>)}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+const PLAIN = {
+  payer: (r) => r.payer, group: (r) => r.payerGroup, ptype: (r) => r.planType, plan: (r) => r.plan, svc: (r) => r.svc || "", cpt: (r) => r.cpt, method: (r) => METHOD[r.method] || r.method,
+  fs: (r) => (r.base != null ? fmt(r.base) : r.basis || "n/a"), rate: (r) => (r.flat != null ? fmt(r.flat) : r.discount != null ? r.discount + "%" : "n/a"),
+  exp: (r, c, on) => { const a = calcUnit(r, c, TODAY, on, false).amount; return a == null ? "n/a" : fmt(a) + " " + unitSuffix(r); },
+  fac: (r) => r.facility, state: (r) => r.state, units: (r) => r.units, appt: (r) => r.apptType, year: (r) => (r.year ? "Year " + r.year : "n/a"), start: (r) => fmtDate(r.start) || "n/a", end: (r) => fmtDate(r.end) || "n/a",
+};
+function downloadCsv(name, header, lines) {
+  const esc = (v) => '"' + String(v).replace(/"/g, '""') + '"';
+  const blob = new Blob([[header, ...lines].map((l) => l.map(esc).join(",")).join("\n")], { type: "text/csv" });
+  const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
 function ContractsPage({ contracts, ruleOn, setRuleOn, createdTerms, setCreatedTerms, onUpload, drawerRow, setDrawerRow, openDoc, toast, claims, ruleLog, setRuleLog }) {
-  const [view, setView] = useState("all");
   const [q, setQ] = useState("");
   const [pop, setPop] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -1164,17 +1571,16 @@ function ContractsPage({ contracts, ruleOn, setRuleOn, createdTerms, setCreatedT
   const [groupBy, setGroupBy] = useState("contract");
   const [cols, setCols] = useState(() => Object.fromEntries(COLS.map(([k]) => [k, true])));
   const [collapsed, setCollapsed] = useState({});
+  const [selected, setSelected] = useState({});
   const [draft, setDraft] = useState(null);
   const [showHist, setShowHist] = useState(false);
   const [pv, setPv] = useState("root");
   const [termsFor, setTermsFor] = useState(null);
   const close = () => setPop(null);
-  const sRef = usePop(pop === "settings", close), fRef = usePop(pop === "filter", close), qRef = usePop(pop === "search", close);
+  const sRef = usePop(pop === "settings", close);
 
   const cmap = Object.fromEntries(contracts.map((c) => [c.id, c]));
   const sorted = [...contracts].sort((a, b) => a.masterPayer.localeCompare(b.masterPayer));
-  const expiring = (c) => !!c.effectiveEnd && c.effectiveEnd <= "2027-11-16";
-  const inView = (c) => view === "all" || expiring(c);
 
   /* settings: every contract rule lives behind the table's gear */
   const tf = (cat) => contracts.flatMap((c) => c.terms.filter((t) => t.category === cat && !t.ruleKey));
@@ -1199,7 +1605,7 @@ function ContractsPage({ contracts, ruleOn, setRuleOn, createdTerms, setCreatedT
   /* filters, search and grouping */
   const kinds = [...new Set(filters.map((f) => f.k))];
   const matchF = (k, v, r) => (k === "payer" ? cmap[r.contractId].masterPayer === v : k === "group" ? r.payerGroup === v : r.method === v);
-  let rows = sorted.filter(inView).flatMap((c) => c.rows).filter((r) => kinds.every((k) => filters.filter((f) => f.k === k).some((f) => matchF(k, f.v, r))));
+  let rows = sorted.flatMap((c) => c.rows).filter((r) => kinds.every((k) => filters.filter((f) => f.k === k).some((f) => matchF(k, f.v, r))));
   if (q) rows = rows.filter((r) => (r.payer + r.plan + r.cpt + (r.svc || "") + r.planType + r.facility + r.state + cmap[r.contractId].number + cmap[r.contractId].masterPayer).toLowerCase().includes(q.toLowerCase()));
   const groups = [];
   if (groupBy === "none") groups.push({ key: "all", name: null, rows });
@@ -1217,103 +1623,76 @@ function ContractsPage({ contracts, ruleOn, setRuleOn, createdTerms, setCreatedT
     ["group", "Payer group", [...new Set(allRows.map((r) => r.payerGroup))].map((v) => [v, v])],
     ["method", "Method", [...new Set(allRows.map((r) => r.method))].map((v) => [v, METHOD[v]])],
   ];
-  const labelOf = (k, v) => (k === "method" ? METHOD[v] : v);
-  const addFilter = (k, v) => { if (!filters.some((f) => f.k === k && f.v === v)) setFilters([...filters, { k, v }]); close(); };
   const drow = drawerRow ? allRows.find((r) => r.id === drawerRow) : null;
   const tcon = termsFor ? cmap[termsFor] : null;
+  const nSel = rows.filter((r) => selected[r.id]).length;
+  const allOn = rows.length > 0 && nSel === rows.length;
+  const toggleAll = () => setSelected(allOn ? {} : Object.fromEntries(rows.map((r) => [r.id, true])));
+  const exportCsv = () => { const pick = rows.filter((r) => selected[r.id]); downloadCsv("contracts.csv", vcols.map(([, l]) => l), pick.map((r) => vcols.map(([k]) => PLAIN[k](r, cmap[r.contractId], ruleOn)))); toast(`Exported ${pick.length} row${pick.length === 1 ? "" : "s"} to contracts.csv`); };
 
-  return (
-    <div className="page fillpage">
-      <div className="pagehead"><h1>Contracts</h1></div>
-
-      <div className="thdr">
-        <div className="tabs">
-          <button className={view === "all" ? "on" : ""} onClick={() => setView("all")}>All ({contracts.length})</button>
-          <button className={view === "expiring" ? "on" : ""} onClick={() => setView("expiring")}>Expiring ({contracts.filter(expiring).length})</button>
-        </div>
-        <div className="hact">
-          <div className="popwrap" ref={qRef}>
-            <button className={"tgl" + (pop === "search" || q ? " on" : "")} aria-label="Search contracts" aria-haspopup="dialog" aria-expanded={pop === "search"} onClick={() => setPop(pop === "search" ? null : "search")}><Search size={16} /></button>
-            {pop === "search" && (
-              <div className="pop searchpop" role="dialog" aria-label="Search contracts">
-                <label className="sf wide"><input autoFocus placeholder="Search" aria-label="Search" value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === "Enter" && close()} /><Search size={16} /></label>
+  const config = (
+    <div className="popwrap" ref={sRef}>
+      <button className={"tgl" + (pop === "settings" ? " on" : "")} aria-label="Table configuration" aria-haspopup="dialog" aria-expanded={pop === "settings"} onClick={openSettings}><Settings size={16} /></button>
+      {pop === "settings" && draft && (
+        <div className="pop settings" role="dialog" aria-label="Table configuration">
+          {pv === "root" && (
+            <>
+              <div className="cfg-s">
+                <div className="dprow"><span>Grouping</span><select className="fsel" aria-label="Grouping" value={groupBy} onChange={(e) => setGroupBy(e.target.value)}><option value="contract">Contract</option><option value="payer">Master payer</option><option value="none">None</option></select></div>
               </div>
-            )}
-          </div>
-          <button className={"tgl" + (showFilters ? " on" : "")} aria-label="Filters" aria-pressed={showFilters} onClick={() => setShowFilters(!showFilters)}><ListFilter size={16} /></button>
-          <button className="tgl" aria-label="Export contracts" onClick={() => toast("Exported contracts.csv")}><Download size={16} /></button>
-          <div className="popwrap" ref={sRef}>
-            <button className={"tgl" + (pop === "settings" ? " on" : "")} aria-label="Table configuration" aria-haspopup="dialog" aria-expanded={pop === "settings"} onClick={openSettings}><Settings size={16} /></button>
-            {pop === "settings" && draft && (
-              <div className="pop settings" role="dialog" aria-label="Table configuration">
-                {pv === "root" && (
-                  <>
-                    <div className="cfg-s">
-                      <div className="dprow"><span>Grouping</span><select className="fsel" aria-label="Grouping" value={groupBy} onChange={(e) => setGroupBy(e.target.value)}><option value="contract">Contract</option><option value="payer">Master payer</option><option value="none">None</option></select></div>
-                    </div>
-                    <div className="cfg-m">
-                      <button className="mi" onClick={() => setPv("columns")}><span className="mi-t"><span>Columns</span><span className="mi-s">{vcols.length} of {COLS.length} shown</span></span><ChevronRight size={20} /></button>
-                      <button className="mi" onClick={() => setPv("rules")}><span className="mi-t"><span>Rules</span><span className="mi-s">{rulesOn} of {rulesTotal} on</span></span><ChevronRight size={20} /></button>
-                    </div>
-                  </>
-                )}
-                {pv === "columns" && (
-                  <>
-                    <div className="cfg-h"><button className="icon" aria-label="Back" onClick={() => setPv("root")}><ChevronLeft size={18} /></button><span className="b">Columns</span></div>
-                    <div className="cfg-b">{COLS.map(([k, l]) => <label key={k} className="crowc"><input type="checkbox" checked={cols[k]} disabled={cols[k] && vcols.length === 1} onChange={(e) => setCols({ ...cols, [k]: e.target.checked })} />{l}</label>)}</div>
-                  </>
-                )}
-                {pv === "rules" && (
-                  <>
-                    <div className="cfg-h"><button className="icon" aria-label="Back" onClick={() => setPv("root")}><ChevronLeft size={18} /></button><span className="b">Rules</span></div>
-                    <div className="cfg-b rules">
-                      {DEFS.map((d) => (
-                        <div key={d.k} className={"prow2" + (d.has ? "" : " dis")}>
-                          <div><div>{d.label}</div><div className="sub2">{d.has ? d.sub : "No matching terms on file yet"}</div></div>
-                          <Switch on={!!draft[d.k]} disabled={!d.has} label={d.label} onChange={(v) => setDraft({ ...draft, [d.k]: v })} />
-                        </div>
-                      ))}
-                    </div>
-                    {showHist && (
-                      <div className="hist">{ruleLog.length ? ruleLog.map((h, i) => <div key={i}><span className="muted">{h.d}</span><span>{h.t}</span></div>) : <span className="muted">No changes yet</span>}</div>
-                    )}
-                    <div className="pfoot"><button className="link" onClick={() => setShowHist(!showHist)}>{showHist ? "Hide history" : "View history"}</button>
-                      <button className="btn primary" disabled={!dirty} onClick={saveSettings}>Save</button></div>
-                  </>
-                )}
+              <div className="cfg-m">
+                <button className="mi" onClick={() => setPv("columns")}><span className="mi-t"><span>Columns</span><span className="mi-s">{vcols.length} of {COLS.length} shown</span></span><ChevronRight size={20} /></button>
+                <button className="mi" onClick={() => setPv("rules")}><span className="mi-t"><span>Rules</span><span className="mi-s">{rulesOn} of {rulesTotal} on</span></span><ChevronRight size={20} /></button>
               </div>
-            )}
-          </div>
-          <AddContractButton onAdd={() => onUpload("pdf")} onImport={() => onUpload("csv")} />
-        </div>
-      </div>
-
-      {showFilters && (
-        <div className="frow">
-          <div className="popwrap" ref={fRef}>
-            <button className="btn" aria-haspopup="menu" aria-expanded={pop === "filter"} onClick={() => setPop(pop === "filter" ? null : "filter")}><Plus size={14} />Filter</button>
-            {pop === "filter" && (
-              <div className="menu fmenu" role="menu">
-                {filterOpts.map(([k, l, vals]) => (
-                  <div key={k}><div className="menu-h">{l}</div>
-                    {vals.map(([v, vl]) => <button key={v} role="menuitem" className="menu-i" onClick={() => addFilter(k, v)}>{vl}</button>)}</div>
+            </>
+          )}
+          {pv === "columns" && (
+            <>
+              <div className="cfg-h"><button className="icon" aria-label="Back" onClick={() => setPv("root")}><ChevronLeft size={18} /></button><span className="b">Columns</span></div>
+              <div className="cfg-b">{COLS.map(([k, l]) => <label key={k} className="crowc"><input type="checkbox" checked={cols[k]} disabled={cols[k] && vcols.length === 1} onChange={(e) => setCols({ ...cols, [k]: e.target.checked })} />{l}</label>)}</div>
+            </>
+          )}
+          {pv === "rules" && (
+            <>
+              <div className="cfg-h"><button className="icon" aria-label="Back" onClick={() => setPv("root")}><ChevronLeft size={18} /></button><span className="b">Rules</span></div>
+              <div className="cfg-b rules">
+                {DEFS.map((d) => (
+                  <div key={d.k} className={"prow2" + (d.has ? "" : " dis")}>
+                    <div><div>{d.label}</div><div className="sub2">{d.has ? d.sub : "No matching terms on file yet"}</div></div>
+                    <Switch on={!!draft[d.k]} disabled={!d.has} label={d.label} onChange={(v) => setDraft({ ...draft, [d.k]: v })} />
+                  </div>
                 ))}
               </div>
-            )}
-          </div>
-          <div className="grow row gap wrap">{filters.map((f) => <span key={f.k + f.v} className="fchip">{labelOf(f.k, f.v)}<button aria-label={"Remove filter " + labelOf(f.k, f.v)} onClick={() => setFilters(filters.filter((x) => x !== f))}><X size={12} /></button></span>)}</div>
-          <button className="btn tert" onClick={() => setShowFilters(false)}><ChevronUp size={14} />Hide</button>
+              {showHist && (
+                <div className="hist">{ruleLog.length ? ruleLog.map((h, i) => <div key={i}><span className="muted">{h.d}</span><span>{h.t}</span></div>) : <span className="muted">No changes yet</span>}</div>
+              )}
+              <div className="pfoot"><button className="link" onClick={() => setShowHist(!showHist)}>{showHist ? "Hide history" : "View history"}</button>
+                <button className="btn primary" disabled={!dirty} onClick={saveSettings}>Save</button></div>
+            </>
+          )}
         </div>
       )}
+    </div>
+  );
+
+  return (
+    <div className="page fillpage tp">
+      <TableHeaderBar title="Contracts" viewLabel={`All Contracts (${contracts.length})`} filterOn={showFilters} onFilter={() => setShowFilters(!showFilters)} config={config}
+        action={<AddContractButton onAdd={() => onUpload("pdf")} onImport={() => onUpload("csv")} />} q={q} setQ={setQ}
+        extra={nSel > 0 && <span className="selbar"><b>{nSel} selected</b><button className="link" onClick={exportCsv}>Export CSV</button><button className="link" onClick={() => setSelected({})}>Clear</button></span>} />
+      {showFilters && <FilterRow opts={filterOpts} filters={filters} setFilters={setFilters} onHide={() => setShowFilters(false)} />}
 
       <div className="tblwrap fill">
         <table className="gtbl">
-          <thead><tr>{vcols.map(([k, l]) => <th key={k} className={RIGHT[k] ? "r" : ""}>{l}</th>)}</tr></thead>
+          <thead><tr>
+            <th className="sel"><input type="checkbox" aria-label="Select all rates" ref={(el) => { if (el) el.indeterminate = nSel > 0 && !allOn; }} checked={allOn} disabled={!rows.length} onChange={toggleAll} /></th>
+            {vcols.map(([k, l]) => <th key={k} className={RIGHT[k] ? "r" : ""}>{l}</th>)}
+          </tr></thead>
           <tbody>
             {groups.map((g) => (
               <React.Fragment key={g.key}>
                 {g.name != null && (
-                  <tr className="grow2"><td colSpan={vcols.length}>
+                  <tr className="grow2"><td colSpan={vcols.length + 1}>
                     <div className="ginner">
                       <button className="gcol" aria-label={collapsed[g.key] ? "Expand group" : "Collapse group"} aria-expanded={!collapsed[g.key]} onClick={() => setCollapsed({ ...collapsed, [g.key]: !collapsed[g.key] })}>{collapsed[g.key] ? <ChevronDown size={18} /> : <ChevronUp size={18} />}</button>
                       <span className="gname">{g.name}</span>
@@ -1329,18 +1708,163 @@ function ContractsPage({ contracts, ruleOn, setRuleOn, createdTerms, setCreatedT
                 )}
                 {!collapsed[g.key] && g.rows.map((r) => (
                   <tr key={r.id} className={"drow clickrow" + (drawerRow === r.id ? " active" : "")} onClick={() => { setTermsFor(null); setDrawerRow(r.id); }} tabIndex={0} onKeyDown={(e) => e.key === "Enter" && setDrawerRow(r.id)}>
+                    <td className="sel" onClick={(e) => e.stopPropagation()}><input type="checkbox" aria-label={"Select " + r.svc} checked={!!selected[r.id]} onChange={(e) => setSelected({ ...selected, [r.id]: e.target.checked })} /></td>
                     {vcols.map(([k]) => <td key={k} className={RIGHT[k] ? "r" : ""}>{CELLS[k](r, cmap[r.contractId], ruleOn)}</td>)}
                   </tr>
                 ))}
               </React.Fragment>
             ))}
-            {!rows.length && <tr><td colSpan={vcols.length} className="empty">No contracts match these filters.</td></tr>}
+            {!rows.length && <tr><td colSpan={vcols.length + 1} className="empty">No contracts match these filters.</td></tr>}
           </tbody>
         </table>
       </div>
 
       {drow && <ExpectedDrawer row={drow} contract={cmap[drow.contractId]} ruleOn={ruleOn} setRuleOn={setRuleOn} onClose={() => setDrawerRow(null)} openDoc={openDoc} claims={claims} />}
       {tcon && <TermsDrawer contract={tcon} ruleOn={ruleOn} createdTerms={createdTerms} onClose={() => setTermsFor(null)} openDoc={openDoc} />}
+    </div>
+  );
+}
+
+/* ---------- Contract Management: Fee schedules ---------- */
+function deriveSchedules(contracts) {
+  const out = {};
+  contracts.forEach((c) => {
+    if (c.kind === "generic" || !c.feeSchedules) return;
+    Object.entries(c.feeSchedules).forEach(([letter, amts]) => {
+      if (!c.plans.some((p) => p.feeSchedule === letter)) return;
+      const year = (c.effectiveStart || "").slice(0, 4);
+      const name = letter === "C" ? "Medicare Physician Fee Schedule (national amounts)" : letter === "M" ? `${c.masterPayer} Medicaid fee schedule` : `${c.masterPayer} outpatient therapy fee schedule${year ? ", " + year : ""}`;
+      const s = out[name] || (out[name] = { name, amounts: amts, usedBy: [], payer: letter === "C" ? "Medicare reference" : c.masterPayer, effective: c.effectiveStart || "", source: "contract" });
+      if (!s.usedBy.includes(c.number)) s.usedBy.push(c.number);
+    });
+  });
+  return Object.values(out);
+}
+const FEE_COLS = [["cpt", "CPT"], ["svc", "Service"], ["amt", "Fee schedule amount"], ["chg", "Charge master"], ["pct", "% of charge"], ["used", "Used by"]];
+function FeeSchedulesPage({ contracts, schedules, rawContracts, onLoad }) {
+  const [q, setQ] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState([]);
+  const [cols, setCols] = useState(() => Object.fromEntries(FEE_COLS.map(([k]) => [k, true])));
+  const [collapsed, setCollapsed] = useState({});
+  const loaded = schedules.map((s) => ({ ...s, payer: "Loaded file", source: "file", usedBy: [...new Set(contracts.flatMap((c) => c.rows.filter((r) => r.basisResolved === s.name).map(() => c.number)))] }));
+  const all = [...deriveSchedules(contracts), ...loaded];
+  const missing = unresolvedBases(rawContracts, schedules);
+  const opts = [["payer", "Source", [...new Set(all.map((s) => s.payer))].map((v) => [v, v])]];
+  const list = all.filter((s) => filters.length === 0 || filters.some((f) => f.v === s.payer));
+  const vcols = FEE_COLS.filter(([k]) => cols[k]);
+  const rowsOf = (s) => CPT_LIST.filter((c) => s.amounts[c] != null).map((c) => ({ cpt: c, svc: CPT[c], amt: s.amounts[c], chg: CHARGE[c], pct: Math.round((s.amounts[c] / CHARGE[c]) * 100), used: s.usedBy.join(", ") || "Not used yet" })).filter((r) => !q || (r.cpt + r.svc + s.name).toLowerCase().includes(q.toLowerCase()));
+  const groups = list.map((s) => ({ s, rows: rowsOf(s) })).filter((g) => g.rows.length);
+  const cell = { cpt: (r) => r.cpt, svc: (r) => r.svc, amt: (r) => fmt(r.amt), chg: (r) => fmt(r.chg), pct: (r) => r.pct + "%", used: (r) => <Cut w={260}>{r.used}</Cut> };
+  return (
+    <div className="page fillpage tp">
+      <TableHeaderBar title="Fee schedules" viewLabel={`All Fee schedules (${all.length})`} filterOn={showFilters} onFilter={() => setShowFilters(!showFilters)} config={<ColumnsConfig defs={FEE_COLS} cols={cols} setCols={setCols} />}
+        action={<button className="btn primary" onClick={() => onLoad(null)}><Plus size={16} />Add Fee Schedule</button>} q={q} setQ={setQ} />
+      {showFilters && <FilterRow opts={opts} filters={filters} setFilters={setFilters} onHide={() => setShowFilters(false)} />}
+      {missing.map((m) => (
+        <div key={m.basis} className="banner amber"><AlertTriangle size={16} /><span><b>{m.basis}</b> is not loaded. {m.rows} rate{m.rows > 1 ? "s" : ""} in {m.numbers.join(", ")} point{m.rows > 1 ? "" : "s"} at it, so expected allowed shows n/a.</span><button className="btn" onClick={() => onLoad(m.basis)}>Load it</button></div>
+      ))}
+      <div className="tblwrap fill">
+        <table className="gtbl">
+          <thead><tr>{vcols.map(([k, l]) => <th key={k} className={k === "amt" || k === "chg" || k === "pct" ? "r" : ""}>{l}</th>)}</tr></thead>
+          <tbody>
+            {groups.map(({ s, rows }) => (
+              <React.Fragment key={s.name}>
+                <tr className="grow2"><td colSpan={vcols.length}>
+                  <div className="ginner">
+                    <button className="gcol" aria-label={collapsed[s.name] ? "Expand group" : "Collapse group"} aria-expanded={!collapsed[s.name]} onClick={() => setCollapsed({ ...collapsed, [s.name]: !collapsed[s.name] })}>{collapsed[s.name] ? <ChevronDown size={18} /> : <ChevronUp size={18} />}</button>
+                    <span className="gname">{s.name}</span>
+                    <span className="ginfo">{rows.length} codes, {s.source === "file" ? `loaded from ${s.file}${s.effective ? ", effective " + fmtDate(s.effective) : ""}` : "from a contract"}, used by {s.usedBy.length} contract{s.usedBy.length === 1 ? "" : "s"}</span>
+                    {s.source === "file" && <Chip tone="teal">Loaded file</Chip>}
+                  </div>
+                </td></tr>
+                {!collapsed[s.name] && rows.map((r) => (
+                  <tr key={s.name + r.cpt} className="drow">{vcols.map(([k]) => <td key={k} className={k === "amt" || k === "chg" || k === "pct" ? "r" : ""}>{cell[k](r)}</td>)}</tr>
+                ))}
+              </React.Fragment>
+            ))}
+            {!groups.length && <tr><td colSpan={vcols.length} className="empty">No fee schedules match.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Contract Management: Payer Hierarchy ---------- */
+const HIER_COLS = [["payer", "Payer"], ["group", "Payer group"], ["plan", "Plan"], ["ptype", "Plan type"], ["contract", "Contract"], ["rates", "Rates"], ["method", "Payment method"]];
+function PayerHierarchyPage({ contracts }) {
+  const [q, setQ] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState([]);
+  const [cols, setCols] = useState(() => Object.fromEntries(HIER_COLS.map(([k]) => [k, true])));
+  const [collapsed, setCollapsed] = useState({});
+  const flat = contracts.flatMap((c) => c.plans.map((p) => ({ master: c.masterPayer, payer: p.payer, group: p.payerGroup, plan: p.plan, ptype: p.planType || "n/a", contract: c.number, rates: c.rows.filter((r) => r.plan === p.plan).length, method: [...new Set(c.rows.filter((r) => r.plan === p.plan).map((r) => METHOD[r.method]))].join(", ") })));
+  const opts = [["group", "Payer group", [...new Set(flat.map((r) => r.group))].map((v) => [v, v])]];
+  const rows = flat.filter((r) => filters.length === 0 || filters.some((f) => f.v === r.group)).filter((r) => !q || (r.master + r.payer + r.plan + r.ptype + r.contract).toLowerCase().includes(q.toLowerCase()));
+  const groups = []; rows.forEach((r) => { let g = groups.find((x) => x.name === r.master); if (!g) { g = { name: r.master, rows: [] }; groups.push(g); } g.rows.push(r); });
+  groups.sort((a, b) => a.name.localeCompare(b.name));
+  const vcols = HIER_COLS.filter(([k]) => cols[k]);
+  const cell = { payer: (r) => r.payer, group: (r) => <Chip tone={toneOf(r.group)}>{r.group}</Chip>, plan: (r) => <span className="b">{r.plan}</span>, ptype: (r) => <Cut w={200}>{r.ptype}</Cut>, contract: (r) => r.contract, rates: (r) => r.rates, method: (r) => <Cut w={260}>{r.method}</Cut> };
+  return (
+    <div className="page fillpage tp">
+      <TableHeaderBar title="Payer Hierarchy" viewLabel={`All Payers (${[...new Set(flat.map((r) => r.master))].length})`} filterOn={showFilters} onFilter={() => setShowFilters(!showFilters)} config={<ColumnsConfig defs={HIER_COLS} cols={cols} setCols={setCols} />} q={q} setQ={setQ} />
+      {showFilters && <FilterRow opts={opts} filters={filters} setFilters={setFilters} onHide={() => setShowFilters(false)} />}
+      <div className="tblwrap fill">
+        <table className="gtbl">
+          <thead><tr>{vcols.map(([k, l]) => <th key={k} className={k === "rates" ? "r" : ""}>{l}</th>)}</tr></thead>
+          <tbody>
+            {groups.map((g) => (
+              <React.Fragment key={g.name}>
+                <tr className="grow2"><td colSpan={vcols.length}>
+                  <div className="ginner">
+                    <button className="gcol" aria-label={collapsed[g.name] ? "Expand group" : "Collapse group"} aria-expanded={!collapsed[g.name]} onClick={() => setCollapsed({ ...collapsed, [g.name]: !collapsed[g.name] })}>{collapsed[g.name] ? <ChevronDown size={18} /> : <ChevronUp size={18} />}</button>
+                    <span className="gname">{g.name}</span><span className="ginfo">Master payer, {g.rows.length} plan{g.rows.length === 1 ? "" : "s"}</span>
+                  </div>
+                </td></tr>
+                {!collapsed[g.name] && g.rows.map((r, i) => <tr key={g.name + r.plan + i} className="drow">{vcols.map(([k]) => <td key={k} className={k === "rates" ? "r" : ""}>{cell[k](r)}</td>)}</tr>)}
+              </React.Fragment>
+            ))}
+            {!groups.length && <tr><td colSpan={vcols.length} className="empty">No payers match.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Contract Management: Documents ---------- */
+const DOC_COLS = [["file", "File"], ["contract", "Contract"], ["payer", "Master payer"], ["pages", "Pages"], ["term", "Effective"], ["uploaded", "Uploaded"], ["qa", "QA"]];
+function DocumentsPage({ contracts, openDoc, onUpload }) {
+  const [q, setQ] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState([]);
+  const [cols, setCols] = useState(() => Object.fromEntries(DOC_COLS.map(([k]) => [k, true])));
+  const opts = [["payer", "Master payer", [...new Set(contracts.map((c) => c.masterPayer))].map((v) => [v, v])]];
+  const rows = [...contracts].sort((a, b) => a.masterPayer.localeCompare(b.masterPayer)).filter((c) => filters.length === 0 || filters.some((f) => f.v === c.masterPayer)).filter((c) => !q || (c.file + c.number + c.masterPayer).toLowerCase().includes(q.toLowerCase()));
+  const vcols = DOC_COLS.filter(([k]) => cols[k]);
+  const cell = {
+    file: (c) => <span className="b"><FileText size={14} className="inl" /><Cut w={300}>{c.file}</Cut></span>, contract: (c) => c.number, payer: (c) => c.masterPayer, pages: (c) => (c.pages || "n/a"),
+    term: (c) => <span className="nowrap">{c.effectiveStart ? fmtDate(c.effectiveStart) + (c.effectiveEnd ? " to " + fmtDate(c.effectiveEnd) : "") : "n/a"}</span>, uploaded: (c) => c.uploaded, qa: () => <Chip tone="moss"><Check size={12} />Verified</Chip>,
+  };
+  return (
+    <div className="page fillpage tp">
+      <TableHeaderBar title="Documents" viewLabel={`All Documents (${contracts.length})`} filterOn={showFilters} onFilter={() => setShowFilters(!showFilters)} config={<ColumnsConfig defs={DOC_COLS} cols={cols} setCols={setCols} />}
+        action={<button className="btn primary" onClick={() => onUpload("pdf")}><Plus size={16} />Add Contract</button>} q={q} setQ={setQ} />
+      {showFilters && <FilterRow opts={opts} filters={filters} setFilters={setFilters} onHide={() => setShowFilters(false)} />}
+      <div className="tblwrap fill">
+        <table className="gtbl">
+          <thead><tr>{vcols.map(([k, l]) => <th key={k} className={k === "pages" ? "r" : ""}>{l}</th>)}</tr></thead>
+          <tbody>
+            {rows.map((c) => (
+              <tr key={c.id} className="drow clickrow" onClick={() => openDoc(c.id, null)}>
+                {vcols.map(([k]) => <td key={k} className={k === "pages" ? "r" : ""}>{cell[k](c)}</td>)}
+              </tr>
+            ))}
+            {!rows.length && <tr><td colSpan={vcols.length} className="empty">No documents match.</td></tr>}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -2037,10 +2561,10 @@ function ConnectionsPage({ contracts, claims, createdTerms, ruleOn }) {
   const under = claims.filter((x) => x.status === "underpaid" && x.contractId === "cascadia" && !x.appeal);
   const hmoAmt = c && hmo ? calcUnit(hmo, c, TODAY, ruleOn, false).amount : null;
   const st = (t) => (t && createdTerms[t.id] ? <Chip tone="moss"><Check size={12} />Rule active</Chip> : <Chip tone="grey">Suggested</Chip>);
-  if (!c) return <div className="page"><div className="pagehead"><div><div className="crumb">Practice data</div><h1>Contract usage</h1></div></div><div className="empty pad">Load the Cascadia contract to see it feed the rest of the platform.</div></div>;
+  if (!c) return <div className="page"><div className="pagehead"><div><div className="crumb">Practice data</div><h1>Destination</h1></div></div><div className="empty pad">Load the Cascadia contract to see it feed the rest of the platform.</div></div>;
   return (
     <div className="page">
-      <div className="pagehead"><div><div className="crumb">Practice data</div><h1>Contract usage</h1></div></div>
+      <div className="pagehead"><div><div className="crumb">Practice data</div><h1>Destination</h1></div></div>
       <div className="muted lead">One contract, loaded once. Everything below reads from the same record, so nobody re-keys rates into a second system.</div>
       <div className="hub">
         <div className="hubcore"><FileText size={20} /><div className="b">{c.masterPayer}</div><div className="muted">{c.plans.length} plans, {c.rows.length} rate rows, {c.terms.length} terms</div></div>
@@ -2085,12 +2609,31 @@ const CHAPTERS = [
   { k: "learn", label: "Learn", line: "See patterns by payer, site, and against peers.", page: "analytics" },
   { k: "connect", label: "Connect", line: "Load once. Scheduling, auth, and AR use it too.", page: "connections" },
 ];
+const PD_PAGES = ["contracts", "fees", "hierarchy", "documents", "connections"];
 const NAV = [
   { g: "Revenue Cycle", icon: Receipt, items: [["claims", "Claims", ["claims"]], ["appeals", "Appeals", ["appeals"]], ["analytics", "Analytics", ["analytics"]]] },
-  { g: "Admin Panel", icon: BookOpen, items: [["contracts", "Practice Data", ["contracts", "connections"]]] },
+  { g: "Admin Panel", icon: BookOpen, items: [["contracts", "Practice Data", PD_PAGES]] },
 ];
-const SUBNAV = [["inert", "Line Item Options"], ["contracts", "Contracts"], ["connections", "Contract Usage"], ["inert", "Write-Off Reasons"], ["inert", "Skip Collection Reasons"], ["inert", "Adjustment Types"], ["inert", "Provider Credentialing"]];
-const CRUMBS = { claims: ["Revenue Cycle", "Claims"], appeals: ["Revenue Cycle", "Appeals"], analytics: ["Revenue Cycle", "Analytics"], contracts: ["Practice Data", "Contracts"], connections: ["Practice Data", "Contract Usage"] };
+const CM_ITEMS = [["contracts", "Contracts"], ["fees", "Fee schedules"], ["hierarchy", "Payer Hierarchy"], ["documents", "Documents"], ["connections", "Destination"]];
+const OTHER_ITEMS = ["Line Item Options", "Write-Off Reasons", "Skip Collection Reasons", "Adjustment Types", "Provider Credentialing"];
+function PracticeNav({ page, onGo, onInert }) {
+  const [open, setOpen] = useState(true);
+  return (
+    <aside className="subnav2" aria-label="Practice data">
+      <div className="sn-h">Billing</div>
+      <div className="sn-group">
+        <button className="sn-gh" aria-expanded={open} onClick={() => setOpen(!open)}><Circle size={16} /><span>Contract Management</span><ChevronUp size={20} className={open ? "" : "flipc2"} /></button>
+        {open && (
+          <div className="sn-body"><span className="sline" />
+            <div className="sn-list">{CM_ITEMS.map(([k, l]) => <button key={k} className={"sn-item" + (page === k ? " on" : "")} onClick={() => onGo(k)}>{l}</button>)}</div>
+          </div>
+        )}
+      </div>
+      {OTHER_ITEMS.map((l) => <button key={l} className="sn-item top" onClick={onInert}><Circle size={16} />{l}</button>)}
+    </aside>
+  );
+}
+const CRUMBS = { claims: ["Revenue Cycle", "Claims"], appeals: ["Revenue Cycle", "Appeals"], analytics: ["Revenue Cycle", "Analytics"], contracts: ["Practice Data", "Contracts"], fees: ["Practice Data", "Fee schedules"], hierarchy: ["Practice Data", "Payer Hierarchy"], documents: ["Practice Data", "Documents"], connections: ["Practice Data", "Destination"] };
 
 function AssistantPanel({ context, prompts = [], onClose }) {
   const [msgs, setMsgs] = useState([]);
@@ -2145,7 +2688,10 @@ function AssistantPanel({ context, prompts = [], onClose }) {
 export default function App() {
   const [page, setPage] = useState("contracts");
   const [chapter, setChapter] = useState("load");
-  const [contracts, setContracts] = useState([SUMMIT, KEYSTONE]);
+  const [rawContracts, setContracts] = useState([SUMMIT, KEYSTONE]);
+  const [schedules, setSchedules] = useState([]);
+  const [feeFlow, setFeeFlow] = useState(false);
+  const contracts = useMemo(() => resolveContracts(rawContracts, schedules), [rawContracts, schedules]);
   const [ruleOn, setRuleOn] = useState({ "summit:pta": true, "keystone:pta": true });
   const [createdTerms, setCreatedTerms] = useState({});
   const [appeals, setAppeals] = useState({});
@@ -2163,7 +2709,7 @@ export default function App() {
   const [aiHook, setAiHook] = useState(null);
   const [ruleLog, setRuleLog] = useState([{ d: "Mar 12, 2026", t: "Apply PTA (CQ) services at the contract percentage: on" }]);
 
-  useEffect(() => { if (upload || appealIds) setAiOpen(true); else setAiHook(null); }, [upload, appealIds]);
+  useEffect(() => { if (!upload && !appealIds && !feeFlow) setAiHook(null); }, [upload, appealIds, feeFlow]);
   const loaded = contracts.some((c) => c.id === "cascadia");
   const claims = useMemo(() => CLAIMS.map((c) => derive(c, contracts, ruleOn, appeals)), [contracts, ruleOn, appeals]);
   const hero = claims.find((c) => c.id === HERO_ID);
@@ -2177,7 +2723,7 @@ export default function App() {
   };
   const go = (k) => {
     const ch = CHAPTERS.find((x) => x.k === k);
-    setChapter(k); setUpload(false); setPage(ch.page); setOpenClaim(null); setAppealIds(null); setDrawerRow(null); setDoc(null);
+    setChapter(k); setUpload(false); setFeeFlow(false); setPage(ch.page); setOpenClaim(null); setAppealIds(null); setDrawerRow(null); setDoc(null);
     if (["understand", "catch", "recover", "learn"].includes(k) && !loaded) { publish(CASCADIA_CANON, true); toast("Loaded the sample Cascadia contract so this step has data."); }
     if (k === "catch") { setView("underpaid"); setSel([]); }
     setPending(k);
@@ -2195,14 +2741,14 @@ export default function App() {
     setSel([]);
   };
   const respond = () => { setAppeals((p) => { const n = { ...p }; Object.keys(n).forEach((id) => { if (n[id].status === "Submitted") { const cl = CLAIMS.find((c) => c.id === id); n[id] = { ...n[id], status: cl.pattern === "bundling" ? "Denied" : "Won" }; } }); return n; }); toast("Payer responses received."); };
-  const reset = () => { setContracts([SUMMIT, KEYSTONE]); setRuleOn({ "summit:pta": true, "keystone:pta": true }); setCreatedTerms({}); setAppeals({}); setSel([]); setOpenClaim(null); setAppealIds(null); setDrawerRow(null); setDoc(null); setUpload(false); setAiHook(null); setView("underpaid"); go("load"); };
+  const reset = () => { setContracts([SUMMIT, KEYSTONE]); setSchedules([]); setFeeFlow(false); setRuleOn({ "summit:pta": true, "keystone:pta": true }); setCreatedTerms({}); setAppeals({}); setSel([]); setOpenClaim(null); setAppealIds(null); setDrawerRow(null); setDoc(null); setUpload(false); setAiHook(null); setView("underpaid"); go("load"); };
   const openDoc = (id, hl, page) => setDoc({ id, hl, page });
   const detail = openClaim ? claims.find((c) => c.id === openClaim) : null;
   const thread = hero ? (hero.appeal ? (hero.appeal.status === "Won" ? `${fmt(hero.variance)} recovered` : "Appeal submitted") : hero.status === "underpaid" ? `${fmt(hero.variance)} underpaid` : hero.status === "no_contract" ? "No contract on file" : "Paid as expected") : "";
   const crumb = appealIds ? ["Claims", appealIds.length === 1 ? appealIds[0] : "Underpaid"] : CRUMBS[page];
   const underAll = claims.filter((c) => c.status === "underpaid");
   const baseContext = `Page: ${CRUMBS[page].join(" / ")}. Contracts on file: ${contracts.map((c) => `${c.masterPayer} (${c.plans.map((p) => p.plan + ", " + METHOD[p.method] + (p.discountPct ? " " + p.discountPct + "%" : "") + (p.flatRate ? " $" + p.flatRate : "")).join("; ")}; appeals due within ${c.disputeDays} days of remittance)`).join(" | ")}. Sample claims: ${claims.length}; underpaid: ${underAll.length} totalling ${fmt(underAll.reduce((s, c) => s + c.variance, 0))}; high recoverability and open: ${underAll.filter((c) => c.level === "High" && !c.appeal).length}; appeals filed: ${claims.filter((c) => c.appeal).length}. Featured claim ${HERO_ID}: ${hero ? hero.reason : ""} Expected allowed is calculated per claim line from the contract (fee schedule x rate, then escalator and PTA rules) and compared with the 835 at posting. Axiom: the billing calculator retires into the new EMR, Axiom is not needed for claim level expected reimbursement, and can stay for planning through a Databricks feed.`;
-  const basePrompts = { contracts: [{ q: "Which payers have contracts on file?" }, { q: "How is expected allowed calculated?" }], connections: [{ q: "Do we still need Axiom?" }, { q: "Which teams use the contract?" }], claims: [{ q: "Which underpaid claims should I appeal first?" }, { q: `Why was ${HERO_ID} flagged?` }], appeals: [{ q: "What is in dispute right now?" }], analytics: [{ q: "Which payer is furthest from peers?" }] }[page] || [];
+  const basePrompts = { contracts: [{ q: "Which payers have contracts on file?" }, { q: "How is expected allowed calculated?" }], connections: [{ q: "Do we still need Axiom?" }, { q: "Which teams use the contract?" }], fees: [{ q: "Which fee schedules are loaded?" }, { q: "Which contracts use the Medicare schedule?" }], hierarchy: [{ q: "Which payers have more than one plan?" }], documents: [{ q: "Which contracts have a document on file?" }], claims: [{ q: "Which underpaid claims should I appeal first?" }, { q: `Why was ${HERO_ID} flagged?` }], appeals: [{ q: "What is in dispute right now?" }], analytics: [{ q: "Which payer is furthest from peers?" }] }[page] || [];
   const wonTotal = claims.filter((c) => c.appeal && c.appeal.status === "Won").reduce((s, c) => s + c.variance, 0);
 
   return (
@@ -2228,7 +2774,7 @@ export default function App() {
         </div>
       )}
       {!presenter && <button className="showp" onClick={() => setPresenter(true)}>Presenter</button>}
-      <div className={"shell" + (upload || appealIds ? " flowing" : "")}>
+      <div className={"shell" + (upload || appealIds || feeFlow ? " flowing" : "")}>
         <nav className="sidecol" aria-label="Main">
           <div className="logo">Air</div>
           <div className="sidescroll">
@@ -2255,18 +2801,16 @@ export default function App() {
             <div className="hdr-r"><span className="aitab"><Mic size={16} />Scribe</span><button className={"aitab" + (aiOpen ? " on" : "")} aria-pressed={aiOpen} onClick={() => setAiOpen(!aiOpen)}><Sparkles size={16} />Athelas AI</button></div>
           </header>
           <div className="workrow">
-          <main className={"canvas" + (upload || appealIds ? " flowing" : (page === "contracts" || page === "connections") ? " pdc" : "")}>
-            {appealIds ? <AppealPackageFlow key={appealIds.join()} ids={appealIds} claims={claims} setAiHook={setAiHook} onCancel={() => setAppealIds(null)} onSubmit={submitAppeals} onViewAppeals={() => { setAppealIds(null); setPage("appeals"); }} /> : upload ? <AddContractFlow key={upload} mode={upload} setAiHook={setAiHook} onCancel={() => setUpload(false)} onPublish={(cs) => { cs.forEach((c) => publish(c, true)); setUpload(false); setChapter("understand"); toast(cs.length === 1 ? `Published ${cs[0].masterPayer}: ${cs[0].plans.length} plans, ${cs[0].rows.length} rate rows.${cs[0].id === "cascadia" ? " Claims are now checked against it." : ""}` : `Published ${cs.length} contracts to the repository.${cs.some((c) => c.id === "cascadia") ? " Claims are now checked against the Cascadia contract." : ""}`); }} /> : <>
-            {(page === "contracts" || page === "connections") ? (
+          <main className={"canvas" + (upload || appealIds || feeFlow ? " flowing" : PD_PAGES.includes(page) ? " pdc" : "")}>
+            {appealIds ? <AppealPackageFlow key={appealIds.join()} ids={appealIds} claims={claims} setAiHook={setAiHook} onCancel={() => setAppealIds(null)} onSubmit={submitAppeals} onViewAppeals={() => { setAppealIds(null); setPage("appeals"); }} /> : upload ? <AddContractFlow key={upload} mode={upload} setAiHook={setAiHook} onCancel={() => setUpload(false)} onPublish={(cs) => { cs.forEach((c) => publish(c, true)); setUpload(false); setChapter("understand"); toast(cs.length === 1 ? `Published ${cs[0].masterPayer}: ${cs[0].plans.length} plans, ${cs[0].rows.length} rate rows.${cs[0].id === "cascadia" ? " Claims are now checked against it." : ""}` : `Published ${cs.length} contracts to the repository.${cs.some((c) => c.id === "cascadia") ? " Claims are now checked against the Cascadia contract." : ""}`); }} /> : feeFlow ? <FeeScheduleFlow key={String(feeFlow.hint)} hint={feeFlow.hint} existing={[...deriveSchedules(rawContracts), ...schedules]} contracts={rawContracts} schedules={schedules} setAiHook={setAiHook} onCancel={() => setFeeFlow(false)} onPublish={(s) => { setSchedules((p) => [...p.filter((x) => x.id !== s.id), s]); setFeeFlow(false); setPage("fees"); toast(`Published ${s.name}: ${s.rows} codes.`); }} /> : <>
+            {PD_PAGES.includes(page) ? (
               <div className="pd">
-                <aside className="subnav" aria-label="Practice data">
-                  <div className="sub-h">Billing</div>
-                  {SUBNAV.map(([k, l]) => k === "inert"
-                    ? <button key={l} className="sub-i" onClick={() => toast("Not part of this demo")}>{l}</button>
-                    : <button key={k} className={"sub-i" + (page === k ? " on" : "")} onClick={() => { setPage(k); setOpenClaim(null); }}>{l}</button>)}
-                </aside>
+                <PracticeNav page={page} onGo={(k) => { setPage(k); setOpenClaim(null); }} onInert={() => toast("Not part of this demo")} />
                 <section className="pd-main">
                   {page === "contracts" ? <ContractsPage contracts={contracts} ruleOn={ruleOn} setRuleOn={setRuleOn} createdTerms={createdTerms} setCreatedTerms={setCreatedTerms} onUpload={(m) => setUpload(m || "pdf")} drawerRow={drawerRow} setDrawerRow={setDrawerRow} openDoc={openDoc} toast={toast} claims={claims} ruleLog={ruleLog} setRuleLog={setRuleLog} />
+                    : page === "fees" ? <FeeSchedulesPage contracts={contracts} rawContracts={rawContracts} schedules={schedules} onLoad={(h) => setFeeFlow({ hint: h })} />
+                    : page === "hierarchy" ? <PayerHierarchyPage contracts={contracts} />
+                    : page === "documents" ? <DocumentsPage contracts={contracts} openDoc={openDoc} onUpload={(m) => setUpload(m || "pdf")} />
                     : <ConnectionsPage contracts={contracts} claims={claims} createdTerms={createdTerms} ruleOn={ruleOn} />}
                 </section>
               </div>
@@ -2334,7 +2878,7 @@ h1{font-size:18px;font-weight:600;line-height:1.2;margin:0}.h2{font-size:18px;fo
 .p-thread .tag{background:rgba(215,98,104,.2);color:#f0a3a6;border-radius:var(--r-soft);padding:0 8px;font-weight:500;font-size:12px}
 .p-thread .tag.moss{background:rgba(95,199,133,.18);color:#8fdcab}
 .pbtn{border:1px solid rgba(255,255,255,.2);background:transparent;border-radius:var(--r-full);padding:0 12px;height:28px;color:#e5e5e5}.pbtn:hover{background:rgba(255,255,255,.1)}
-.showp{position:absolute;top:6px;right:10px;z-index:5;border:1px solid var(--bst);background:var(--base);border-radius:var(--r-full);padding:0 12px;height:28px;font-size:12px}
+.showp{position:absolute;left:8px;bottom:52px;z-index:5;border:1px solid var(--bst);background:var(--base);border-radius:var(--r-full);padding:0 12px;height:28px;font-size:12px}
 
 /* Air app shell */
 .shell{flex:1;display:grid;grid-template-columns:200px 1fr;min-height:0;background:var(--tonal)}
@@ -2507,7 +3051,7 @@ h1{font-size:18px;font-weight:600;line-height:1.2;margin:0}.h2{font-size:18px;fo
 .fedge{display:flex;flex-direction:column;align-items:center;min-width:150px;font-size:12px;color:var(--fg3);padding:0 8px}.fedge i{display:block;width:100%;height:2px;background:var(--accent);position:relative;margin-top:4px}.fedge i:after{content:"";position:absolute;right:-1px;top:-4px;border-left:8px solid var(--accent);border-top:5px solid transparent;border-bottom:5px solid transparent}
 
 /* Practice Data secondary menu */
-.pd{display:grid;grid-template-columns:260px 1fr;min-height:100%}
+.pd{display:grid;grid-template-columns:208px 1fr;min-height:100%}
 .subnav{padding:16px 12px;border-right:1px solid var(--bs);display:flex;flex-direction:column;gap:2px;align-self:stretch}
 .sub-h{font-size:16px;font-weight:500;padding:0 12px 12px}
 .sub-i{display:block;width:100%;text-align:left;height:36px;padding:0 12px;border:0;background:transparent;border-radius:var(--r-soft);color:var(--fg1);font-size:13px}
@@ -2791,6 +3335,56 @@ h1{font-size:18px;font-weight:600;line-height:1.2;margin:0}.h2{font-size:18px;fo
 .thumb.on{border-color:var(--accent);color:var(--fg-accent);background:var(--accent-sub)}
 .errbox.card{align-items:flex-start}
 .apcol.wide{max-width:1180px}
+
+/* Figma Table Header + secondary navigation (Contract Management) */
+.th{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:8px}
+.th-title{flex:1;min-width:240px;display:flex;flex-direction:column;gap:4px}
+.th-h{font-size:18px;font-weight:600;line-height:normal;padding-bottom:4px;color:var(--fg1)}
+.th-views{display:flex;gap:12px;align-items:center}
+.th-views .tabs{margin-bottom:0}
+.selbar{display:inline-flex;align-items:center;gap:12px;font-size:13px}.selbar b{font-weight:500}
+.sf{width:240px}
+.page.tp,.pd .page.tp{padding:12px;max-width:none}
+.pd-main>.fillpage.tp{padding-bottom:12px}
+.gtbl th.sel,.gtbl td.sel{width:36px;min-width:36px;padding:0 8px}
+.gtbl td.sel{height:36px}
+.subnav2{padding:12px;border-right:1px solid var(--bs);display:flex;flex-direction:column;gap:4px;align-self:stretch;width:208px;overflow:auto}
+.sn-h{height:28px;display:flex;align-items:center;font-size:15px;font-weight:500;color:var(--fg2)}
+.sn-group{display:flex;flex-direction:column}
+.sn-gh{display:flex;align-items:center;gap:6px;height:28px;border:0;background:transparent;padding:0;font-weight:500;color:var(--fg2);width:100%;text-align:left}
+.sn-gh span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.sn-gh svg{flex:none}.sn-gh svg:last-child{margin-left:2px}.flipc2{transform:rotate(180deg)}
+.sn-body{display:flex}
+.sn-list{flex:1;display:flex;flex-direction:column;gap:2px;padding-bottom:12px;min-width:0}
+.sn-item{display:flex;align-items:center;gap:6px;width:100%;height:28px;padding:0 8px;border:0;background:transparent;border-radius:var(--r-soft);color:var(--fg2);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sn-item:hover{background:var(--d5)}.sn-item.on{background:var(--accent-sub);color:#0d28bf}
+.sn-item.top{padding:0}.sn-item svg{flex:none}
+.cfg-h .muted{margin-left:auto;font-size:12px}
+
+/* hover card on Expected allowed */
+.hovr{display:inline-block;cursor:help;outline:none}
+.hovr>.b{border-bottom:1px dotted var(--fg3)}
+.hovr:focus-visible>.b{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+.calc-pop{position:fixed;z-index:60;width:330px;display:flex;flex-direction:column;gap:6px;padding:12px;background:var(--base);border:1px solid var(--bs);border-radius:var(--r-extra);box-shadow:0 2px 8px rgba(0,0,0,.06),0 10px 28px rgba(0,0,0,.12);white-space:normal;text-align:left;font-weight:400;cursor:default;line-height:1.5;color:var(--fg1)}
+.cp-h{font-weight:600;font-size:13px}
+.cp-f{background:var(--solid2);border-radius:var(--r-soft);padding:6px 8px;font-family:'Geist Mono',ui-monospace,monospace;font-size:12px;overflow-wrap:anywhere}
+.cp-row{display:flex;align-items:flex-start;gap:8px;padding:2px 0;border-bottom:1px solid var(--bs)}
+.cp-row.off{color:var(--fg3)}.cp-row.off .cp-v{text-decoration:line-through}
+.cp-l{flex:1;display:flex;flex-direction:column;min-width:0}.cp-l .muted{font-size:12px;line-height:1.4}
+.cp-v{font-family:'Geist Mono',ui-monospace,monospace;font-weight:500;min-width:62px;text-align:right}
+.cp-t{display:flex;justify-content:space-between;align-items:center;background:#141414;color:#e5e5e5;border-radius:var(--r-soft);padding:6px 10px;font-weight:600}
+.cp-n{font-size:12px;color:var(--fg3);line-height:1.4}
+
+/* fee schedule loader */
+.cmid.wide2{flex:0 0 46%;min-width:420px}
+.fee-prev{flex:1;background:var(--base)}
+.fp-h{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--bs);flex:none}
+.fp-b{flex:1;min-height:0;overflow:auto}
+.fp-b .tbl{border-collapse:separate;border-spacing:0;min-width:max-content}
+.fp-b tr.active td{background:var(--accent-sub)}
+.fp-b tr.rm td{color:var(--fg3);text-decoration:line-through;background:var(--solid2)}
+.fp-b tr.rm td:last-child{text-decoration:none}
+.pad0{padding:2px 0 6px}
+.emptyicon.bad{background:var(--t-red);color:var(--danger)}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#141414;color:#e5e5e5;padding:8px 16px;border-radius:var(--r-soft);z-index:50;box-shadow:0 6px 8px rgba(0,0,0,.25);max-width:80vw}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}.sw span{transition:none}}
 @media (max-width:1000px){.shell{grid-template-columns:1fr}.sidecol{display:none}.cols,.hub,.two{grid-template-columns:1fr}.split{grid-template-columns:1fr}.crow{grid-template-columns:1fr}.hdr-c{display:none}}
