@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LineChart, Line, CartesianGrid, ReferenceLine } from "recharts";
-import { Upload, FileText, ChevronRight, ChevronDown, Check, CheckCircle2, AlertTriangle, X, Search, Sparkles, Send, Clock, Link2, Loader2, Info, Receipt, BarChart3, Circle, PanelLeft, Bell, Mic, BookOpen, Settings, HelpCircle, Download, Plus, ThumbsUp, ThumbsDown, ZoomIn, ZoomOut, ArrowUp, ArrowRight, SkipForward, ListChecks, SlidersHorizontal, ListFilter, ChevronUp, ChevronLeft, Printer, Maximize2, History, UserPlus, TrendingDown, Ban, ArrowLeftRight, CircleHelp, Calendar, RefreshCw, Share2, ArrowDown } from "lucide-react";
+import { Upload, FileText, ChevronRight, ChevronDown, Check, CheckCircle2, AlertTriangle, X, Search, Sparkles, Send, Clock, Link2, Loader2, Info, Receipt, BarChart3, Circle, PanelLeft, Bell, Mic, BookOpen, Settings, HelpCircle, Download, Plus, ThumbsUp, ThumbsDown, ZoomIn, ZoomOut, ArrowUp, ArrowRight, SkipForward, ListChecks, SlidersHorizontal, ListFilter, ChevronUp, ChevronLeft, Printer, Maximize2, History, UserPlus, TrendingDown, Ban, ArrowLeftRight, CircleHelp, Calendar, RefreshCw, Share2, ArrowDown, ShieldPlus, Lightbulb, Wrench } from "lucide-react";
 
 /* ============================================================
    ATI DEMO, Mock B: Contract management and underpayment engine
@@ -2034,59 +2034,65 @@ const CL_UNDER = ["id", "status", "patient", "provider", "dos", "ins", "expected
 const CL_SORT = { dos: "Date of Service", recover: "Recoverability", variance: "Variance", tis: "Time in Status", id: "Claim ID" };
 const CL_METHOD = { "Cascadia Mutual Health": "WAYSTAR", "Summit Care Alliance": "FAX", "Keystone Health Partners": "PORTAL" };
 function claimStatus(d) {
-  if (d.appeal) {
-    if (d.appeal.status === "Won") return { key: "recovered", label: "Recovered", Icon: CheckCircle2, workable: false };
-    if (d.appeal.status === "Denied") return { key: "denied", label: "Appeal Denied", Icon: Ban, workable: true };
-    return { key: "pending", label: "Appeal Pending", Icon: ArrowLeftRight, workable: true };
-  }
+  if (d.appeal) return { key: "appealed", label: "Appealed", Icon: ArrowLeftRight, workable: d.appeal.status !== "Won" };
   if (d.status === "underpaid") return { key: "underpaid", label: "Underpaid", Icon: TrendingDown, workable: true };
   return { key: "paid", label: "Paid", Icon: CheckCircle2, workable: false };
 }
 function nextStep(d, st) {
   if (st.key === "underpaid") return d.daysLeft < 0 ? "Appeal window closed" : d.pattern === "escalator" ? "Appeal: contract escalator not applied" : d.pattern === "pta" ? "Appeal: PTA rate reduced" : "Review payer edit (CO-97)";
   if (st.key === "paid" && d.status === "no_contract") return "Check this payment against a contract";
-  return { pending: "Waiting on payer response", recovered: "Post recovered payment", denied: "Review the denial", paid: "No action needed" }[st.key];
+  if (st.key === "appealed") return d.appeal.status === "Won" ? "Post recovered payment" : d.appeal.status === "Denied" ? "Review the denial" : "Waiting on payer response";
+  return "No action needed";
 }
 const StatusPill = ({ st }) => { const I = st.Icon; return <span className={"pill st-" + st.key}><I size={16} />{st.label}</span>; };
 const Ring = ({ n }) => (
   <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="#d6d6d6" strokeWidth="2" /><circle cx="8" cy="8" r="6" fill="none" stroke="#2b5fd9" strokeWidth="2" strokeDasharray={`${(n / 4) * 37.7} 37.7`} transform="rotate(-90 8 8)" strokeLinecap="round" /></svg>
 );
 const CL_BUILTIN = ["all", "workable", "mine"];
+const DEFAULT_VIEWS = [
+  { id: "cv-under", name: "Underpayments", filters: [{ k: "status", op: "in", vals: ["Underpaid"] }], grouping: "status", cols: CL_UNDER, sort: { k: "recover", dir: -1 } },
+  { id: "cv-appeals", name: "Appeals", filters: [{ k: "status", op: "in", vals: ["Appealed"] }], grouping: "status", cols: ["id", "status", "tis", "stage", "patient", "provider", "dos", "ins", "variance", "asg"], sort: { k: "dos", dir: -1 } },
+];
 const CL_UNDER_COLS = ["expected", "paid", "variance", "recover", "by"];
 const colsToMap = (arr) => Object.fromEntries(CL_COLS.map(([k]) => [k, arr.includes(k)]));
 function ClaimsPage({ claims, view, setView, sel, setSel, setOpenClaim, startAppeal, loaded, goLoad, onAssign, toast, onAnalytics, customViews, onSaveView, onUpdateView, onDeleteView, preset, onPresetUsed }) {
   const custom = customViews.find((v) => v.id === view) || null;
   const kind = custom ? view : CL_BUILTIN.includes(view) ? view : "workable";
-  const cfgOf = (v) => { const c = customViews.find((x) => x.id === v); return c ? { filters: c.filters, grouping: c.grouping, cols: c.cols, sort: c.sort } : { filters: [], grouping: "status", cols: CL_DEFAULT, sort: { k: "dos", dir: -1 } }; };
+  const cfgOf = (v) => { const c = customViews.find((x) => x.id === v); return c ? { filters: [], grouping: c.grouping, cols: c.cols, sort: c.sort } : { filters: [], grouping: "status", cols: CL_DEFAULT, sort: { k: "dos", dir: -1 } }; };
+  const baseFilters = custom ? custom.filters : [];
   const init = cfgOf(kind);
   const [filters, setFilters] = useState(init.filters);
   const [fOpen, setFOpen] = useState(false);
   const [dOpen, setDOpen] = useState(false);
-  const [sOpen, setSOpen] = useState(false);
+  const [openChip, setOpenChip] = useState(null);
+  const [naming, setNaming] = useState(false);
   const [saveName, setSaveName] = useState("");
-  const [saveCols, setSaveCols] = useState(true);
   const [grouping, setGrouping] = useState(init.grouping);
   const [cols, setCols] = useState(() => colsToMap(init.cols));
   const [collapsed, setCollapsed] = useState({});
   const [limits, setLimits] = useState({});
   const [sort, setSort] = useState(init.sort);
-  const fRef = usePop(fOpen, () => setFOpen(false)), dRef = usePop(dOpen, () => setDOpen(false)), sRef = usePop(sOpen, () => setSOpen(false));
-  useEffect(() => { if (preset) { setFilters(preset.filters); setCollapsed({}); onPresetUsed(); } }, [preset]);
+  const fRef = usePop(fOpen, () => setFOpen(false)), dRef = usePop(dOpen, () => setDOpen(false)), cRef = usePop(!!openChip, () => setOpenChip(null));
+  useEffect(() => { if (preset) { const m = {}; preset.filters.forEach((f) => { (m[f.k] = m[f.k] || { k: f.k, op: "in", vals: [] }).vals.push(f.v); }); setFilters(Object.values(m)); setCollapsed({}); onPresetUsed(); } }, [preset]);
   const prev = useRef(kind);
   useEffect(() => {
     if (prev.current === kind) return;
     prev.current = kind;
-    const c = cfgOf(kind); setFilters(c.filters); setGrouping(c.grouping); setCols(colsToMap(c.cols)); setSort(c.sort); setCollapsed({}); setSel([]);
+    const c = cfgOf(kind); setFilters(c.filters); setGrouping(c.grouping); setCols(colsToMap(c.cols)); setSort(c.sort); setCollapsed({}); setSel([]); setNaming(false); setOpenChip(null);
   }, [kind]);
 
   const all = useMemo(() => claims.map((d) => { const st = claimStatus(d); return { d, st, ins: (d.plan.toLowerCase().includes(d.master.split(" ")[0].toLowerCase()) ? d.plan : d.master.split(" ")[0] + " " + d.plan).toUpperCase(), next: nextStep(d, st), method: CL_METHOD[d.master] || "PORTAL", stage: d.appeal ? (d.appeal.status === "Won" ? { label: "Closed", n: 4 } : { label: "Appeal", n: 2 }) : st.key === "paid" ? { label: "Closed", n: 4 } : { label: "Payer 1", n: 1 }, tis: daysBetween(d.appeal ? d.appeal.on : d.remitDate, TODAY) }; }), [claims]);
   const inView = (x) => (kind === "workable" ? x.st.workable : kind === "mine" ? x.d.assignee === "LR" : true);
   const base = all.filter(inView);
-  const kinds = [...new Set(filters.map((f) => f.k))];
+  const allFilters = [...baseFilters, ...filters];
   const matchF = (k, v, x) => (k === "status" ? x.st.label === v : k === "payer" ? x.d.master === v : k === "facility" ? x.d.facility === v : k === "group" ? x.d.group === v : x.next === v);
-  const items = base.filter((x) => kinds.every((k) => filters.filter((f) => f.k === k).some((f) => matchF(k, f.v, x))));
-  const underMode = filters.some((f) => f.k === "status" && f.v === "Underpaid");
-  const fopts = [["status", "Status", [...new Set(all.map((x) => x.st.label))]], ["payer", "Payer", [...new Set(all.map((x) => x.d.master))]], ["group", "Payer group", [...new Set(all.map((x) => x.d.group))]], ["facility", "Facility", [...new Set(all.map((x) => x.d.facility))]], ["next", "Next step", [...new Set(all.map((x) => x.next))]]];
+  const passF = (f, x) => { if (!f.vals.length) return true; const hit = f.vals.some((v) => matchF(f.k, v, x)); return f.op === "out" ? !hit : hit; };
+  const items = base.filter((x) => allFilters.every((f) => passF(f, x)));
+  const underMode = allFilters.some((f) => f.k === "status" && f.op !== "out" && f.vals.includes("Underpaid"));
+  const FLABEL = { status: "Claim Status", payer: "Payer", group: "Payer group", facility: "Facility", next: "Next step" };
+  const fopts = [["status", [...new Set(all.map((x) => x.st.label))]], ["payer", [...new Set(all.map((x) => x.d.master))]], ["group", [...new Set(all.map((x) => x.d.group))]], ["facility", [...new Set(all.map((x) => x.d.facility))]], ["next", [...new Set(all.map((x) => x.next))]]];
+  const setChip = (k, patch) => setFilters(filters.map((f) => (f.k === k ? { ...f, ...patch } : f)));
+  const addField = (k) => { setFilters([...filters, { k, op: "in", vals: [] }]); setFOpen(false); setOpenChip({ k, kind: "val" }); };
   const sortVal = (x) => (sort.k === "dos" ? x.d.dos : sort.k === "recover" ? x.d.recover : sort.k === "variance" ? x.d.variance : sort.k === "tis" ? x.tis : x.d.id);
   const sorted = [...items].sort((a, b) => (sortVal(a) < sortVal(b) ? -1 : sortVal(a) > sortVal(b) ? 1 : 0) * sort.dir);
   const amountOf = (x) => (underMode ? x.d.variance : x.d.billed);
@@ -2100,6 +2106,7 @@ function ClaimsPage({ claims, view, setView, sel, setSel, setOpenClaim, startApp
   });
   groups.forEach((g) => { g.amount = r2(g.items.reduce((s, x) => s + amountOf(x), 0)); g.rec = g.items.reduce((s, x) => s + (x.d.recover || 0), 0); });
   groups.sort((a, b) => (underMode ? b.rec - a.rec : 0) || b.amount - a.amount);
+  useEffect(() => { if (underMode && !custom) setCols((c) => ({ ...c, expected: true, paid: true, variance: true, recover: true, by: true })); }, [underMode]);
   const vcols = CL_COLS.filter(([k]) => cols[k]);
   const eligible = (x) => x.d.status === "underpaid" && !x.d.appeal && x.d.daysLeft >= 0;
   const nSel = items.filter((x) => sel.includes(x.d.id)).length;
@@ -2113,16 +2120,20 @@ function ClaimsPage({ claims, view, setView, sel, setSel, setOpenClaim, startApp
   const baseCols = custom ? custom.cols : CL_DEFAULT;
   const colKey = vcols.map(([k]) => k).join();
   const changed = grouping !== (custom ? custom.grouping : "status") || colKey !== CL_COLS.filter(([k]) => baseCols.includes(k)).map(([k]) => k).join();
-  const dirty = !!custom && (JSON.stringify(filters) !== JSON.stringify(custom.filters) || changed || sort.k !== custom.sort.k || sort.dir !== custom.sort.dir);
+  const sortChanged = !!custom && (sort.k !== custom.sort.k || sort.dir !== custom.sort.dir);
+  const activeF = filters.filter((f) => f.vals.length > 0);
+  const modified = activeF.length > 0 || changed || sortChanged;
+  const resetAll = () => { const c = cfgOf(kind); setFilters([]); setGrouping(c.grouping); setCols(colsToMap(c.cols)); setSort(c.sort); setCollapsed({}); setOpenChip(null); };
   const sortBy = (k) => { if (!CL_SORT[k]) return; setSort(sort.k === k ? { k, dir: -sort.dir } : { k, dir: -1 }); };
   const exportCsv = () => { downloadCsv("claims.csv", vcols.map(([, l]) => l), sorted.map((x) => vcols.map(([k]) => (k === "id" ? x.d.id : k === "status" ? x.st.label : k === "tis" ? x.tis + "d" : k === "stage" ? x.stage.label : k === "patient" ? x.d.name : k === "provider" ? x.d.provider : k === "dos" ? mdy(x.d.dos) : k === "ins" ? x.ins : k === "expected" ? fmt(x.d.expected) : k === "paid" ? fmt(x.d.paid) : k === "variance" ? fmt(x.d.variance) : k === "recover" ? x.d.level || "" : k === "by" ? (x.d.status === "underpaid" ? x.d.daysLeft + " days" : "") : x.d.assignee || "")))); toast(`Exported ${sorted.length} claims to claims.csv`); };
-  const openSave = () => { setSaveName(underMode ? "Underpayments" : "New view"); setSaveCols(true); setSOpen(true); };
+  const startSave = () => {
+    if (custom) { onUpdateView(custom.id, { filters: allFilters, grouping, cols: CL_COLS.map(([k]) => k).filter((k) => cols[k]), sort }); setFilters([]); return; }
+    setSaveName(""); setNaming(true); setOpenChip(null);
+  };
   const doSave = () => {
-    const keys = vcols.map(([k]) => k);
-    const withUnder = underMode && saveCols;
-    const colArr = CL_COLS.map(([k]) => k).filter((k) => keys.includes(k) || (withUnder && CL_UNDER_COLS.includes(k)));
-    onSaveView({ name: saveName.trim() || "New view", filters, grouping, cols: colArr, sort: withUnder ? { k: "recover", dir: -1 } : sort });
-    setSOpen(false);
+    if (!saveName.trim()) return;
+    onSaveView({ name: saveName.trim(), filters, grouping, cols: CL_COLS.map(([k]) => k).filter((k) => cols[k]), sort: underMode ? { k: "recover", dir: -1 } : sort });
+    setNaming(false);
   };
   const cell = (k, x) => {
     const d = x.d;
@@ -2170,43 +2181,51 @@ function ClaimsPage({ claims, view, setView, sel, setSel, setOpenClaim, startApp
           <button className="btn primary" onClick={() => toast("Not part of this demo")}><Plus size={16} />Create Claim</button>
         </div>
       </div>
+      {naming && (
+        <div className="cl-name">
+          <input className="cl-nameinput" autoFocus aria-label="View name" placeholder="Name your view..." value={saveName} onChange={(e) => setSaveName(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") doSave(); if (e.key === "Escape") setNaming(false); }} />
+          <div className="row gap"><button className="pillbtn accent" onClick={() => setNaming(false)}>Cancel</button><button className="pillbtn primary" disabled={!saveName.trim()} onClick={doSave}>Save View</button></div>
+        </div>
+      )}
       <div className="cl-filter">
         <div className="popwrap" ref={fRef}>
           <button className="pillbtn" aria-haspopup="menu" aria-expanded={fOpen} onClick={() => setFOpen(!fOpen)}><ListFilter size={16} />Filter</button>
           {fOpen && (
             <div className="menu fmenu" role="menu">
-              {fopts.map(([k, l, vals]) => (
-                <div key={k}><div className="menu-h">{l}</div>
-                  {vals.map((v) => <button key={v} role="menuitem" className="menu-i" onClick={() => { if (!filters.some((f) => f.k === k && f.v === v)) setFilters([...filters, { k, v }]); setFOpen(false); }}>{v}</button>)}</div>
-              ))}
+              {fopts.filter(([k]) => !filters.some((f) => f.k === k)).map(([k]) => <button key={k} role="menuitem" className="menu-i" onClick={() => addField(k)}>{FLABEL[k]}</button>)}
+              {fopts.every(([k]) => filters.some((f) => f.k === k)) && <div className="menu-h">All fields are in use</div>}
             </div>
           )}
         </div>
-        <div className="row gap wrap">{filters.map((f) => <span key={f.k + f.v} className="fchip"><span className="fk">{fopts.find((o) => o[0] === f.k)[1]} is</span>{f.v}<button aria-label={"Remove filter " + f.v} onClick={() => setFilters(filters.filter((y) => y !== f))}><X size={12} /></button></span>)}</div>
-        {!custom && filters.length > 0 && (
-          <div className="popwrap" ref={sRef}>
-            <button className="pillbtn accent" aria-haspopup="dialog" aria-expanded={sOpen} onClick={() => (sOpen ? setSOpen(false) : openSave())}><Plus size={14} />Save as view</button>
-            {sOpen && (
-              <div className="pop savev" role="dialog" aria-label="Save as new view">
-                <div className="sv-h">Save as new view</div>
-                <label className="fld wide"><span>View name</span><input autoFocus value={saveName} onChange={(e) => setSaveName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && doSave()} /></label>
-                <div className="sv-f">{filters.map((f) => <span key={f.k + f.v} className="sv-chip">{fopts.find((o) => o[0] === f.k)[1]} is {f.v}</span>)}</div>
-                {underMode && <label className="sv-c"><input type="checkbox" checked={saveCols} onChange={(e) => setSaveCols(e.target.checked)} />Add Expected, Paid, Variance, Recoverability and Appeal by columns</label>}
-                <div className="sv-b"><button className="btn" onClick={() => setSOpen(false)}>Cancel</button><button className="btn primary" onClick={doSave}>Save view</button></div>
-              </div>
-            )}
-          </div>
-        )}
-        {custom && dirty && <button className="pillbtn accent" onClick={() => onUpdateView(custom.id, { filters, grouping, cols: CL_COLS.map(([k]) => k).filter((k) => cols[k]), sort })}>Save changes</button>}
+        <div className="row gap wrap" ref={cRef}>
+          {filters.map((f) => {
+            const vals = (fopts.find((o) => o[0] === f.k) || [0, []])[1];
+            const isOp = openChip && openChip.k === f.k && openChip.kind === "op", isVal = openChip && openChip.k === f.k && openChip.kind === "val";
+            return (
+              <span key={f.k} className="fchip2">
+                <span className="fc-f"><ListChecks size={14} />{FLABEL[f.k]}</span>
+                <span className="popwrap">
+                  <button className="fc-op" aria-haspopup="menu" aria-expanded={isOp} onClick={() => setOpenChip(isOp ? null : { k: f.k, kind: "op" })}>{f.op === "out" ? "excludes" : "includes any of"}<ChevronDown size={14} /></button>
+                  {isOp && <div className="menu fopm" role="menu">{[["in", "includes any of"], ["out", "excludes"]].map(([v, l]) => <button key={v} role="menuitem" className="menu-i" onClick={() => { setChip(f.k, { op: v }); setOpenChip(null); }}>{l}</button>)}</div>}
+                </span>
+                <span className="popwrap">
+                  <button className="fc-v" aria-haspopup="listbox" aria-expanded={isVal} title={f.vals.join(", ")} onClick={() => setOpenChip(isVal ? null : { k: f.k, kind: "val" })}>{f.vals.length} selected<ChevronDown size={14} /></button>
+                  {isVal && <div className="menu fvmenu" role="listbox" aria-label={FLABEL[f.k] + " values"}>{vals.map((v) => <label key={v} className="menu-i chk"><input type="checkbox" checked={f.vals.includes(v)} onChange={(e) => setChip(f.k, { vals: e.target.checked ? [...f.vals, v] : f.vals.filter((y) => y !== v) })} />{v}</label>)}</div>}
+                </span>
+                <button className="fc-x" aria-label={"Remove filter " + FLABEL[f.k]} onClick={() => { setFilters(filters.filter((y) => y !== f)); setOpenChip(null); }}><X size={14} /></button>
+              </span>
+            );
+          })}
+        </div>
         <span className="grow" />
         {underMode && (
           <>
-            <span className="clsum"><b>{fmt(items.reduce((s, x) => s + x.d.variance, 0))}</b> underpaid, <b>{fmt(items.filter(eligible).reduce((s, x) => s + x.d.recover, 0))}</b> expected recovery, <b>{items.filter((x) => eligible(x) && x.d.daysLeft <= 30).length}</b> windows close within 30 days</span>
             <button className="pillbtn" disabled={!high.length} onClick={() => setSel([...new Set([...sel, ...high.map((x) => x.d.id)])])}>Select high recoverability ({high.length})</button>
           </>
         )}
+        {modified && !naming && <><button className="rstbtn" onClick={resetAll}>Reset</button><button className="pillbtn accent" onClick={startSave}>Save</button><span className="vsep" /></>}
         <div className="popwrap" ref={dRef}>
-          <button className="pillbtn" aria-haspopup="dialog" aria-expanded={dOpen} onClick={() => setDOpen(!dOpen)}><SlidersHorizontal size={16} />Display{changed && <span className="reddot" aria-label="Display changed" />}</button>
+          <button className="pillbtn" aria-haspopup="dialog" aria-expanded={dOpen} onClick={() => setDOpen(!dOpen)}><SlidersHorizontal size={16} />Display{(changed || (activeF.length > 0 && !custom)) && !naming && <span className="reddot" aria-label="Display changed" />}</button>
           {dOpen && (
             <div className="pop dsp" role="dialog" aria-label="Display options">
               <div className="cfg-s"><div className="dprow"><span>Grouping</span><select className="fsel" aria-label="Grouping" value={grouping} onChange={(e) => { setGrouping(e.target.value); setCollapsed({}); }}><option value="status">Status and payer</option><option value="payer">Payer</option><option value="none">None</option></select></div></div>
@@ -2474,14 +2493,28 @@ function AppealPackageFlow({ ids, claims, onCancel, onSubmit, setAiHook, onViewA
     if (arr.length) setExtra((p) => [...p, ...arr]);
   };
 
-  const topCrumb = bulk ? "Underpaid" : all[0] ? all[0].id : "Claims";
+  const topCrumb = bulk ? "Claims" : all[0] ? all[0].id : "Claims";
   const cats = ["All", "Contract", "Remittance", "Worksheet", "Other"];
   const shownDocs = docs.filter((d) => docTab === "All" || d.cat === docTab);
   const allShownOn = shownDocs.length > 0 && shownDocs.every(incl);
-  const pillSel = groups.length > 1 && (
-    <select className="pillsel" aria-label="Packet" value={active ? active.key : ""} onChange={(e) => setGk(e.target.value)}>
-      {groups.map((g) => <option key={g.key} value={g.key}>{g.master}, {PATTERN[g.pattern] ? PATTERN[g.pattern].short : "Underpaid"} ({g.claims.length})</option>)}
-    </select>
+  const packetList = (
+    <aside className="clist apclist" aria-label={bulk ? "Packets" : "Patient"}>
+      <div className="clist-h">{bulk ? "Packets" : "Patient"} <span className="cnt">{groups.length}</span></div>
+      {groups.map((g) => {
+        const on = !!active && g.key === active.key, lt = letters[g.key];
+        const reason = PATTERN[g.pattern] ? PATTERN[g.pattern].short : "Underpaid";
+        const title = bulk ? g.master : g.claims[0].name;
+        const sub = bulk ? g.claims.length + (g.claims.length === 1 ? " claim" : " claims") + " | " + reason : g.claims[0].id + " | " + g.master;
+        return (
+          <div key={g.key} className={"citem" + (on ? " on" : "")}>
+            <button className="citem-b" title={title + ", " + sub} aria-current={on ? "true" : undefined} onClick={() => setGk(g.key)}>
+              {lt ? <CheckCircle2 size={20} className="okc" /> : <Circle size={20} />}
+              <span className="ct"><span className="c1 ellip">{title}</span><span className="c2">{sub}</span></span>
+            </button>
+          </div>
+        );
+      })}
+    </aside>
   );
 
   if (done) return (
@@ -2491,7 +2524,7 @@ function AppealPackageFlow({ ids, claims, onCancel, onSubmit, setAiHook, onViewA
         <div className="emptyicon ok"><CheckCircle2 size={30} /></div>
         <div className="h2">{done.n > 1 ? `${done.n} appeals submitted` : "Appeal submitted"}</div>
         <p className="muted emptycopy">Batch {done.batch}. {fmt(done.amt)} in dispute. The payer has 30 days to respond, and each claim keeps its own deadline and status.</p>
-        <div className="row gap"><button className="btn" onClick={onCancel}>Back to claims</button><button className="btn primary" onClick={onViewAppeals}>View appeals</button></div>
+        <div className="row gap"><button className="btn" onClick={onCancel}>Back to claims</button><button className="btn primary" onClick={onViewAppeals}>View in Claims</button></div>
       </div>
     </div>
   );
@@ -2521,6 +2554,10 @@ function AppealPackageFlow({ ids, claims, onCancel, onSubmit, setAiHook, onViewA
         </div>
       </div>
 
+      {step <= 3 && (
+        <div className="aprow">
+          {packetList}
+          <div className="apmain">
       {step === 1 && (
         <div className="flowbody"><div className="apcol">
           <AiBanner title="Pick the documents to send">
@@ -2535,7 +2572,7 @@ function AppealPackageFlow({ ids, claims, onCancel, onSubmit, setAiHook, onViewA
           </ACard>
 
           {active && (
-            <ACard title={bulk ? "Remittances you are appealing" : "Remittance you are appealing"} right={pillSel}>
+            <ACard title={bulk ? "Remittances you are appealing" : "Remittance you are appealing"}>
               <div className="kv2">
                 {[["Status", "Underpaid"], ["Index", "Primary"], ["Payer", active.master], ["Plan", f.plan], ["Reason", f.why], ["Claims", f.claims], ["Remit date", f.remit], ["Service date", f.service], ["Disputed", f.disputed], ["Appeal deadline", `${f.deadline} (${Math.min(...active.claims.map((c) => c.daysLeft))} days left)`], ["Contract", f.contractRef], ["Method", "Payer portal (simulated)"]].map(([k, v]) => <React.Fragment key={k}><span className="k2">{k}</span><span className="v2">{v}</span></React.Fragment>)}
                 <span className="k2 span">Reason detail</span><span className="v2 span">{active.claims[0].reason}</span>
@@ -2543,7 +2580,7 @@ function AppealPackageFlow({ ids, claims, onCancel, onSubmit, setAiHook, onViewA
             </ACard>
           )}
 
-          <ACard title={bulk ? "Claims on this appeal" : "Procedures on this claim"} right={<span className="pillnote">{bulk ? "One packet per payer and reason (recommended)" : "One packet for this claim"}</span>}>
+          <ACard title={bulk ? "Claims on this appeal" : "Procedures on this claim"} startOpen={!bulk} right={<span className="pillnote">{bulk ? "One packet per payer and reason (recommended)" : "One packet for this claim"}</span>}>
             <div className="plist">
               {all.map((c) => (
                 <div key={c.id}>
@@ -2584,7 +2621,6 @@ function AppealPackageFlow({ ids, claims, onCancel, onSubmit, setAiHook, onViewA
       {(step === 2 || step === 3) && active && (
         <div className="fsplit even">
           <div className="apleft">
-            {pillSel && <div className="packrow"><span className="muted">Packet</span>{pillSel}</div>}
             {step === 2 ? (
               <>
                 <ACard title="Claim and appeal values">
@@ -2670,6 +2706,10 @@ function AppealPackageFlow({ ids, claims, onCancel, onSubmit, setAiHook, onViewA
         </div>
       )}
 
+          </div>
+        </div>
+      )}
+
       {step === 4 && (
         <div className="flowbody"><div className="apcol">
           <AiBanner title={doneCount === 4 ? "Everything is ready to submit" : "Finish the checklist before you submit"}>
@@ -2698,163 +2738,6 @@ function AppealPackageFlow({ ids, claims, onCancel, onSubmit, setAiHook, onViewA
 /* ============================================================
    Appeals tracking
    ============================================================ */
-const AP2_COLS = [["id", "Appeal ID", 130], ["status", "Status", 170], ["tis", "Time in Status", 118], ["patient", "Patient", 150], ["claim", "Claim ID", 130], ["ins", "Insurances", 218], ["filed", "Filed", 112], ["due", "Response due", 132], ["dispute", "In dispute", 110], ["recovered", "Recovered", 110], ["asg", "Assignee", 84]];
-const AP2_SORT = { filed: "Filed", dispute: "In dispute", id: "Appeal ID" };
-function AppealsPage({ claims, respond, setOpenClaim, onAssign, toast, goClaims }) {
-  const [view, setView] = useState("all");
-  const [filters, setFilters] = useState([]);
-  const [fOpen, setFOpen] = useState(false);
-  const [dOpen, setDOpen] = useState(false);
-  const [grouping, setGrouping] = useState("status");
-  const [cols, setCols] = useState(() => Object.fromEntries(AP2_COLS.map(([k]) => [k, true])));
-  const [collapsed, setCollapsed] = useState({});
-  const [sort, setSort] = useState({ k: "filed", dir: -1 });
-  const [sel, setSel] = useState([]);
-  const fRef = usePop(fOpen, () => setFOpen(false)), dRef = usePop(dOpen, () => setDOpen(false));
-
-  const all = useMemo(() => claims.filter((c) => c.appeal).map((d) => { const st = claimStatus(d); return { d, st, ins: (d.plan.toLowerCase().includes(d.master.split(" ")[0].toLowerCase()) ? d.plan : d.master.split(" ")[0] + " " + d.plan).toUpperCase(), next: nextStep(d, st), method: CL_METHOD[d.master] || "PORTAL", tis: daysBetween(d.appeal.on, TODAY), due: addDays(d.appeal.on, 30) }; }), [claims]);
-  const base = all.filter((x) => (view === "open" ? x.st.key === "pending" : view === "mine" ? x.d.assignee === "LR" : true));
-  const kinds = [...new Set(filters.map((f) => f.k))];
-  const matchF = (k, v, x) => (k === "status" ? x.st.label === v : k === "payer" ? x.d.master === v : x.next === v);
-  const items = base.filter((x) => kinds.every((k) => filters.filter((f) => f.k === k).some((f) => matchF(k, f.v, x))));
-  const fopts = [["status", "Status", [...new Set(all.map((x) => x.st.label))]], ["payer", "Payer", [...new Set(all.map((x) => x.d.master))]], ["next", "Next step", [...new Set(all.map((x) => x.next))]]];
-  const sortVal = (x) => (sort.k === "filed" ? x.d.appeal.on : sort.k === "dispute" ? x.d.variance : x.d.appeal.id);
-  const sorted = [...items].sort((a, b) => (sortVal(a) < sortVal(b) ? -1 : sortVal(a) > sortVal(b) ? 1 : 0) * sort.dir);
-  const groups = [];
-  if (grouping === "none") groups.push({ key: "all", head: null, items: sorted });
-  else sorted.forEach((x) => {
-    const key = grouping === "payer" ? x.d.master : [x.st.key, x.ins, x.next, x.method].join("|");
-    let g = groups.find((y) => y.key === key);
-    if (!g) { g = { key, head: x, items: [] }; groups.push(g); }
-    g.items.push(x);
-  });
-  groups.forEach((g) => { g.amount = r2(g.items.reduce((s, x) => s + x.d.variance, 0)); });
-  groups.sort((a, b) => b.amount - a.amount);
-  const vcols = AP2_COLS.filter(([k]) => cols[k]);
-  const nSel = items.filter((x) => sel.includes(x.d.id)).length;
-  const allOn = items.length > 0 && nSel === items.length;
-  const toggleAll = () => setSel(allOn ? sel.filter((id) => !items.some((x) => x.d.id === id)) : [...new Set([...sel, ...items.map((x) => x.d.id)])]);
-  const toggle = (id) => setSel(sel.includes(id) ? sel.filter((x) => x !== id) : [...sel, id]);
-  const changed = grouping !== "status" || vcols.length !== AP2_COLS.length;
-  const won = all.filter((x) => x.d.appeal.status === "Won"), lost = all.filter((x) => x.d.appeal.status === "Denied");
-  const inDispute = all.filter((x) => x.d.appeal.status === "Submitted").reduce((s, x) => s + x.d.variance, 0);
-  const recovered = won.reduce((s, x) => s + x.d.variance, 0);
-  const openN = all.filter((x) => x.st.key === "pending").length;
-  const sortBy = (k) => { if (!AP2_SORT[k]) return; setSort(sort.k === k ? { k, dir: -sort.dir } : { k, dir: -1 }); };
-  const exportCsv = () => { downloadCsv("appeals.csv", vcols.map(([, l]) => l), sorted.map((x) => vcols.map(([k]) => (k === "id" ? x.d.appeal.id : k === "status" ? x.st.label : k === "tis" ? x.tis + "d" : k === "patient" ? x.d.name : k === "claim" ? x.d.id : k === "ins" ? x.ins : k === "filed" ? mdy(x.d.appeal.on) : k === "due" ? mdy(x.due) : k === "dispute" ? fmt(x.d.variance) : k === "recovered" ? (x.d.appeal.status === "Won" ? fmt(x.d.variance) : "") : x.d.assignee || "")))); toast(`Exported ${sorted.length} appeals to appeals.csv`); };
-  const cell = (k, x) => {
-    const d = x.d;
-    switch (k) {
-      case "id": return <span className="clid">{d.appeal.id}</span>;
-      case "status": return <StatusPill st={x.st} />;
-      case "tis": return x.tis + "d";
-      case "patient": return <button className="plink" onClick={(e) => { e.stopPropagation(); setOpenClaim(d.id); }}>{d.name}</button>;
-      case "claim": return d.id;
-      case "ins": return <span className="pill"><span className="insdot" />{x.ins}</span>;
-      case "filed": return mdy(d.appeal.on);
-      case "due": return mdy(x.due);
-      case "dispute": return fmt(d.variance);
-      case "recovered": return d.appeal.status === "Won" ? <b>{fmt(d.variance)}</b> : <span className="muted">n/a</span>;
-      default: return (
-        <span onClick={(e) => e.stopPropagation()}>
-          {d.assignee ? <button className="asg on" aria-label={"Assigned to " + d.assignee + ", select to unassign"} onClick={() => onAssign([d.id], null)}>{d.assignee}</button> : <button className="asg" aria-label={"Assign " + d.id + " to me"} onClick={() => onAssign([d.id], "LR")}><UserPlus size={16} /></button>}
-        </span>
-      );
-    }
-  };
-  const tabs = [["all", "All Appeals"], ["open", "Open Appeals"], ["mine", "My Appeals"]];
-  return (
-    <div className="clpage">
-      <div className="cl-top">
-        <div className="cl-tabs" role="tablist">
-          {tabs.map(([k, l]) => <button key={k} role="tab" aria-selected={view === k} className={"cl-tab" + (view === k ? " on" : "")} onClick={() => { setView(k); setSel([]); }}>{l}{view === k ? ` (${items.length.toLocaleString()})` : ""}</button>)}
-        </div>
-        <div className="cl-act">
-          <button className="tgl" aria-label="History" disabled title="History"><History size={18} /></button>
-          <button className="tgl" aria-label="Export appeals" onClick={exportCsv}><Download size={18} /></button>
-          <button className="tgl" aria-label="Help" onClick={() => toast("Not part of this demo")}><CircleHelp size={18} /></button>
-          <button className="btn primary" disabled={!openN} title="Demo control: the payer answers every open appeal" onClick={respond}><Clock size={16} />Simulate payer responses</button>
-        </div>
-      </div>
-      <div className="cl-filter">
-        <div className="popwrap" ref={fRef}>
-          <button className="pillbtn" aria-haspopup="menu" aria-expanded={fOpen} onClick={() => setFOpen(!fOpen)}><ListFilter size={16} />Filter</button>
-          {fOpen && (
-            <div className="menu fmenu" role="menu">
-              {fopts.map(([k, l, vals]) => (
-                <div key={k}><div className="menu-h">{l}</div>
-                  {vals.map((v) => <button key={v} role="menuitem" className="menu-i" onClick={() => { if (!filters.some((f) => f.k === k && f.v === v)) setFilters([...filters, { k, v }]); setFOpen(false); }}>{v}</button>)}</div>
-              ))}
-            </div>
-          )}
-        </div>
-        <div className="row gap wrap">{filters.map((f) => <span key={f.k + f.v} className="fchip"><span className="fk">{fopts.find((o) => o[0] === f.k)[1]} is</span>{f.v}<button aria-label={"Remove filter " + f.v} onClick={() => setFilters(filters.filter((y) => y !== f))}><X size={12} /></button></span>)}</div>
-        <span className="grow" />
-        {all.length > 0 && <span className="clsum"><b>{fmt(inDispute)}</b> in dispute, <b>{fmt(recovered)}</b> recovered, win rate <b>{won.length + lost.length ? Math.round((won.length / (won.length + lost.length)) * 100) + "%" : "n/a"}</b></span>}
-        <div className="popwrap" ref={dRef}>
-          <button className="pillbtn" aria-haspopup="dialog" aria-expanded={dOpen} onClick={() => setDOpen(!dOpen)}><SlidersHorizontal size={16} />Display{changed && <span className="reddot" aria-label="Display changed" />}</button>
-          {dOpen && (
-            <div className="pop dsp" role="dialog" aria-label="Display options">
-              <div className="cfg-s"><div className="dprow"><span>Grouping</span><select className="fsel" aria-label="Grouping" value={grouping} onChange={(e) => { setGrouping(e.target.value); setCollapsed({}); }}><option value="status">Status and payer</option><option value="payer">Payer</option><option value="none">None</option></select></div></div>
-              <div className="cfg-b"><div className="k">Columns</div>{AP2_COLS.map(([k, l]) => <label key={k} className="crowc"><input type="checkbox" checked={!!cols[k]} disabled={cols[k] && vcols.length === 1} onChange={(e) => setCols({ ...cols, [k]: e.target.checked })} />{l}</label>)}</div>
-              <div className="pfoot"><button className="link" onClick={() => { setGrouping("status"); setCols(Object.fromEntries(AP2_COLS.map(([k]) => [k, true]))); }}>Reset</button></div>
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="clwrap">
-        <table className="cltbl">
-          <thead><tr>
-            <th className="sel"><input type="checkbox" aria-label="Select all appeals" ref={(el) => { if (el) el.indeterminate = nSel > 0 && !allOn; }} checked={allOn} disabled={!items.length} onChange={toggleAll} /></th>
-            {vcols.map(([k, l, w]) => (
-              <th key={k} className={(k === "asg" ? "asg-h " : "") + (AP2_SORT[k] ? "sortable" : "")} style={{ minWidth: w }} onClick={() => sortBy(k)} aria-sort={sort.k === k ? (sort.dir < 0 ? "descending" : "ascending") : undefined}>
-                {l}{sort.k === k && <span className="sarrow">{sort.dir < 0 ? "\u2193" : "\u2191"}</span>}
-              </th>
-            ))}
-          </tr></thead>
-          <tbody>
-            {groups.map((g) => {
-              const open = g.head === null || collapsed[g.key] === false || (collapsed[g.key] === undefined && g === groups[0]);
-              const h = g.head;
-              return (
-                <React.Fragment key={g.key}>
-                  {h && (
-                    <tr className="clgrp"><td colSpan={vcols.length + 1}>
-                      <div className="clgin">
-                        <button className="gcol" aria-label={open ? "Collapse group" : "Expand group"} aria-expanded={open} onClick={() => setCollapsed({ ...collapsed, [g.key]: !open ? false : true })}>{open ? <ChevronUp size={18} /> : <ChevronDown size={18} />}</button>
-                        {grouping === "payer" ? <span className="gchip">{h.d.master}</span> : <><StatusPill st={h.st} /><span className="gchip">{h.ins}</span><span className="gchip">{h.next}</span><span className="gchip">{h.method}</span></>}
-                        <span className="gchip amt"><b>{fmt(g.amount)}</b><span className="gsep">|</span>{g.items.length}</span>
-                      </div>
-                    </td></tr>
-                  )}
-                  {open && g.items.map((x) => (
-                    <tr key={x.d.id} className={"clrow" + (sel.includes(x.d.id) ? " picked" : "")} onClick={() => setOpenClaim(x.d.id)}>
-                      <td className="sel" onClick={(e) => e.stopPropagation()}><input type="checkbox" aria-label={"Select " + x.d.appeal.id} checked={sel.includes(x.d.id)} onChange={() => toggle(x.d.id)} /></td>
-                      {vcols.map(([k]) => <td key={k} className={k === "asg" ? "asg-c" : ""}>{cell(k, x)}</td>)}
-                    </tr>
-                  ))}
-                </React.Fragment>
-              );
-            })}
-            {!items.length && (
-              <tr><td colSpan={vcols.length + 1} className="empty">
-                {all.length ? "No appeals match." : <>No appeals yet. Filter Claims by Underpaid, then appeal them in bulk. <button className="link" onClick={goClaims}>Go to Claims</button></>}
-              </td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-      {sel.length > 0 && (
-        <div className="bulkbar" role="region" aria-label="Bulk actions">
-          <span className="bb-n">{sel.length} selected</span>
-          <button className="bb-btn" onClick={() => onAssign(all.filter((x) => sel.includes(x.d.id)).map((x) => x.d.id), "LR")}>Assign to me</button>
-          <button className="bb-btn" onClick={() => setSel([])}>Clear</button>
-        </div>
-      )}
-    </div>
-  );
-}
-
 /* ============================================================
    Analytics
    ============================================================ */
@@ -2897,12 +2780,17 @@ function computeDash(claims, cfg) {
   const under = (a) => a.filter((d) => d.status === "underpaid");
   const rate = (a) => (a.length ? (under(a).length / a.length) * 100 : null);
   const dollars = (a) => r2(under(a).reduce((s, d) => s + d.variance, 0));
+  const decidedAll = pool.filter((d) => d.appeal && (d.appeal.status === "Won" || d.appeal.status === "Denied"));
+  const decDate = (d) => d.appeal.resp || TODAY;
+  const dcur = decidedAll.filter((d) => decDate(d) >= start && decDate(d) <= end), dprev = decidedAll.filter((d) => decDate(d) >= pStart && decDate(d) <= pEnd);
+  const wr = (a) => (a.length ? (a.filter((d) => d.appeal.status === "Won").length / a.length) * 100 : null);
   const cb = bucketize(start, end, cfg.gran, cfg.days > 200), pb = bucketize(pStart, pEnd, cfg.gran, cfg.days > 200);
   const n = cb.length;
   const series = Array.from({ length: n }, (_, i) => {
     const c = cb[i], p = pb[i];
     const ca = c ? cur.filter((d) => inR(d, c.s, c.e)) : [], pa = p ? prv.filter((d) => inR(d, p.s, p.e)) : [];
-    return { label: c.label, rateCur: c && ca.length >= (c.partial ? 1 : 8) ? r2(rate(ca)) : null, ratePrev: p && pa.length >= (p.partial ? 1 : 8) ? r2(rate(pa)) : null, dolCur: c ? dollars(ca) : null, dolPrev: p ? dollars(pa) : null, partial: !!c && c.partial && i === cb.length - 1 };
+    const wa = c ? dcur.filter((d) => decDate(d) >= c.s && decDate(d) <= c.e) : [], wp = p ? dprev.filter((d) => decDate(d) >= p.s && decDate(d) <= p.e) : [];
+    return { label: c.label, winCur: wa.length >= 3 ? r2(wr(wa)) : null, winPrev: wp.length >= 3 ? r2(wr(wp)) : null, rateCur: c && ca.length >= (c.partial ? 1 : 8) ? r2(rate(ca)) : null, ratePrev: p && pa.length >= (p.partial ? 1 : 8) ? r2(rate(pa)) : null, dolCur: c ? dollars(ca) : null, dolPrev: p ? dollars(pa) : null, partial: !!c && c.partial && i === cb.length - 1 };
   });
   // recovery pipeline over its own range
   const pDays = cfg.pipeDays || cfg.days, pStartD = addDays(end, -(pDays - 1));
@@ -2911,6 +2799,8 @@ function computeDash(claims, cfg) {
   const unworked = u.filter((d) => !d.appeal), lost = unworked.filter((d) => d.daysLeft < 0), open = unworked.filter((d) => d.daysLeft >= 0);
   const sum = (a) => r2(a.reduce((s, d) => s + d.variance, 0));
   const pipeline = { detected: [u.length, sum(u)], appealed: [appealed.length, sum(appealed)], won: [won.length, sum(won)], pending: [pending.length, sum(pending)], denied: [denied.length, sum(denied)], lost: [lost.length, sum(lost)], open: [open.length, sum(open)], winRate: won.length + denied.length ? (won.length / (won.length + denied.length)) * 100 : null };
+  const wonC = dcur.filter((d) => d.appeal.status === "Won");
+  const win = { cur: wr(dcur), prev: wr(dprev), decided: dcur.length, won: wonC.length, denied: dcur.length - wonC.length, recovered: r2(wonC.reduce((s, d) => s + d.variance, 0)), avgDays: dcur.length ? Math.round(dcur.reduce((s, d) => s + daysBetween(d.appeal.on, decDate(d)), 0) / dcur.length) : null };
   // deadlines, for everything still open today
   const openNow = under(pool).filter((d) => !d.appeal);
   const within = (n2) => openNow.filter((d) => d.daysLeft >= 0 && d.daysLeft <= n2);
@@ -2928,7 +2818,7 @@ function computeDash(claims, cfg) {
   });
   const peers = Object.entries(cur.reduce((m, d) => { (m[d.master] = m[d.master] || []).push(d); return m; }, {})).map(([k, a]) => ({ k, rate: rate(a), n: a.length, b: BENCH[k] })).filter((x) => x.b);
   const avgVar = u.length ? sum(u) / u.length : 0;
-  return { start, end, cur, prv, pipeStart: pStartD, series, hasPrev: prv.length > 0, rateCur: rate(cur), ratePrev: rate(prv), dolCur: dollars(cur), dolPrev: dollars(prv), pipeline, deadlines, byDim, peers, perPct: 0.01 * 6750000 * avgVar, pool };
+  return { start, end, cur, prv, win, pipeStart: pStartD, series, hasPrev: prv.length > 0, rateCur: rate(cur), ratePrev: rate(prv), dolCur: dollars(cur), dolPrev: dollars(prv), pipeline, deadlines, byDim, peers, perPct: 0.01 * 6750000 * avgVar, pool };
 }
 const InfoTip = ({ text }) => <span className="infotip" tabIndex={0} role="img" aria-label={text} data-tip={text}><Info size={14} /></span>;
 function GoalPop({ value, unit, onSave }) {
@@ -2947,9 +2837,10 @@ function GoalPop({ value, unit, onSave }) {
     </div>
   );
 }
-function DCard({ title, info, subtitle, right, children, wide, id }) {
+function DCard({ title, info, subtitle, right, children, wide, id, onOpen }) {
+  const tap = (e) => { if (onOpen && !e.target.closest("button, select, input, label, a, .popwrap, .infotip")) onOpen(); };
   return (
-    <section className={"dcard" + (wide ? " wide" : "")} aria-label={title} data-card={id}>
+    <section className={"dcard" + (wide ? " wide" : "") + (onOpen ? " opens" : "")} aria-label={title} data-card={id} onClick={onOpen ? tap : undefined}>
       <div className="dc-h"><div><div className="dc-t">{title}{info && <InfoTip text={info} />}</div><div className="dc-s">{subtitle}</div></div>{right}</div>
       <div className="dc-b">{children}</div>
     </section>
@@ -2973,13 +2864,105 @@ const PillSelect = ({ value, onChange, options, label }) => (
 
 const DASHES = [["underpayments", "Underpayments", "Underpayment rate and dollars over time, recovery, deadlines, and how you compare with similar practices."], ["financial", "Financial Health", "Days in A/R, gross charges, payments posted, and payments by CPT code."], ["operations", "Practice Operations", "Visits, cancellations, and provider utilization."]];
 
-function DashboardsPage({ claims, contracts, goals, setGoals, dash, setDash, onOpenClaims, toast }) {
+
+/* Click into the underpaid tiles: the claims behind the number, and what the contracts say */
+const DRILL_GROUPS = [["payer", "Payer", "Payers"], ["group", "Line of business", "Lines of business"], ["facility", "Facility", "Facilities"]];
+const DEFS = {
+  rate: ["The share of claims that were paid below the amount the contract says they should be paid, out of the claims that could be checked against a contract on file.", "Underpaid claims divided by claims with a contract on file, in the period you picked. A claim is underpaid when the payment on the 835 is $0.01 or more below the expected allowed amount. Expected allowed is the contracted rate, adjusted by the rules you have created."],
+  dollars: ["The total shortfall between what the contracts say should have been paid and what payers actually paid, across the underpaid claims.", "The sum of expected allowed minus paid for every underpaid claim in the period you picked."],
+};
+function UnderDrill({ which, card, D, terms, termTone, sub, filters, onOpenClaims, onOpenClaim }) {
+  const [grp, setGrp] = useState("payer");
+  const [pick, setPick] = useState(null);
+  const [q1, setQ1] = useState(""), [s1, setS1] = useState(false);
+  const [q2, setQ2] = useState(""), [s2, setS2] = useState(false);
+  const [defOpen, setDefOpen] = useState(true);
+  const keyOf = { payer: (d) => d.master, group: (d) => d.group, facility: (d) => d.facility }[grp];
+  const label = DRILL_GROUPS.find((x) => x[0] === grp);
+  const under = D.cur.filter((d) => d.status === "underpaid");
+  const totals = {}; D.cur.forEach((d) => { const k = keyOf(d); totals[k] = (totals[k] || 0) + 1; });
+  const dollars = r2(under.reduce((s, d) => s + d.variance, 0));
+  const groups = [];
+  under.forEach((d) => { const k = keyOf(d); let g = groups.find((x) => x.key === k); if (!g) { g = { key: k, n: 0, amount: 0 }; groups.push(g); } g.n++; g.amount = r2(g.amount + d.variance); });
+  groups.forEach((g) => { g.rate = (g.n / totals[g.key]) * 100; g.share = dollars ? (g.amount / dollars) * 100 : 0; });
+  groups.sort((a, b) => b.amount - a.amount);
+  const shownGroups = groups.filter((g) => !q1 || g.key.toLowerCase().includes(q1.toLowerCase()));
+  const list = under.filter((d) => !pick || keyOf(d) === pick).filter((d) => !q2 || (d.id + d.name + d.master + d.plan + d.facility + d.group).toLowerCase().includes(q2.toLowerCase())).sort((a, b) => b.variance - a.variance);
+  const COLS = [["id", "Claim ID"], ["status", "Status"], ["ins", "Insurances"], ["group", "Line of business"], ["facility", "Facility"], ["dos", "Date of Service"], ["expected", "Expected"], ["paid", "Paid (835)"], ["variance", "Variance"], ["by", "Appeal by"]];
+  const R = ["expected", "paid", "variance"];
+  const cell = (k, d) => (k === "id" ? <span className="clid">{d.id}</span> : k === "status" ? <StatusPill st={claimStatus(d)} /> : k === "ins" ? d.plan : k === "group" ? d.group : k === "facility" ? d.facility : k === "dos" ? mdy(d.dos) : k === "expected" ? fmt(d.expected) : k === "paid" ? fmt(d.paid) : k === "variance" ? <span className="neg b">-{fmt(d.variance)}</span> : (d.appeal ? <span className="muted">Appealed</span> : <span className={d.daysLeft < 0 ? "neg" : d.daysLeft <= 30 ? "warn" : ""}>{d.daysLeft < 0 ? "Closed" : d.daysLeft + " days"}</span>));
+  const apiFilters = [{ k: "status", v: "Underpaid" }, ...filters];
+  return (
+    <div className="split">
+      <div className="sp-l">
+        {card}
+        <section className="dcard" aria-label="Breakdown" data-card="breakdown">
+          <div className="dc-h"><div className="dc-t">Underpaid by {label[1].toLowerCase()} for this period</div>
+            <button className="icon" aria-label="Search the breakdown" onClick={() => { setS1(!s1); setQ1(""); }}><Search size={18} /></button></div>
+          <div className="dc-b">
+            {s1 && <input className="sp-search" autoFocus placeholder={"Search " + label[2].toLowerCase()} aria-label="Search the breakdown" value={q1} onChange={(e) => setQ1(e.target.value)} />}
+            <div className="dr-grp"><span className="muted">Group by</span><div className="seg">{DRILL_GROUPS.map(([k, l]) => <button key={k} className={grp === k ? "on" : ""} onClick={() => { setGrp(k); setPick(null); }}>{l}</button>)}</div></div>
+            <table className="tbl sp-tbl">
+              <thead><tr><th>{label[2]}</th><th className="r">Underpaid</th><th className="r">Claims</th><th className="r">% of claims</th><th className="r">Share</th></tr></thead>
+              <tbody>
+                {shownGroups.map((g) => <tr key={g.key} className={"pickrow" + (pick === g.key ? " picked" : "")} onClick={() => setPick(pick === g.key ? null : g.key)}><td className="b">{g.key}</td><td className="r">{fmt(g.amount)}</td><td className="r">{g.n}</td><td className="r">{g.rate.toFixed(1)}%</td><td className="r">{g.share.toFixed(0)}%</td></tr>)}
+                {!shownGroups.length && <tr><td colSpan={5} className="empty">Nothing matches.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <DCard id="terms" wide title="Contract terms and what you actually collect" info="The contracted rate as a percent of the Medicare fee schedule, against similar practices, and the share of the contracted amount that payers actually paid." subtitle={sub + " \u00b7 Peer figures are illustrative"}>
+          <div className="tblwrap"><table className="tbl">
+            <thead><tr><th>Payer and plan</th><th>Contract</th><th className="r">% of Medicare</th><th className="r">Peers</th><th>Terms</th><th className="r">Paid vs contract</th><th>Result</th></tr></thead>
+            <tbody>{terms.map((x) => { const [tone, lab] = termTone(x); const under2 = x.real != null && x.real < 99; return (
+              <tr key={x.key}><td className="b">{x.payer}<span className="sub">{x.plan}</span></td><td>{x.number}</td><td className="r">{x.pct == null ? "n/a" : x.pct.toFixed(0) + "%"}</td><td className="r">{x.peer}%</td>
+                <td>{x.chips.map((c) => <Chip key={c} tone="grey">{c}</Chip>)}</td><td className="r">{x.real == null ? "n/a" : x.real.toFixed(1) + "%"}</td>
+                <td><Chip tone={tone}>{lab}</Chip>{under2 && <Chip tone="rust">Paid below contract</Chip>}</td></tr>); })}</tbody></table></div>
+        </DCard>
+        <section className="dcard" aria-label="Definition and calculation">
+          <button className="dc-h defh" aria-expanded={defOpen} onClick={() => setDefOpen(!defOpen)}><span className="dc-t">Definition &amp; calculation</span>{defOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}</button>
+          {defOpen && <div className="dc-b defb"><div className="defk">Definition</div><p>{DEFS[which][0]}</p><div className="defk">Calculation</div><p>{DEFS[which][1]}</p></div>}
+        </section>
+      </div>
+      <div className="sp-r">
+        <section className="dcard sp-claims" aria-label="Underpaid claims" data-card="claims">
+          <div className="dc-h sp-ch">
+            <div className="dc-t">Underpaid claims for this period</div>
+            <div className="row gap">
+              <button className="pillbtn primary" onClick={() => onOpenClaims(apiFilters)}>View Claims</button>
+              <button className="icon" aria-label="Search the claims" onClick={() => { setS2(!s2); setQ2(""); }}><Search size={18} /></button>
+              <button className="pillbtn accent" onClick={() => { downloadCsv("underpaid_claims.csv", COLS.map(([, l]) => l), list.map((d) => [d.id, claimStatus(d).label, d.plan, d.group, d.facility, mdy(d.dos), fmt(d.expected), fmt(d.paid), fmt(d.variance), d.appeal ? "Appealed" : d.daysLeft < 0 ? "Closed" : d.daysLeft + " days"])); }}><Download size={14} />Download</button>
+            </div>
+          </div>
+          {(s2 || pick) && (
+            <div className="sp-bar">
+              {s2 && <input className="sp-search" autoFocus placeholder="Search claims" aria-label="Search the claims" value={q2} onChange={(e) => setQ2(e.target.value)} />}
+              {pick && <span className="fchip2"><span className="fc-f">{label[1]}</span><span className="fc-v" style={{ cursor: "default" }}>{pick}</span><button className="fc-x" aria-label="Clear the selected group" onClick={() => setPick(null)}><X size={14} /></button></span>}
+            </div>
+          )}
+          <div className="sp-scroll">
+            <table className="cltbl">
+              <thead><tr>{COLS.map(([k, l]) => <th key={k} className={R.includes(k) ? "r" : ""}>{l}</th>)}</tr></thead>
+              <tbody>
+                {list.map((d) => <tr key={d.id} className="clrow" onClick={() => onOpenClaim(d.id)}>{COLS.map(([k]) => <td key={k} className={R.includes(k) ? "r" : ""}>{cell(k, d)}</td>)}</tr>)}
+                {!list.length && <tr><td colSpan={COLS.length} className="empty">No underpaid claims match.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function DashboardsPage({ claims, contracts, goals, setGoals, dash, setDash, onOpenClaims, onOpenClaim, toast }) {
   const [days, setDays] = useState("180");
   const [basis, setBasis] = useState("post");
   const [gran, setGran] = useState("month");
   const [compare, setCompare] = useState("prev");
   const [dim, setDim] = useState("payer");
   const [pipeDays, setPipeDays] = useState("180");
+  const [drill, setDrill] = useState(null);
   const [filters, setFilters] = useState([]);
   const [fOpen, setFOpen] = useState(false);
   const fRef = usePop(fOpen, () => setFOpen(false));
@@ -3002,6 +2985,8 @@ function DashboardsPage({ claims, contracts, goals, setGoals, dash, setDash, onO
   const prevLabel = nDays <= 31 ? "previous month" : "previous period";
   const peersMode = compare === "peers";
   const series = D.series.map((s) => ({ ...s, ratePrev: peersMode ? PEER_RATE : s.ratePrev }));
+  const W = D.win;
+  const winChg = dChange(W.cur, W.prev, "pts", prevLabel);
   const rateChg = peersMode ? dChange(D.rateCur, PEER_RATE, "pts", "peer median") : dChange(D.rateCur, D.ratePrev, "pts", prevLabel);
   const dolChg = dChange(D.dolCur, D.dolPrev, "pct", prevLabel);
   const showPrev = peersMode || D.hasPrev;
@@ -3035,15 +3020,63 @@ function DashboardsPage({ claims, contracts, goals, setGoals, dash, setDash, onO
   }));
   const termTone = (x) => (x.pct == null ? ["grey", "Per visit rate"] : x.pct >= x.peer + 2 ? ["moss", "Above peers"] : x.pct >= x.peer - 2 ? ["grey", "In line"] : ["rust", "Below peers"]);
 
+  const rateCard = (open) => (
+    <DCard id="rate" onOpen={open ? () => setDrill("rate") : null} title="Underpayment rate" info="Claims paid below the contracted amount, divided by claims that could be checked against a contract on file." subtitle={sub} right={<GoalPop value={goalR} unit="%" onSave={(v) => setGoals({ ...goals, rate: v })} />}>
+      <div className="dc-top">
+        <div>{open ? <button className="dc-big dc-click" aria-label="View underpaid claims" onClick={() => setDrill("rate")}>{D.rateCur == null ? "n/a" : D.rateCur.toFixed(1) + "%"}<ChevronRight size={20} /></button> : <div className="dc-big">{D.rateCur == null ? "n/a" : D.rateCur.toFixed(1) + "%"}</div>}<Chg c={rateChg} />{goalR != null && D.rateCur != null && <div className="dc-goal">Goal {goalR}%: {D.rateCur <= goalR ? "on track" : (D.rateCur - goalR).toFixed(1) + " points above"}</div>}</div>
+        <div className="dc-pills"><PillSelect label="Group by" value={g} onChange={setGran} options={granOk.map((x) => [x, x === "week" ? "Weekly" : "Monthly"])} /><PillSelect label="Compare with" value={compare} onChange={setCompare} options={[["prev", "vs " + prevLabel], ["peers", "vs peer median"]]} /></div>
+      </div>
+      <div className="dc-ct">Underpayment rate trend</div>
+      <DLegend items={[...(showPrev ? [[D_GREY, rateName]] : []), [D_TEAL, rangeLabel]]} />
+      <div className="dchart">
+        <ResponsiveContainer width="100%" height={230}>
+          <BarChart data={series} margin={{ top: 8, right: 8, left: 0, bottom: 0 }} barGap={2} barCategoryGap="24%">
+            <HatchDefs /><CartesianGrid vertical={false} stroke="rgba(0,0,0,.08)" />
+            <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#737373" }} />
+            <YAxis tickLine={false} axisLine={false} width={40} tick={{ fontSize: 12, fill: "#737373" }} tickFormatter={(v) => v + "%"} />
+            <Tooltip cursor={{ fill: "#f5f5f5" }} content={<ChartTip f={(v) => v.toFixed(1) + "%"} names={{ ratePrev: rateName, rateCur: rangeLabel }} />} />
+            {goalR != null && <ReferenceLine y={goalR} stroke="#1f1f1f" strokeDasharray="4 4" />}
+            {showPrev && <Bar dataKey="ratePrev" fill={D_GREY} radius={[2, 2, 0, 0]} isAnimationActive={false} />}
+            <Bar dataKey="rateCur" fill={D_TEAL} radius={[2, 2, 0, 0]} isAnimationActive={false}>{series.map((s, i) => <Cell key={i} fill={s.partial ? "url(#hatch)" : D_TEAL} stroke={s.partial ? D_TEAL : undefined} />)}</Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="dc-note">{escShare > 0 ? `Cascadia not applying its ${(contracts.find((c) => c.id === "cascadia") || {}).escalatorPct || 2.5}% rate increase is ${escShare.toFixed(0)}% of the shortfall in this period.` : "Rate is claims paid below the contracted amount over claims that could be checked against a contract."}</div>
+    </DCard>
+  );
+  const dollarsCard = (open) => (
+    <DCard id="dollars" onOpen={open ? () => setDrill("dollars") : null} title="Underpaid dollars" info="The shortfall between the contracted amount and what the payer paid, summed across underpaid claims." subtitle={sub} right={<GoalPop value={goalD} unit="$" onSave={(v) => setGoals({ ...goals, dollars: v })} />}>
+      <div className="dc-top">
+        <div>{open ? <button className="dc-big dc-click" aria-label="View underpaid claims" onClick={() => setDrill("dollars")}>{fmt(D.dolCur, 0)}<ChevronRight size={20} /></button> : <div className="dc-big">{fmt(D.dolCur, 0)}</div>}<Chg c={dolChg} />{goalD != null && <div className="dc-goal">Goal {fmt(goalD, 0)}: {D.dolCur <= goalD ? "on track" : fmt(D.dolCur - goalD, 0) + " above"}</div>}</div>
+        <div className="dc-pills"><PillSelect label="Group by" value={g} onChange={setGran} options={granOk.map((x) => [x, x === "week" ? "Weekly" : "Monthly"])} /></div>
+      </div>
+      <div className="dc-ct">Underpaid dollars trend</div>
+      <DLegend items={[...(D.hasPrev ? [[D_GREY, prevLabel[0].toUpperCase() + prevLabel.slice(1)]] : []), [D_TEAL, rangeLabel]]} />
+      <div className="dchart">
+        <ResponsiveContainer width="100%" height={230}>
+          <BarChart data={D.series} margin={{ top: 8, right: 8, left: 0, bottom: 0 }} barGap={2} barCategoryGap="24%">
+            <HatchDefs /><CartesianGrid vertical={false} stroke="rgba(0,0,0,.08)" />
+            <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#737373" }} />
+            <YAxis tickLine={false} axisLine={false} width={48} tick={{ fontSize: 12, fill: "#737373" }} tickFormatter={fmtK} />
+            <Tooltip cursor={{ fill: "#f5f5f5" }} content={<ChartTip f={(v) => fmt(v)} names={{ dolPrev: prevLabel[0].toUpperCase() + prevLabel.slice(1), dolCur: rangeLabel }} />} />
+            {goalD != null && <ReferenceLine y={goalD} stroke="#1f1f1f" strokeDasharray="4 4" />}
+            {D.hasPrev && <Bar dataKey="dolPrev" fill={D_GREY} radius={[2, 2, 0, 0]} isAnimationActive={false} />}
+            <Bar dataKey="dolCur" fill={D_TEAL} radius={[2, 2, 0, 0]} isAnimationActive={false}>{D.series.map((s, i) => <Cell key={i} fill={s.partial ? "url(#hatch)" : D_TEAL} stroke={s.partial ? D_TEAL : undefined} />)}</Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="dc-note amber2">At ATI volume of about 6.75M claims a year, each 1% of claims underpaid by this average ({fmt(D.cur.length ? D.cur.filter((d) => d.status === "underpaid").reduce((s, d) => s + d.variance, 0) / Math.max(1, D.cur.filter((d) => d.status === "underpaid").length) : 0)}) is worth about {fmtK(D.perPct)} a year. Illustrative.</div>
+    </DCard>
+  );
   return (
     <div className="dpage">
       <div className="dhead">
-        <div className="dbc"><button className="dbc-l" onClick={() => setDash(null)}>Dashboards</button><span className="bc-sep">/</span><span className="b">Underpayments</span>
+        <div className="dbc"><button className="dbc-l" onClick={() => setDash(null)}>Dashboards</button><span className="bc-sep">/</span>{drill ? <button className="dbc-l" onClick={() => setDrill(null)}>Underpayments</button> : <span className="b">Underpayments</span>}{drill && <><span className="bc-sep">/</span><span className="b">{drill === "rate" ? "Underpayment rate" : "Underpaid dollars"}</span></>}
           <button className="icon" aria-label="Copy link" onClick={() => { try { navigator.clipboard && navigator.clipboard.writeText(window.location.href); } catch (e) { /* ignore */ } toast("Link copied"); }}><Link2 size={16} /></button></div>
-        <div className="row gap">
+        {!drill && <div className="row gap">
           <button className="pillbtn accent" onClick={() => { try { navigator.clipboard && navigator.clipboard.writeText(window.location.href); } catch (e) { /* ignore */ } toast("Link copied"); }}><Share2 size={14} />Share</button>
           <button className="tgl" aria-label="Export the claims behind this dashboard" onClick={() => { downloadCsv("underpayments_dashboard.csv", ["Claim", "Payer", "Plan", "Date of service", "Remit date", "Status", "Variance"], D.cur.map((d) => [d.id, d.master, d.plan, mdy(d.dos), mdy(d.remitDate), claimStatus(d).label, d.variance])); toast(`Exported ${D.cur.length} claims`); }}><Download size={18} /></button>
-        </div>
+        </div>}
       </div>
       <div className="dbar">
         <div className="popwrap" ref={fRef}>
@@ -3057,57 +3090,36 @@ function DashboardsPage({ claims, contracts, goals, setGoals, dash, setDash, onO
         <span className="drefresh"><RefreshCw size={14} />Data last refreshed: less than 30 mins ago</span>
       </div>
 
-      <h2 className="dsec">Underpayment summary</h2>
+      {drill && <UnderDrill which={drill} card={drill === "rate" ? rateCard(false) : dollarsCard(false)} D={D} terms={terms} termTone={termTone} sub={sub} filters={filters} onOpenClaims={onOpenClaims} onOpenClaim={onOpenClaim} />}
+      {!drill && (
+        <>
       <div className="dgrid">
-        <DCard id="rate" title="Underpayment rate" info="Claims paid below the contracted amount, divided by claims that could be checked against a contract on file." subtitle={sub} right={<GoalPop value={goalR} unit="%" onSave={(v) => setGoals({ ...goals, rate: v })} />}>
-          <div className="dc-top">
-            <div><div className="dc-big">{D.rateCur == null ? "n/a" : D.rateCur.toFixed(1) + "%"}</div><Chg c={rateChg} />{goalR != null && D.rateCur != null && <div className="dc-goal">Goal {goalR}%: {D.rateCur <= goalR ? "on track" : (D.rateCur - goalR).toFixed(1) + " points above"}</div>}</div>
-            <div className="dc-pills"><PillSelect label="Group by" value={g} onChange={setGran} options={granOk.map((x) => [x, x === "week" ? "Weekly" : "Monthly"])} /><PillSelect label="Compare with" value={compare} onChange={setCompare} options={[["prev", "vs " + prevLabel], ["peers", "vs peer median"]]} /></div>
-          </div>
-          <div className="dc-ct">Underpayment rate trend</div>
-          <DLegend items={[...(showPrev ? [[D_GREY, rateName]] : []), [D_TEAL, rangeLabel]]} />
-          <div className="dchart">
-            <ResponsiveContainer width="100%" height={230}>
-              <BarChart data={series} margin={{ top: 8, right: 8, left: 0, bottom: 0 }} barGap={2} barCategoryGap="24%">
-                <HatchDefs /><CartesianGrid vertical={false} stroke="rgba(0,0,0,.08)" />
-                <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#737373" }} />
-                <YAxis tickLine={false} axisLine={false} width={40} tick={{ fontSize: 12, fill: "#737373" }} tickFormatter={(v) => v + "%"} />
-                <Tooltip cursor={{ fill: "#f5f5f5" }} content={<ChartTip f={(v) => v.toFixed(1) + "%"} names={{ ratePrev: rateName, rateCur: rangeLabel }} />} />
-                {goalR != null && <ReferenceLine y={goalR} stroke="#1f1f1f" strokeDasharray="4 4" />}
-                {showPrev && <Bar dataKey="ratePrev" fill={D_GREY} radius={[2, 2, 0, 0]} isAnimationActive={false} />}
-                <Bar dataKey="rateCur" fill={D_TEAL} radius={[2, 2, 0, 0]} isAnimationActive={false}>{series.map((s, i) => <Cell key={i} fill={s.partial ? "url(#hatch)" : D_TEAL} stroke={s.partial ? D_TEAL : undefined} />)}</Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="dc-note">{escShare > 0 ? `Cascadia not applying its ${(contracts.find((c) => c.id === "cascadia") || {}).escalatorPct || 2.5}% rate increase is ${escShare.toFixed(0)}% of the shortfall in this period.` : "Rate is claims paid below the contracted amount over claims that could be checked against a contract."}</div>
-        </DCard>
+        {rateCard(true)}
 
-        <DCard id="dollars" title="Underpaid dollars" info="The shortfall between the contracted amount and what the payer paid, summed across underpaid claims." subtitle={sub} right={<GoalPop value={goalD} unit="$" onSave={(v) => setGoals({ ...goals, dollars: v })} />}>
+        {dollarsCard(true)}
+        <DCard id="win" title="Win rate" info="Appeals the payer decided in this period, and the share that were won." subtitle={sub} right={<GoalPop value={goals.win} unit="%" onSave={(v) => setGoals({ ...goals, win: v })} />}>
           <div className="dc-top">
-            <div><div className="dc-big">{fmt(D.dolCur, 0)}</div><Chg c={dolChg} />{goalD != null && <div className="dc-goal">Goal {fmt(goalD, 0)}: {D.dolCur <= goalD ? "on track" : fmt(D.dolCur - goalD, 0) + " above"}</div>}</div>
+            <div><div className="dc-big">{W.cur == null ? "n/a" : W.cur.toFixed(0) + "%"}</div><Chg c={winChg} />{goals.win != null && W.cur != null && <div className="dc-goal">Goal {goals.win}%: {W.cur >= goals.win ? "on track" : (goals.win - W.cur).toFixed(0) + " points below"}</div>}</div>
             <div className="dc-pills"><PillSelect label="Group by" value={g} onChange={setGran} options={granOk.map((x) => [x, x === "week" ? "Weekly" : "Monthly"])} /></div>
           </div>
-          <div className="dc-ct">Underpaid dollars trend</div>
+          <div className="dstats wr"><div><b>{W.decided}</b><span>appeals decided</span></div><div><b>{fmt(W.recovered, 0)}</b><span>recovered</span></div><div><b>{W.avgDays == null ? "n/a" : W.avgDays + " days"}</b><span>to a decision</span></div></div>
+          <div className="dc-ct">Win rate trend</div>
           <DLegend items={[...(D.hasPrev ? [[D_GREY, prevLabel[0].toUpperCase() + prevLabel.slice(1)]] : []), [D_TEAL, rangeLabel]]} />
           <div className="dchart">
-            <ResponsiveContainer width="100%" height={230}>
+            <ResponsiveContainer width="100%" height={200}>
               <BarChart data={D.series} margin={{ top: 8, right: 8, left: 0, bottom: 0 }} barGap={2} barCategoryGap="24%">
-                <HatchDefs /><CartesianGrid vertical={false} stroke="rgba(0,0,0,.08)" />
+                <CartesianGrid vertical={false} stroke="rgba(0,0,0,.08)" />
                 <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#737373" }} />
-                <YAxis tickLine={false} axisLine={false} width={48} tick={{ fontSize: 12, fill: "#737373" }} tickFormatter={fmtK} />
-                <Tooltip cursor={{ fill: "#f5f5f5" }} content={<ChartTip f={(v) => fmt(v)} names={{ dolPrev: prevLabel[0].toUpperCase() + prevLabel.slice(1), dolCur: rangeLabel }} />} />
-                {goalD != null && <ReferenceLine y={goalD} stroke="#1f1f1f" strokeDasharray="4 4" />}
-                {D.hasPrev && <Bar dataKey="dolPrev" fill={D_GREY} radius={[2, 2, 0, 0]} isAnimationActive={false} />}
-                <Bar dataKey="dolCur" fill={D_TEAL} radius={[2, 2, 0, 0]} isAnimationActive={false}>{D.series.map((s, i) => <Cell key={i} fill={s.partial ? "url(#hatch)" : D_TEAL} stroke={s.partial ? D_TEAL : undefined} />)}</Bar>
+                <YAxis domain={[0, 100]} tickLine={false} axisLine={false} width={40} tick={{ fontSize: 12, fill: "#737373" }} tickFormatter={(v) => v + "%"} />
+                <Tooltip cursor={{ fill: "#f5f5f5" }} content={<ChartTip f={(v) => v.toFixed(0) + "%"} names={{ winPrev: prevLabel[0].toUpperCase() + prevLabel.slice(1), winCur: rangeLabel }} />} />
+                {goals.win != null && <ReferenceLine y={goals.win} stroke="#1f1f1f" strokeDasharray="4 4" />}
+                {D.hasPrev && <Bar dataKey="winPrev" fill={D_GREY} radius={[2, 2, 0, 0]} isAnimationActive={false} />}
+                <Bar dataKey="winCur" fill={D_TEAL} radius={[2, 2, 0, 0]} isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className="dc-note amber2">At ATI volume of about 6.75M claims a year, each 1% of claims underpaid by this average ({fmt(D.cur.length ? D.cur.filter((d) => d.status === "underpaid").reduce((s, d) => s + d.variance, 0) / Math.max(1, D.cur.filter((d) => d.status === "underpaid").length) : 0)}) is worth about {fmtK(D.perPct)} a year. Illustrative.</div>
         </DCard>
-      </div>
 
-      <h2 className="dsec">Recovery</h2>
-      <div className="dgrid">
         <DCard id="pipeline" title="Recovery pipeline" info="What happened to the underpayments found in this period: appealed, recovered, denied, still waiting, or lost because the appeal window closed." subtitle={`Underpayments found ${shortDate(D.pipeStart)} \u2014 ${shortDate(D.end)}`} right={<PillSelect label="Pipeline range" value={pipeDays} onChange={setPipeDays} options={D_RANGES.slice(1)} />}>
           <div className="dc-top"><div><div className="dc-big">{fmt(P.won[1], 0)}</div><div className="dc-chg">recovered{P.winRate != null ? `, ${P.winRate.toFixed(0)}% win rate on decided appeals` : ""}</div></div></div>
           <div className="pipe">
@@ -3125,7 +3137,7 @@ function DashboardsPage({ claims, contracts, goals, setGoals, dash, setDash, onO
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={DL.weeks} margin={{ top: 8, right: 8, left: 0, bottom: 0 }} barCategoryGap="24%">
                 <CartesianGrid vertical={false} stroke="rgba(0,0,0,.08)" />
-                <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#737373" }} interval={0} />
+                <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#737373" }} />
                 <YAxis tickLine={false} axisLine={false} width={44} tick={{ fontSize: 12, fill: "#737373" }} tickFormatter={fmtK} />
                 <Tooltip cursor={{ fill: "#f5f5f5" }} content={<ChartTip f={(v) => fmt(v)} names={{ dollars: "Closing" }} />} />
                 <Bar dataKey="dollars" radius={[2, 2, 0, 0]} isAnimationActive={false}>{DL.weeks.map((w, i) => <Cell key={i} fill={i < 5 ? "#F2B66D" : D_TEAL} />)}</Bar>
@@ -3134,10 +3146,6 @@ function DashboardsPage({ claims, contracts, goals, setGoals, dash, setDash, onO
           </div>
           <div className="dc-note">Amber bars close within 30 days.</div>
         </DCard>
-      </div>
-
-      <h2 className="dsec">Where it comes from</h2>
-      <div className="dgrid">
         <DCard id="by" title="Underpaid dollars by cause" info="Each bar is the shortfall for one group, split by why the payer paid less. Select a bar to open those claims." subtitle={sub}
           right={<div className="seg">{dimOpts.map(([k, l]) => <button key={k} className={dim === k ? "on" : ""} onClick={() => setDim(k)}>{l}</button>)}</div>}>
           <DLegend items={CAUSES.map(([, l, c]) => [c, l])} />
@@ -3155,7 +3163,7 @@ function DashboardsPage({ claims, contracts, goals, setGoals, dash, setDash, onO
           {!rows.length && <div className="empty">No underpayments in this period.</div>}
         </DCard>
 
-        <DCard id="peers" title="How you compare with similar practices" info="Underpayment rate by payer against outpatient PT groups of similar size. The shaded band is the middle half of the cohort." subtitle={sub + " \u00b7 Illustrative benchmark"}>
+        <DCard id="peers" wide title="How you compare with similar practices" info="Underpayment rate by payer against outpatient PT groups of similar size. The shaded band is the middle half of the cohort." subtitle={sub + " \u00b7 Illustrative benchmark"}>
           <div className="cohort">
             {D.peers.map((x) => { const mx = Math.max(40, ...D.peers.map((y) => (y.rate || 0) + 5)); return (
               <div key={x.k} className="crow2"><div className="cname">{x.k}</div>
@@ -3167,16 +3175,8 @@ function DashboardsPage({ claims, contracts, goals, setGoals, dash, setDash, onO
         </DCard>
       </div>
 
-      <div className="dgrid one">
-        <DCard id="terms" wide title="Contract terms and what you actually collect" info="The contracted rate as a percent of the Medicare fee schedule, against similar practices, and the share of the contracted amount that payers actually paid." subtitle={sub + " \u00b7 Peer figures are illustrative"}>
-          <div className="tblwrap"><table className="tbl">
-            <thead><tr><th>Payer and plan</th><th>Contract</th><th className="r">% of Medicare</th><th className="r">Peers</th><th>Terms</th><th className="r">Paid vs contract</th><th>Result</th></tr></thead>
-            <tbody>{terms.map((x) => { const [tone, label] = termTone(x); const under2 = x.real != null && x.real < 99; return (
-              <tr key={x.key}><td className="b">{x.payer}<span className="sub">{x.plan}</span></td><td>{x.number}</td><td className="r">{x.pct == null ? "n/a" : x.pct.toFixed(0) + "%"}</td><td className="r">{x.peer}%</td>
-                <td>{x.chips.map((c) => <Chip key={c} tone="grey">{c}</Chip>)}</td><td className="r">{x.real == null ? "n/a" : x.real.toFixed(1) + "%"}</td>
-                <td><Chip tone={tone}>{label}</Chip>{under2 && <Chip tone="rust">Paid below contract</Chip>}</td></tr>); })}</tbody></table></div>
-        </DCard>
-      </div>
+        </>
+      )}
     </div>
   );
 }
@@ -3242,10 +3242,13 @@ const CHAPTERS = [
 ];
 const PD_PAGES = ["contracts", "fees", "hierarchy", "documents", "connections"];
 const NAV = [
-  { g: "Revenue Cycle", icon: Receipt, items: [["claims", "Claims", ["claims"]], ["appeals", "Appeals", ["appeals"]]] },
-  { g: "Reporting", icon: BarChart3, items: [["dashboards", "Dashboards", ["dashboards"]]] },
-  { g: "Admin Panel", icon: BookOpen, items: [["contracts", "Practice Data", PD_PAGES]] },
+  { id: "ehr", g: "EHR", icon: ShieldPlus, items: ["Calendar", "Patients", "Inbox", "Preferences", "Interventions", "Pharmacy Requests", "Orders"].map((l) => ({ l })) },
+  { id: "insights", g: "Insights", icon: Lightbulb, items: [{ l: "Overview" }, { l: "Dashboards", k: "dashboards", keys: ["dashboards"], dot: "peach" }, { l: "Performance Analysis" }, { l: "Revenue Analysis" }, { l: "Denials Analysis" }, { l: "A/R Report", dot: "blue" }, { l: "EHR Reports" }, { l: "My Reports" }, { l: "AI Report Builder", dot: "peach" }] },
+  { id: "daily", g: "Daily Operations", icon: Calendar, items: [{ l: "Onboarding" }, { l: "Appointments (New)", dot: "peach" }, { l: "Prior Authorizations" }, { l: "Call Center" }, { l: "Agents Center" }, { l: "Claims", k: "claims", keys: ["claims"], dot: "peach" }, { l: "Claim Details" }, { l: "Encounter Details" }, { l: "Remittances", dot: "peach" }, { l: "Patient Responsibility" }] },
+  { id: "utilities", g: "Utilities", icon: Wrench, items: ["Posting Tool", "EOB Creation", "Remittances (Old)"].map((l) => ({ l })) },
+  { id: "admin", g: "Admin Panel", icon: BookOpen, items: [{ l: "Practice Data", k: "contracts", keys: PD_PAGES }] },
 ];
+const NAV_OPEN = { ehr: false, insights: true, daily: true, utilities: true, admin: true };
 const CM_ITEMS = [["contracts", "Contracts"], ["fees", "Fee schedules"], ["hierarchy", "Payer Hierarchy"], ["documents", "Documents"], ["connections", "Destination"]];
 const OTHER_ITEMS = ["Line Item Options", "Write-Off Reasons", "Skip Collection Reasons", "Adjustment Types", "Provider Credentialing"];
 function PracticeNav({ page, onGo, onInert }) {
@@ -3265,7 +3268,7 @@ function PracticeNav({ page, onGo, onInert }) {
     </aside>
   );
 }
-const CRUMBS = { claims: ["Claims"], appeals: ["Appeals"], dashboards: ["Dashboards"], contracts: ["Practice Data", "Contracts"], fees: ["Practice Data", "Fee schedules"], hierarchy: ["Practice Data", "Payer Hierarchy"], documents: ["Practice Data", "Documents"], connections: ["Practice Data", "Destination"] };
+const CRUMBS = { claims: ["Claims"], dashboards: ["Dashboards"], contracts: ["Practice Data", "Contracts"], fees: ["Practice Data", "Fee schedules"], hierarchy: ["Practice Data", "Payer Hierarchy"], documents: ["Practice Data", "Documents"], connections: ["Practice Data", "Destination"] };
 
 function AssistantPanel({ context, prompts = [], onClose }) {
   const [msgs, setMsgs] = useState([]);
@@ -3332,8 +3335,8 @@ export default function App() {
   const [doc, setDoc] = useState(null);
   const [view, setView] = useState("workable");
   const [assign, setAssign] = useState({});
-  const [customViews, setCustomViews] = useState([]);
-  const [goals, setGoals] = useState({ rate: null, dollars: null });
+  const [customViews, setCustomViews] = useState(DEFAULT_VIEWS);
+  const [goals, setGoals] = useState({ rate: null, dollars: null, win: null });
   const [dash, setDash] = useState("underpayments");
   const [claimsPreset, setClaimsPreset] = useState(null);
   const [openClaim, setOpenClaim] = useState(null);
@@ -3345,6 +3348,7 @@ export default function App() {
   useEffect(() => { const h = (e) => { if (e.altKey && (e.code === "KeyP" || e.key === "p")) { e.preventDefault(); setPresenter((v) => !v); } }; window.addEventListener("keydown", h); return () => window.removeEventListener("keydown", h); }, []);
   const [aiOpen, setAiOpen] = useState(false);
   const [navOff, setNavOff] = useState(false);
+  const [navOpen, setNavOpen] = useState(NAV_OPEN);
   const [aiHook, setAiHook] = useState(null);
   const [ruleLog, setRuleLog] = useState([{ d: "Mar 12, 2026", t: "Apply PTA (CQ) services at the contract percentage: on" }]);
 
@@ -3365,7 +3369,7 @@ export default function App() {
     const ch = CHAPTERS.find((x) => x.k === k);
     setChapter(k); setUpload(false); setFeeFlow(false); setPage(ch.page); setOpenClaim(null); setAppealIds(null); setDrawerRow(null); setDoc(null);
     if (["understand", "catch", "recover", "learn"].includes(k) && !loaded) { publish(CASCADIA_CANON, true, ruleIds(CASCADIA_CANON)); toast("Loaded the sample Cascadia contract and approved its rules so this step has data."); }
-    if (k === "catch") { setView("workable"); setSel([]); }
+    if (k === "catch") { setView("cv-under"); setSel([]); }
     setPending(k);
   };
   useEffect(() => {
@@ -3381,14 +3385,14 @@ export default function App() {
     setSel([]);
   };
   const respond = () => { setAppeals((p) => { const n = { ...p }; Object.keys(n).forEach((id) => { if (n[id].status === "Submitted") { const cl = CLAIMS.find((c) => c.id === id); n[id] = { ...n[id], status: cl.pattern === "bundling" ? "Denied" : "Won" }; } }); return n; }); toast("Payer responses received."); };
-  const reset = () => { setContracts([SUMMIT, KEYSTONE]); setSchedules([]); setFeeFlow(false); setRuleOn({ "summit:pta": true, "keystone:pta": true }); setCreatedTerms({}); setAppeals(SEED_APPEALS); setAssign({}); setCustomViews([]); setGoals({ rate: null, dollars: null }); setDash("underpayments"); setClaimsPreset(null); setSel([]); setOpenClaim(null); setAppealIds(null); setDrawerRow(null); setDoc(null); setUpload(false); setAiHook(null); setView("workable"); go("load"); };
+  const reset = () => { setContracts([SUMMIT, KEYSTONE]); setSchedules([]); setFeeFlow(false); setRuleOn({ "summit:pta": true, "keystone:pta": true }); setCreatedTerms({}); setAppeals(SEED_APPEALS); setAssign({}); setCustomViews(DEFAULT_VIEWS); setGoals({ rate: null, dollars: null, win: null }); setDash("underpayments"); setClaimsPreset(null); setSel([]); setOpenClaim(null); setAppealIds(null); setDrawerRow(null); setDoc(null); setUpload(false); setAiHook(null); setView("workable"); go("load"); };
   const openDoc = (id, hl, page) => setDoc({ id, hl, page });
   const detail = openClaim ? claims.find((c) => c.id === openClaim) : null;
   const thread = hero ? (hero.appeal ? (hero.appeal.status === "Won" ? `${fmt(hero.variance)} recovered` : "Appeal submitted") : hero.status === "underpaid" ? `${fmt(hero.variance)} underpaid` : hero.status === "no_contract" ? "No contract on file" : "Paid as expected") : "";
-  const crumb = appealIds ? ["Claims", appealIds.length === 1 ? appealIds[0] : "Underpaid"] : CRUMBS[page];
+  const crumb = appealIds ? ["Claims", appealIds.length === 1 ? appealIds[0] : "Appeal package"] : CRUMBS[page];
   const underAll = claims.filter((c) => c.status === "underpaid");
   const baseContext = `Page: ${CRUMBS[page].join(" / ")}. Contracts on file: ${contracts.map((c) => `${c.masterPayer} (${c.plans.map((p) => p.plan + ", " + METHOD[p.method] + (p.discountPct ? " " + p.discountPct + "%" : "") + (p.flatRate ? " $" + p.flatRate : "")).join("; ")}; appeals due within ${c.disputeDays} days of remittance)`).join(" | ")}. Sample claims: ${claims.length}; underpaid: ${underAll.length} totalling ${fmt(underAll.reduce((s, c) => s + c.variance, 0))}; high recoverability and open: ${underAll.filter((c) => c.level === "High" && !c.appeal).length}; appeals filed: ${claims.filter((c) => c.appeal).length}. Featured claim ${HERO_ID}: ${hero ? hero.reason : ""} Expected allowed is calculated per claim line from the contract (fee schedule x rate, then escalator and PTA rules) and compared with the 835 at posting. Axiom: the billing calculator retires into the new EMR, Axiom is not needed for claim level expected reimbursement, and can stay for planning through a Databricks feed.`;
-  const basePrompts = { contracts: [{ q: "Which payers have contracts on file?" }, { q: "How is expected allowed calculated?" }], connections: [{ q: "Do we still need Axiom?" }, { q: "Which teams use the contract?" }], fees: [{ q: "Which fee schedules are loaded?" }, { q: "Which contracts use the Medicare schedule?" }], hierarchy: [{ q: "Which payers have more than one plan?" }], documents: [{ q: "Which contracts have a document on file?" }], claims: [{ q: "Which underpaid claims should I appeal first?" }, { q: `Why was ${HERO_ID} flagged?` }], appeals: [{ q: "What is in dispute right now?" }], dashboards: [{ q: "Which payer is furthest from peers?" }, { q: "How much is at risk this month?" }, { q: "Why did the rate fall in October?" }] }[page] || [];
+  const basePrompts = { contracts: [{ q: "Which payers have contracts on file?" }, { q: "How is expected allowed calculated?" }], connections: [{ q: "Do we still need Axiom?" }, { q: "Which teams use the contract?" }], fees: [{ q: "Which fee schedules are loaded?" }, { q: "Which contracts use the Medicare schedule?" }], hierarchy: [{ q: "Which payers have more than one plan?" }], documents: [{ q: "Which contracts have a document on file?" }], claims: [{ q: "Which underpaid claims should I appeal first?" }, { q: `Why was ${HERO_ID} flagged?` }], dashboards: [{ q: "Which payer is furthest from peers?" }, { q: "How much is at risk this month?" }, { q: "Why did the rate fall in October?" }] }[page] || [];
   const wonTotal = claims.filter((c) => c.appeal && c.appeal.status === "Won").reduce((s, c) => s + c.variance, 0);
 
   return (
@@ -3409,6 +3413,7 @@ export default function App() {
             <span className="muted">Following</span> <b>{HERO_ID}</b><span className="tag">{thread}</span>
             {wonTotal > 0 && <span className="tag moss">{fmt(wonTotal)} recovered in total</span>}
           </div>
+          <button className="pbtn" onClick={respond} disabled={!Object.values(appeals).some((a) => a.status === "Submitted")} title="Demo control: the payer answers every open appeal">Simulate payer responses</button>
           <button className="pbtn" onClick={reset}>Reset</button>
           <button className="pbtn" onClick={() => setPresenter(false)} aria-label="Hide presenter bar">Hide</button>
         </div>
@@ -3419,15 +3424,21 @@ export default function App() {
           <div className="logo">Air</div>
           <div className="sidescroll">
             {NAV.map((g) => {
-              const Ic = g.icon;
+              const Ic = g.icon, isOpen = navOpen[g.id];
               return (
-                <div key={g.g} className="sgroup">
-                  <div className="shead"><Ic size={16} /><span>{g.g}</span><ChevronDown size={16} className="flip" /></div>
-                  <div className="sbody"><span className="sline" />
-                    <div className="slist">
-                      {g.items.map(([k, l, keys]) => <button key={k} className={"ni" + (keys.includes(page) ? " on" : "")} onClick={() => { setPage(k); setOpenClaim(null); }}><span>{l}</span></button>)}
+                <div key={g.id} className="sgroup">
+                  <button className="shead" aria-expanded={isOpen} onClick={() => setNavOpen({ ...navOpen, [g.id]: !isOpen })}><Ic size={16} /><span>{g.g}</span><ChevronDown size={16} className={isOpen ? "flip" : ""} /></button>
+                  {isOpen && (
+                    <div className="sbody"><span className="sline" />
+                      <div className="slist">
+                        {g.items.map((it) => (
+                          <button key={it.l} className={"ni" + (it.k && it.keys.includes(page) ? " on" : "") + (it.k ? "" : " off")} onClick={() => { if (it.k) { setPage(it.k); setOpenClaim(null); } else toast("Not part of this demo"); }}>
+                            <span>{it.l}</span>{it.dot && <i className={"ndot " + it.dot} aria-hidden="true" />}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               );
             })}
@@ -3442,7 +3453,7 @@ export default function App() {
           </header>
           <div className="workrow">
           <main className={"canvas" + (upload || appealIds || feeFlow ? " flowing" : PD_PAGES.includes(page) ? " pdc" : "")}>
-            {appealIds ? <AppealPackageFlow key={appealIds.join()} ids={appealIds} claims={claims} setAiHook={setAiHook} onCancel={() => setAppealIds(null)} onSubmit={submitAppeals} onViewAppeals={() => { setAppealIds(null); setPage("appeals"); }} /> : upload ? <AddContractFlow key={upload} mode={upload} setAiHook={setAiHook} onCancel={() => setUpload(false)} onPublish={(es) => { es.forEach((e) => publish(e.contract, true, e.approved)); setUpload(false); setChapter("understand"); const all = es.reduce((s, e) => s + ruleIds(e.contract).length, 0), ok = es.reduce((s, e) => s + e.approved.length, 0); toast(`Published ${es.length} contract${es.length === 1 ? "" : "s"}. ${all ? (ok === all ? `${ok} rule${ok === 1 ? "" : "s"} added to Rules as drafts. Activate ${ok === 1 ? "it" : "them"} there.` : `${ok} of ${all} rules added to Rules as drafts, ${all - ok} not added.`) : ""}`); }} /> : feeFlow ? <FeeScheduleFlow key={String(feeFlow.hint)} hint={feeFlow.hint} existing={[...deriveSchedules(rawContracts), ...schedules]} contracts={rawContracts} schedules={schedules} setAiHook={setAiHook} onCancel={() => setFeeFlow(false)} onPublish={(s) => { setSchedules((p) => [...p.filter((x) => x.id !== s.id), s]); setFeeFlow(false); setPage("fees"); toast(`Published ${s.name}: ${s.rows} codes.`); }} /> : <>
+            {appealIds ? <AppealPackageFlow key={appealIds.join()} ids={appealIds} claims={claims} setAiHook={setAiHook} onCancel={() => setAppealIds(null)} onSubmit={submitAppeals} onViewAppeals={() => { setAppealIds(null); setView("cv-appeals"); setSel([]); setPage("claims"); }} /> : upload ? <AddContractFlow key={upload} mode={upload} setAiHook={setAiHook} onCancel={() => setUpload(false)} onPublish={(es) => { es.forEach((e) => publish(e.contract, true, e.approved)); setUpload(false); setChapter("understand"); const all = es.reduce((s, e) => s + ruleIds(e.contract).length, 0), ok = es.reduce((s, e) => s + e.approved.length, 0); toast(`Published ${es.length} contract${es.length === 1 ? "" : "s"}. ${all ? (ok === all ? `${ok} rule${ok === 1 ? "" : "s"} added to Rules as drafts. Activate ${ok === 1 ? "it" : "them"} there.` : `${ok} of ${all} rules added to Rules as drafts, ${all - ok} not added.`) : ""}`); }} /> : feeFlow ? <FeeScheduleFlow key={String(feeFlow.hint)} hint={feeFlow.hint} existing={[...deriveSchedules(rawContracts), ...schedules]} contracts={rawContracts} schedules={schedules} setAiHook={setAiHook} onCancel={() => setFeeFlow(false)} onPublish={(s) => { setSchedules((p) => [...p.filter((x) => x.id !== s.id), s]); setFeeFlow(false); setPage("fees"); toast(`Published ${s.name}: ${s.rows} codes.`); }} /> : <>
             {PD_PAGES.includes(page) ? (
               <div className="pd">
                 <PracticeNav page={page} onGo={(k) => { setPage(k); setOpenClaim(null); }} onInert={() => toast("Not part of this demo")} />
@@ -3460,8 +3471,7 @@ export default function App() {
                   onSaveView={(v) => { const id = "cv" + Date.now(); setCustomViews((p) => [...p, { ...v, id }]); setView(id); toast(`Saved the view "${v.name}"`); }}
                   onUpdateView={(id, patch) => { setCustomViews((p) => p.map((x) => (x.id === id ? { ...x, ...patch } : x))); toast("View updated"); }}
                   onDeleteView={(id) => { setCustomViews((p) => p.filter((x) => x.id !== id)); setView("workable"); toast("View deleted"); }} />}
-                {page === "appeals" && <AppealsPage claims={claims} respond={respond} setOpenClaim={setOpenClaim} toast={toast} goClaims={() => setPage("claims")} onAssign={(ids, v) => setAssign((p) => { const n = { ...p }; ids.forEach((id) => { n[id] = v; }); return n; })} />}
-                {page === "dashboards" && <DashboardsPage claims={claims} contracts={contracts} goals={goals} setGoals={setGoals} dash={dash} setDash={setDash} toast={toast} onOpenClaims={(f) => { setClaimsPreset({ filters: f, nonce: Date.now() }); setView("workable"); setSel([]); setPage("claims"); }} />}
+                {page === "dashboards" && <DashboardsPage claims={claims} contracts={contracts} goals={goals} setGoals={setGoals} dash={dash} setDash={setDash} toast={toast} onOpenClaim={(id) => { setPage("claims"); setOpenClaim(id); }} onOpenClaims={(f) => { const onlyUnder = f.length === 1 && f[0].k === "status" && f[0].v === "Underpaid"; if (onlyUnder) { setView("cv-under"); } else { setClaimsPreset({ filters: f, nonce: Date.now() }); setView("workable"); } setSel([]); setPage("claims"); }} />}
               </>
             )}
             </>}
@@ -3470,7 +3480,7 @@ export default function App() {
           </div>
         </div>
       </div>
-      {detail && (page === "claims" || page === "appeals") && <ClaimFlyout d={detail} onClose={() => setOpenClaim(null)} startAppeal={startAppeal} openDoc={openDoc} />}
+      {detail && page === "claims" && <ClaimFlyout d={detail} onClose={() => setOpenClaim(null)} startAppeal={startAppeal} openDoc={openDoc} />}
                   {doc && <DocModal doc={doc} contracts={contracts} onClose={() => setDoc(null)} />}
       {msg && <div className="toast" role="status">{msg}</div>}
     </div>
@@ -3524,17 +3534,21 @@ h1{font-size:18px;font-weight:600;line-height:1.2;margin:0}.h2{font-size:18px;fo
 .showp{position:absolute;left:8px;bottom:52px;z-index:5;border:1px solid var(--bst);background:var(--base);border-radius:var(--r-full);padding:0 12px;height:28px;font-size:12px}
 
 /* Air app shell */
-.shell{flex:1;display:grid;grid-template-columns:200px 1fr;min-height:0;background:var(--tonal)}
+.shell{flex:1;display:grid;grid-template-columns:232px 1fr;min-height:0;background:var(--tonal)}
 .sidecol{display:flex;flex-direction:column;gap:16px;padding:8px;min-height:0}
 .logo{font-weight:600;font-size:20px;letter-spacing:-.02em;padding:0 8px;height:32px;display:flex;align-items:center}
 .sidescroll{flex:1;overflow:auto;border-bottom:1px solid var(--bs)}
 .sgroup{display:flex;flex-direction:column;margin-bottom:4px}
-.shead{display:flex;align-items:center;gap:6px;height:28px;font-weight:500;color:var(--fg2)}
+.shead{display:flex;align-items:center;gap:6px;height:30px;width:100%;padding:0;border:0;background:transparent;text-align:left;font-weight:500;font-size:14px;color:var(--fg2);cursor:pointer}
+.shead:hover{color:var(--fg1)}
 .shead .flip{transform:rotate(180deg);margin-left:2px}
 .sbody{display:flex}.sline{width:1px;background:var(--d10);margin:0 12px 12px 8px}
 .slist{flex:1;display:flex;flex-direction:column;gap:2px;padding-bottom:12px;min-width:0}
 .ni{display:flex;align-items:center;gap:6px;width:100%;text-align:left;background:transparent;border:0;color:var(--fg2);padding:0 8px;height:28px;border-radius:var(--r-soft);overflow:hidden;white-space:nowrap}
-.ni span{overflow:hidden;text-overflow:ellipsis}
+.ni span{overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.ni.off{cursor:default}
+.ndot{width:10px;height:10px;border-radius:50%;flex:none}.ndot.peach{background:#EBDDD3}.ndot.blue{background:#B9C1F3}
+.ni.on .ndot.peach{background:#DACBC9}
 .ni:hover{background:var(--d5)}.ni.on{background:var(--accent-sub);color:var(--fg-accent);font-weight:500}
 .sfoot{display:flex;align-items:center;height:36px;padding-top:8px}
 .avatar{width:28px;height:28px;border-radius:50%;border:1px solid var(--bst);display:grid;place-items:center;font-size:11px;font-weight:500;background:var(--base)}
@@ -4068,7 +4082,7 @@ h1{font-size:18px;font-weight:600;line-height:1.2;margin:0}.h2{font-size:18px;fo
 .gchip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border:1px solid var(--bs);border-radius:var(--r-soft);background:var(--base);white-space:nowrap}
 .gchip.amt{border-radius:var(--r-full);background:var(--base)}.gchip.amt b{font-weight:500}.gsep{color:var(--fg3)}
 .pill{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid var(--bs);border-radius:var(--r-full);background:var(--base);font-weight:500;white-space:nowrap}
-.pill.st-underpaid svg{color:var(--danger)}.pill.st-denied svg{color:var(--danger)}.pill.st-pending svg{color:#2b5fd9}.pill.st-recovered svg{color:#2a9953}.pill.st-paid svg{color:var(--fg3)}
+.pill.st-underpaid svg{color:var(--danger)}.pill.st-denied svg{color:var(--danger)}.pill.st-appealed svg{color:#2b5fd9}.pill.st-recovered svg{color:#2a9953}.pill.st-paid svg{color:var(--fg3)}
 .insdot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--fg3);display:inline-block}
 .clid{font-weight:400}
 .plink{border:0;background:transparent;padding:0;color:var(--fg-accent);font-size:13px;cursor:pointer}.plink:hover{text-decoration:underline}
@@ -4100,7 +4114,7 @@ h1{font-size:18px;font-weight:600;line-height:1.2;margin:0}.h2{font-size:18px;fo
 .dhead{display:flex;align-items:center;justify-content:space-between;padding:12px 4px 10px}
 .dbc{display:flex;align-items:center;gap:8px;font-size:18px}.dbc-l{border:0;background:transparent;color:var(--fg2);font-size:18px;padding:0}.dbc-l:hover{text-decoration:underline}
 .dbc .bc-sep{padding:0 4px}
-.dbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 4px;border-top:1px solid var(--bs);border-bottom:1px solid var(--bs);margin-bottom:6px}
+.dbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 4px;border-top:1px solid var(--bs);border-bottom:1px solid var(--bs);margin-bottom:16px}
 .fpill{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 6px 0 12px;border:1px solid var(--bs);border-radius:var(--r-full);background:var(--base);white-space:nowrap}
 .fpill .fis{background:var(--d5);border-radius:var(--r-full);padding:0 8px;color:var(--fg2)}
 .dpill{position:relative;display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 8px 0 10px;border:1px solid var(--bs);border-radius:var(--r-full);background:var(--base);font-weight:500}
@@ -4110,7 +4124,7 @@ h1{font-size:18px;font-weight:600;line-height:1.2;margin:0}.h2{font-size:18px;fo
 .fpill .dpill{border:0;height:26px;padding:0 6px 0 0;font-weight:500}
 .drefresh{display:inline-flex;align-items:center;gap:6px;color:var(--fg2)}
 .dsec{font-size:18px;font-weight:500;margin:22px 4px 10px}
-.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}.dgrid.one{grid-template-columns:1fr}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:stretch}.dgrid.one{grid-template-columns:1fr}
 .dcard{border:1px solid var(--bs);border-radius:var(--r-extra);background:var(--base);min-width:0}
 .dc-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:14px 16px 10px;border-bottom:1px solid var(--bs)}
 .dc-t{font-size:15px;font-weight:500;display:flex;align-items:center;gap:6px}.dc-s{color:var(--fg2);margin-top:2px}
@@ -4166,6 +4180,66 @@ h1{font-size:18px;font-weight:600;line-height:1.2;margin:0}.h2{font-size:18px;fo
 .srcchip:hover{background:var(--d10)}
 .rr-eff{display:flex;gap:6px;align-items:flex-start;margin-top:8px;padding-top:8px;border-top:1px solid var(--bs);line-height:1.45}
 .rr-eff svg{flex:none;margin-top:2px}
+
+/* view creation as in the Claims page */
+.fchip2{display:inline-flex;align-items:center;gap:2px;height:30px;padding:0 4px 0 12px;border:1px solid var(--bs);border-radius:var(--r-full);background:var(--base);white-space:nowrap}
+.fchip2 .fc-f{display:inline-flex;align-items:center;gap:6px;font-weight:500;margin-right:6px}
+.fchip2 .fc-op,.fchip2 .fc-v{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 6px 0 10px;border:0;border-radius:var(--r-full);background:transparent;color:var(--fg1)}
+.fchip2 .fc-op{background:var(--d5)}.fchip2 .fc-op:hover,.fchip2 .fc-v:hover{background:var(--d10)}
+.fchip2 .fc-x{width:24px;height:24px;margin-left:2px;border:0;border-radius:50%;background:transparent;display:grid;place-items:center;padding:0;color:var(--fg1)}.fchip2 .fc-x:hover{background:var(--d10)}
+.fchip2 .popwrap .menu{left:0;right:auto;top:30px;min-width:190px}
+.fvmenu{max-height:300px;overflow:auto}
+.menu-i.chk{display:flex;align-items:center;gap:8px;cursor:pointer;width:100%}.menu-i.chk input{margin:0}
+.rstbtn{border:0;background:transparent;color:var(--fg2);padding:0 6px;height:30px}.rstbtn:hover{color:var(--fg1)}
+.pillbtn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.pillbtn.primary:hover:not(:disabled){background:var(--accent-h)}
+.pillbtn.primary:disabled{background:var(--d10);border-color:transparent;color:var(--fg3);opacity:1}
+.cl-name{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-top:1px solid var(--bs);flex:none}
+.cl-nameinput{width:min(580px,60%);height:40px;padding:0 12px;border:2px solid var(--accent);border-radius:var(--r-soft);font:inherit;font-size:15px;outline:none;background:var(--base);color:var(--fg1)}
+.cl-nameinput::placeholder{color:var(--fg3)}
+.pbtn:disabled{opacity:.4;cursor:not-allowed}
+
+/* drill-in from the underpaid tiles, and the win rate tile */
+.dc-click{border:0;background:transparent;padding:0;text-align:left;display:inline-flex;align-items:center;gap:4px;cursor:pointer;color:var(--fg1);font-family:inherit}
+.dc-big.dc-click{font-size:28px;font-weight:400;line-height:1.2;letter-spacing:-.01em}
+.dc-click svg{color:var(--fg3);margin-top:3px}.dc-click:hover{color:var(--fg-accent)}.dc-click:hover svg{color:var(--fg-accent)}
+.dgrid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.dstats.wr{justify-content:space-between;gap:12px;margin:2px 0 8px}.dstats.wr div{align-items:flex-start}
+.dstats.big{gap:28px}.dstats.big div{align-items:flex-start}.dstats.big b{font-size:24px;font-weight:400;letter-spacing:-.01em}.dstats.big span{font-size:13px}
+.drill{display:flex;flex-direction:column;gap:12px;padding-top:12px}
+.dr-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.dr-tabs{margin:4px 0 0}
+.dr-grp{display:flex;align-items:center;gap:10px}
+.dr-wrap{border:1px solid var(--bs);border-radius:var(--r-extra);overflow:auto;background:var(--base)}
+.dr-wrap .cltbl{min-width:900px}
+@media (max-width:1300px){.dgrid.three{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:1100px){.dgrid.three{grid-template-columns:1fr}}
+.dgrid+.dgrid{margin-top:16px}
+
+/* tapping a card divides the screen: the card and its breakdown on the left, the claims on the right */
+.dcard.opens{cursor:pointer;transition:box-shadow .12s,border-color .12s}.dcard.opens:hover{border-color:var(--bst);box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start;padding-top:4px}
+.sp-l{display:flex;flex-direction:column;gap:16px;min-width:0}
+.sp-r{position:sticky;top:8px;min-width:0}
+.sp-claims{display:flex;flex-direction:column;max-height:calc(100vh - 150px)}
+.sp-ch{align-items:center}
+.sp-scroll{overflow:auto;flex:1;min-height:0}.sp-scroll .cltbl{min-width:880px}
+.sp-bar{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--bs);flex:none}
+.sp-search{height:34px;width:100%;border:1px solid var(--bst);border-radius:var(--r-soft);padding:0 10px;font:inherit;outline:none;background:var(--base);color:var(--fg1)}
+.sp-search:focus{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.sp-tbl{width:100%;border-collapse:separate;border-spacing:0;margin-top:10px}
+.sp-tbl th{background:var(--solid2);font-weight:400;height:36px;padding:0 12px;text-align:left;border-bottom:1px solid var(--bs)}.sp-tbl th.r,.sp-tbl td.r{text-align:right}
+.sp-tbl td{height:42px;padding:0 12px;border-bottom:1px solid var(--bs)}
+.sp-tbl .pickrow{cursor:pointer}.sp-tbl .pickrow:hover td{background:var(--accent-sub-h)}.sp-tbl .pickrow.picked td{background:var(--accent-sub)}
+.defh{display:flex;width:100%;justify-content:space-between;align-items:center;border:0;background:transparent;text-align:left;padding:16px;cursor:pointer;border-bottom:0}
+.defb{padding-top:0}.defk{font-size:12px;font-weight:500;color:var(--fg3);text-transform:uppercase;letter-spacing:.04em;margin:8px 0 2px}.defb p{margin:0 0 8px;line-height:1.55}
+@media (max-width:1150px){.split{grid-template-columns:1fr}.sp-r{position:static}.sp-claims{max-height:none}}
+.dgrid>.dcard.wide{grid-column:1/-1}
+
+/* appeal flow: the packets list at the far left, like the contracts list */
+.aprow{flex:1;min-height:0;display:flex}
+.apmain{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
+.apclist{border-top:1px solid var(--bs)}
+.apclist .okc{color:#2a9953}
 .toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:#141414;color:#e5e5e5;padding:8px 16px;border-radius:var(--r-soft);z-index:50;box-shadow:0 6px 8px rgba(0,0,0,.25);max-width:80vw}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}.sw span{transition:none}}
 @media (max-width:1000px){.shell{grid-template-columns:1fr}.sidecol{display:none}.cols,.hub,.two{grid-template-columns:1fr}.split{grid-template-columns:1fr}.crow{grid-template-columns:1fr}.hdr-c{display:none}}
