@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LineChart, Line, CartesianGrid } from "recharts";
-import { Upload, FileText, ChevronRight, ChevronDown, Check, CheckCircle2, AlertTriangle, X, Search, Sparkles, Send, Clock, Link2, Loader2, Info, Receipt, BarChart3, Circle, PanelLeft, Bell, Mic, BookOpen, Settings, HelpCircle, Download, Plus, ThumbsUp, ThumbsDown, ZoomIn, ZoomOut, ArrowUp, ArrowRight, SkipForward, ListChecks, SlidersHorizontal, ListFilter, ChevronUp, ChevronLeft, Printer, Maximize2 } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LineChart, Line, CartesianGrid, ReferenceLine } from "recharts";
+import { Upload, FileText, ChevronRight, ChevronDown, Check, CheckCircle2, AlertTriangle, X, Search, Sparkles, Send, Clock, Link2, Loader2, Info, Receipt, BarChart3, Circle, PanelLeft, Bell, Mic, BookOpen, Settings, HelpCircle, Download, Plus, ThumbsUp, ThumbsDown, ZoomIn, ZoomOut, ArrowUp, ArrowRight, SkipForward, ListChecks, SlidersHorizontal, ListFilter, ChevronUp, ChevronLeft, Printer, Maximize2, History, UserPlus, TrendingDown, Ban, ArrowLeftRight, CircleHelp, Calendar, RefreshCw, Share2, ArrowDown } from "lucide-react";
 
 /* ============================================================
    ATI DEMO, Mock B: Contract management and underpayment engine
@@ -13,7 +13,7 @@ const SAMPLE_PDF_HB = "JVBERi0xLjQKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jd
 const SAMPLE_PDF_B64 = "JVBERi0xLjQKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgKG9wZW5zb3VyY2UpCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUiAvRjMgNCAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL0Jhc2VGb250IC9IZWx2ZXRpY2EgL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcgL05hbWUgL0YxIC9TdWJ0eXBlIC9UeXBlMSAvVHlwZSAvRm9udAo+PgplbmRvYmoKMyAwIG9iago8PAovQmFzZUZvbnQgL1RpbWVzLUJvbGQgL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcgL05hbWUgL0YyIC9TdWJ0eXBlIC9UeXBlMSAvVHlwZSAvRm9udAo+PgplbmRvYmoKNCAwIG9iago8PAovQmFzZUZvbnQgL1RpbWVzLVJvbWFuIC9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nIC9OYW1lIC9GMyAvU3VidHlwZSAvVHlwZTEgL1R5cGUgL0ZvbnQKPj4KZW5kb2JqCjUgMCBvYmoKPDwKL0NvbnRlbnRzIDExIDAgUiAvTWVkaWFCb3ggWyAwIDAgNjEyIDc5MiBdIC9QYXJlbnQgMTAgMCBSIC9SZXNvdXJjZXMgPDwKL0ZvbnQgMSAwIFIgL1Byb2NTZXQgWyAvUERGIC9UZXh0IC9JbWFnZUIgL0ltYWdlQyAvSW1hZ2VJIF0KPj4gL1JvdGF0ZSAwIC9UcmFucyA8PAoKPj4gCiAgL1R5cGUgL1BhZ2UKPj4KZW5kb2JqCjYgMCBvYmoKPDwKL0NvbnRlbnRzIDEyIDAgUiAvTWVkaWFCb3ggWyAwIDAgNjEyIDc5MiBdIC9QYXJlbnQgMTAgMCBSIC9SZXNvdXJjZXMgPDwKL0ZvbnQgMSAwIFIgL1Byb2NTZXQgWyAvUERGIC9UZXh0IC9JbWFnZUIgL0ltYWdlQyAvSW1hZ2VJIF0KPj4gL1JvdGF0ZSAwIC9UcmFucyA8PAoKPj4gCiAgL1R5cGUgL1BhZ2UKPj4KZW5kb2JqCjcgMCBvYmoKPDwKL0NvbnRlbnRzIDEzIDAgUiAvTWVkaWFCb3ggWyAwIDAgNjEyIDc5MiBdIC9QYXJlbnQgMTAgMCBSIC9SZXNvdXJjZXMgPDwKL0ZvbnQgMSAwIFIgL1Byb2NTZXQgWyAvUERGIC9UZXh0IC9JbWFnZUIgL0ltYWdlQyAvSW1hZ2VJIF0KPj4gL1JvdGF0ZSAwIC9UcmFucyA8PAoKPj4gCiAgL1R5cGUgL1BhZ2UKPj4KZW5kb2JqCjggMCBvYmoKPDwKL1BhZ2VNb2RlIC9Vc2VOb25lIC9QYWdlcyAxMCAwIFIgL1R5cGUgL0NhdGFsb2cKPj4KZW5kb2JqCjkgMCBvYmoKPDwKL0F1dGhvciAoXChhbm9ueW1vdXNcKSkgL0NyZWF0aW9uRGF0ZSAoRDoyMDI2MTExNjIyMzQ1NyswMCcwMCcpIC9DcmVhdG9yIChcKHVuc3BlY2lmaWVkXCkpIC9LZXl3b3JkcyAoKSAvTW9kRGF0ZSAoRDoyMDI2MTExNjIyMzQ1NyswMCcwMCcpIC9Qcm9kdWNlciAoUmVwb3J0TGFiIFBERiBMaWJyYXJ5IC0gXChvcGVuc291cmNlXCkpIAogIC9TdWJqZWN0IChcKHVuc3BlY2lmaWVkXCkpIC9UaXRsZSAoXChhbm9ueW1vdXNcKSkgL1RyYXBwZWQgL0ZhbHNlCj4+CmVuZG9iagoxMCAwIG9iago8PAovQ291bnQgMyAvS2lkcyBbIDUgMCBSIDYgMCBSIDcgMCBSIF0gL1R5cGUgL1BhZ2VzCj4+CmVuZG9iagoxMSAwIG9iago8PAovRmlsdGVyIFsgL0FTQ0lJODVEZWNvZGUgL0ZsYXRlRGVjb2RlIF0gL0xlbmd0aCAxNDU0Cj4+CnN0cmVhbQpHYXRVMkA7aG8xJkgvMi0wZm8hJ1YiLkE5Mk5FNEMzLzphRGBBK1ZoLm9sRE5MO2RzNCRiJE1YXSJidGNNbnF1RkUoVlRRTTZQWyRII01UUSkkMzInJkclaikhNThVKmdHSyJANlAnPjs+QFJxVl8kZVEmU1dWcyVRVyc5cUNqWyw4KWstNlZtTDUvPTJVVl9bJSY7SD8tOUAkJGxQUGc/clhxVjxtXVRdQS8/WldDcSFMMUZiU1J1NC82NnVRSVUuPFdkXm9sPitTWm4tP2Y9cSkhamdlRWtCUjUwO28tWHEtYCFyS0VGJTAlI1ZrTl8/LlxuQldmVF0/X1FrWEFSX2ZOL0JwbGNzcSQzTjVSL0hHdSFFO0lrazBdM2M+VlBaMktBbiZnKSdobyhpVyo9cz81O1VRYmtGNFRCLFZKVGBCMGxycHNKVHVgSHVVS19OT0AqPmdcXl9MPlN1L1cmdCV0SjNDOTFoQz04ZFwqIi1kYldcQ14rUT9aLj0iSW44UTpWcURxKERSODNPO2luQz9NbnNiImJqNyJaXEc/Jj8/Uy1bZlE2ayRFaTRcaWNfIjtIaDM7Z14uYChnJCgraWlQXS1mbzosOCtpOypwWj1SOGY4TEFPL3RsXkY6J2lQWGUuai1NS1c1JDckOmAjOFI9bFRodSc1MXVwKytVQytNRThqOiJgWkFgaUJfKXJSTVZQTW8wVG9gT0dAYTxDLVFMO1Ewbl10SExyIj5iVj8pbk0wR2guNWRZSlJgYWE8KHQjPylpSTg4QEFiVnEyPms3KTczWytjYS9TUE88WV5VYztTcWwjVXRxPGBUcCE/LlNAOV5yVC1oZTwmPHJcb1BXMzwvWFdgLV4zQCVATm1qS0pJWklPTFcwTVhrajJIWj5ZTCFoQTg5cWtQOi1xYmA5aUtcIi1uKC0xbW1rSC9YZT9ERFgmYGFfRGlPJ2YxQnM9JkA4VzpGYmlTZWVuMT88UCRpM2tTWXEoQTkpIiZma0pRQUdoZXVfOWdSQ1RKbUxoU1xvTy1tcDhWQD8yR1c4TTpgRyRaVDguMkZTYWkmJSo2LT1eZ04xYDVzbG5UKXUzLE1BKyItdFEkOHBHO21YW1FJOGUxXVRBcjE1QGltalJKJCFdTiteOCN1P0knZVYoVGhYZFoubVVrYURiU0Mrck4pTSdEbCpeTGpxSzkxLmdfK0w0Wz8pKGpjOV0zXmI3IWEjXSNXLjhQVkVZcTgkIylOIWlmK3VqXFBSaElDb1BqLFhmblI1UllzdXRXZ04za2dOI0xPVURybjpzJiZPS2QkcXQuJChhZlpkbjJiPDYvckMjM15TbEVBa3EpK0AzcWJZVC0nVCIqbWdGN2Y2ViEsSXNbdDdbOCFWUjA/V2ZCT2RBTysjOypENEo5cmBRQjNqOE5OPTQrJjohVSQlRnRsTEpvPzpuJyJFKi82ZzpNaTpYTmJxPTQhSk5ncUtDaEgpSWJlUmNuTCtAM14jZFlhNUloOTtLLm9OMVA8RTNQJEIvLzkmVyJJRk0mU1hFMCUmI2g2WlVBaXU0NkYmXWAhQEA9SjVdI247b2dhYnBybzRYbjpVRUNkUVFoJDFSSlBRImtdUSJHMENHODo3RyNRUGdMO1FNRyIhI1NKUCIsJixiKTQ0RFlXdDZPKyQibXEhMFZ0YktkLkFhQltvYWpnJEJdS2VvPks1UCVcWENJN3BZKnBAcnU5IV9EUy1cYTJeJCovKTxtJkxdb3FUJylNLUJEVVFJS0xcPCYxNDlXME5yVW5ZODkjcylJTEBOQzczS2ZmZDtdMnNlRWU2QGQpSDpTP1tEcyg0cUxDSXQkZXUqUlA1SltlPjhPWzBaWXBSOzQmK2IzL2E1YFAtNEd1NTVDcF5kI0QoQFxBXE9ZS1IwP1pNTlcwUmZZZk9dN0ltQHFXcF1+PmVuZHN0cmVhbQplbmRvYmoKMTIgMCBvYmoKPDwKL0ZpbHRlciBbIC9BU0NJSTg1RGVjb2RlIC9GbGF0ZURlY29kZSBdIC9MZW5ndGggMjgyCj4+CnN0cmVhbQpHYXQ9YjV1NUJQJSMrMEsoJTk0J1BeODpuKl5QQWtMSj5vNWFCIzJBLkkhLy45YD1dRlYqYTFZIUVsa2xrTkFiKGN0TGZoOkI+XHVcOWZPSylUST1kb2BqT2YwO2M8W1pvQi5PZlhAb048R1ExdW9wKjg9OlFrXFs5dDpNVlNGVEszRFZDUGA6VycrITMkSG9cU142SXIoY0csS2dGNyhVYUxgME0zNipKY1YnMmVTODYuXmY3cFVNXjtrS0c4XTNgPSRedF1ePktAWHMxbT0tZ21aIVU8Q11Tbk9WXzMnbCNBKzFcdCdwPEEnaWFcJU09L0g4VzI8YUNrMHQ7LjIvbGlvZVhLcT9RVXRfPTA6bmReZScyISRtfj5lbmRzdHJlYW0KZW5kb2JqCjEzIDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDU2NAo+PgpzdHJlYW0KR2F0VW9iQVEmZyY0UT9tTUhQJlsnSjJbTVVgU0A2MSg9VV4+aCpHOiMwOTgxUiJVLzdYc0JuN2hqNzYoKCtwIjY6ZElAKV8uYDhRYmU0LmBJOlc2ayd1My9RamJhJjMrPFErZmAnQFhbT0woUThvJSJcM2koKEx1W1BeMXVnO2ZXW05WbzQqSzw0RFJxRT8yRkIkQTZnRmgxKmkvLmEpcy9yPnAvJHQhcGAoPF1abixmbUNHYG47ckZLUmRANig8YDB0IUkmVUIuRE5MKSE7UWBYYHJZN2pJRSsjQkdKVUxiKF82bGlASkMrbEEua1ZlJi5KLCRbSj0tcz81SzhAPCpTUV1JPWYuSUxYbylMVkg7UmlwcVM7cGZTUkd0QS40NE8zajI3YTY5aW08OiZvTU5pYmViQlJnUXNFaiN1SGxZRmZzQDxIaTBraU9NXDhaVk5haktvSWopO2pqZEJBX29iUzUtJyQvakxvSHI7X1wxZyhgbmddMEt0J1NsLVNcU21wU0lFa0c8SSEuQFhbQDF0Qjw+MD1qQU0pV0k9QiUxYnQhSiNmMGlfTlslX1BwIVJQYjs+J2Ihal9MZC9rc2M9Ri5CIy09R2EwNCxYXDxrT1prR1UxJDxpNFIoRGJBLkg9c01dYTstWlUkKT9zVTwzREIhPylYUidZNSQyYWk6W28pKUI4RUVAXlBDREJqNyJuLjlYa0drYU4kQ19gWlU7Nz9WR1k4MmlGRGluQz1SS34+ZW5kc3RyZWFtCmVuZG9iagp4cmVmCjAgMTQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDYxIDAwMDAwIG4gCjAwMDAwMDAxMTIgMDAwMDAgbiAKMDAwMDAwMDIxOSAwMDAwMCBuIAowMDAwMDAwMzI3IDAwMDAwIG4gCjAwMDAwMDA0MzYgMDAwMDAgbiAKMDAwMDAwMDYzMSAwMDAwMCBuIAowMDAwMDAwODI2IDAwMDAwIG4gCjAwMDAwMDEwMjEgMDAwMDAgbiAKMDAwMDAwMTA5MCAwMDAwMCBuIAowMDAwMDAxMzcwIDAwMDAwIG4gCjAwMDAwMDE0NDIgMDAwMDAgbiAKMDAwMDAwMjk4OCAwMDAwMCBuIAowMDAwMDAzMzYxIDAwMDAwIG4gCnRyYWlsZXIKPDwKL0lEIApbPGQyZjk0MDJlNTA5MGYzMDhlMzg2NDRhZmRlODNmMmRkPjxkMmY5NDAyZTUwOTBmMzA4ZTM4NjQ0YWZkZTgzZjJkZD5dCiUgUmVwb3J0TGFiIGdlbmVyYXRlZCBQREYgZG9jdW1lbnQgLS0gZGlnZXN0IChvcGVuc291cmNlKQoKL0luZm8gOSAwIFIKL1Jvb3QgOCAwIFIKL1NpemUgMTQKPj4Kc3RhcnR4cmVmCjQwMTYKJSVFT0YK";
 
 /* ---------- helpers ---------- */
-const TODAY = "2026-11-16";
+const TODAY = "2026-11-18";
 const r2 = (n) => Math.round(n * 100) / 100;
 const fmt = (n, d = 2) => (n == null || isNaN(n) ? "n/a" : (n < 0 ? "-" : "") + "$" + Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }));
 const fmtDate = (s) => (s ? new Date(s + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "");
@@ -118,13 +118,13 @@ function calcUnit(row, contract, dos, on, cq) {
   if (row.escalates && contract.escalatorPct && contract.escalatorStart && dos >= contract.escalatorStart) {
     const active = !!on[contract.id + ":escalator"];
     const nv = active ? r2(v * (1 + contract.escalatorPct / 100)) : v;
-    steps.push({ k: "esc", rule: "escalator", label: `Annual escalator, +${contract.escalatorPct}%`, note: `Applies to service dates from ${fmtDate(contract.escalatorStart)}`, value: nv, active });
+    steps.push({ k: "esc", rule: "escalator", label: `Annual escalator, +${contract.escalatorPct}%`, note: `Applies to service dates from ${fmtDate(contract.escalatorStart)}`, value: nv, active, draft: on[contract.id + ":escalator"] === "draft" });
     v = nv;
   }
   if (cq && contract.ptaPct != null && row.method !== "per_visit") {
     const active = !!on[contract.id + ":pta"];
     const nv = active ? r2((v * contract.ptaPct) / 100) : v;
-    steps.push({ k: "pta", rule: "pta", label: `PTA services (modifier CQ), paid at ${contract.ptaPct}%`, note: "Applies when a PTA delivers the service", value: nv, active });
+    steps.push({ k: "pta", rule: "pta", label: `PTA services (modifier CQ), paid at ${contract.ptaPct}%`, note: "Applies when a PTA delivers the service", value: nv, active, draft: on[contract.id + ":pta"] === "draft" });
     v = nv;
   }
   return { steps, amount: v };
@@ -160,6 +160,9 @@ const ON_ALL = { "cascadia:escalator": true, "cascadia:pta": true, "summit:pta":
 const ON_NOESC = { "cascadia:escalator": false, "cascadia:pta": true, "summit:pta": true };
 const HERO_ID = "CLM-26-30418";
 
+const FIRST = ["Maya", "Marcus", "Elena", "Tomas", "Priya", "Noah", "Lucia", "Owen", "Sofia", "Daniel", "Amara", "Ravi", "Hana", "Leo", "Nina", "Jonas"];
+const LAST = ["Okafor", "Lindqvist", "Ramos", "Haddad", "Whitcomb", "Nakamura", "Abara", "Petrov", "Calloway", "Duarte", "Eriksen", "Fontaine", "Gupta", "Hollis", "Ibarra", "Jensen"];
+const PROVIDERS = ["Dr. Imani Brooks", "Dr. Carlos Vega", "Dr. Helen Park", "Dr. Theo Marsh", "Dr. Aiko Tanaka"];
 function makeClaim(i, forced) {
   const rnd = rng32(1000 + i * 31);
   const f = forced || {};
@@ -170,7 +173,9 @@ function makeClaim(i, forced) {
     for (const k of fac.plans) { x -= PLAN_META[k].w; if (x <= 0) { planKey = k; break; } }
     planKey = planKey || fac.plans[0];
   }
-  const dos = f.dos || addDays("2026-05-01", Math.floor(rnd() * 183));
+  const gap = 21 + Math.floor(rng32(555 + i)() * 10);
+  const post = addDays("2025-12-10", Math.floor(rnd() * 343));
+  const dos = f.dos || addDays(post, -gap);
   const a = rnd();
   const apptType = f.apptType || (a < 0.1 ? "Evaluation" : a < 0.8 ? "Follow-up" : a < 0.9 ? "Re-evaluation" : "Discharge");
   let lineSpec = f.lines;
@@ -186,7 +191,7 @@ function makeClaim(i, forced) {
   const claim = {
     id: f.id || `CLM-26-${30000 + i * 7}`, patient: f.patient || String.fromCharCode(65 + Math.floor(rnd() * 26)) + "." + String.fromCharCode(65 + Math.floor(rnd() * 26)) + ".",
     pid: f.pid || "PT-" + (40000 + Math.floor(rnd() * 9999)), dos, facility: fac.name, state: fac.state, planKey, plan: meta.plan, master: meta.master, contractId: meta.contractId, group: meta.group,
-    apptType, cq: cqOn, remitDate: f.remit || addDays(dos, 21 + Math.floor(rnd() * 10)), remitId: "835-" + (700000 + i * 13),
+    apptType, cq: cqOn, remitDate: f.remit || (f.dos ? addDays(dos, gap) : post), remitId: "835-" + (700000 + i * 13),
     lines: lineSpec.map(([cpt, units]) => ({ cpt, units, cq: cqOn && cpt !== "97161", billed: CHARGE[cpt] * units })),
   };
   const contract = CANON[claim.contractId];
@@ -194,17 +199,38 @@ function makeClaim(i, forced) {
   let pattern = null;
   let paid = truth.slice();
   const roll = rnd();
-  if ((planKey === "choice" || planKey === "select") && dos < "2026-10-01" && (f.pattern === "escalator" || roll < 0.6)) { pattern = "escalator"; paid = expectedLines(claim, contract, ON_NOESC); }
-  else if (planKey === "summit" && claim.lines.some((l) => l.cq) && (f.pattern === "pta" || roll < 0.55)) { pattern = "pta"; paid = truth.map((t, k) => (claim.lines[k].cq ? r2(t * 0.85) : t)); }
-  else if (planKey === "keystone" && claim.lines.some((l) => l.cpt === "97110") && claim.lines.some((l) => l.cpt === "97530")) { pattern = "bundling"; paid = truth.map((t, k) => (claim.lines[k].cpt === "97530" ? 0 : t)); }
+  if ((planKey === "choice" || planKey === "select") && dos < "2026-10-01" && (f.pattern === "escalator" || roll < 0.3)) { pattern = "escalator"; paid = expectedLines(claim, contract, ON_NOESC); }
+  else if (planKey === "summit" && claim.lines.some((l) => l.cq) && (f.pattern === "pta" || roll < 0.4)) { pattern = "pta"; paid = truth.map((t, k) => (claim.lines[k].cq ? r2(t * 0.85) : t)); }
+  else if (planKey === "keystone" && claim.lines.some((l) => l.cpt === "97110") && claim.lines.some((l) => l.cpt === "97530") && (f.pattern === "bundling" || roll < 0.45)) { pattern = "bundling"; paid = truth.map((t, k) => (claim.lines[k].cpt === "97530" ? 0 : t)); }
   claim.lines.forEach((l, k) => { l.paid = paid[k]; });
   claim.pattern = pattern;
   claim.billed = claim.lines.reduce((s, l) => s + l.billed, 0);
   claim.paid = r2(claim.lines.reduce((s, l) => s + l.paid, 0));
+  const rx = rng32(7000 + i * 17);
+  claim.name = f.name || FIRST[Math.floor(rx() * FIRST.length)] + " " + LAST[Math.floor(rx() * LAST.length)];
+  claim.provider = f.provider || PROVIDERS[(FACILITIES.findIndex((x) => x.name === claim.facility) + Math.floor(rx() * 2)) % PROVIDERS.length];
+  claim.assignee = f.assignee !== undefined ? f.assignee : rx() < 0.28 ? "LR" : null;
   return claim;
 }
-const HERO = makeClaim(0, { id: HERO_ID, patient: "M.O.", pid: "PT-48213", dos: "2026-08-14", facility: "Hartford", planKey: "choice", apptType: "Follow-up", lines: [["97110", 3], ["97140", 1], ["97530", 2]], cq: false, remit: "2026-09-08", pattern: "escalator" });
-const CLAIMS = [HERO, ...Array.from({ length: 169 }, (_, i) => makeClaim(i + 1))];
+const HERO = makeClaim(0, { id: HERO_ID, patient: "M.O.", pid: "PT-48213", dos: "2026-08-14", facility: "Hartford", planKey: "choice", apptType: "Follow-up", lines: [["97110", 3], ["97140", 1], ["97530", 2]], cq: false, remit: "2026-09-08", pattern: "escalator", name: "Marcus Okafor", provider: "Dr. Imani Brooks", assignee: "LR" });
+const CLAIMS = [HERO, ...Array.from({ length: 1499 }, (_, i) => makeClaim(i + 1))];
+/* an appeal history for the payers that were already on file, so recovery numbers have something behind them */
+const SEED_APPEALS = (() => {
+  const out = {}; const rr = rng32(91); let n = 3000;
+  CLAIMS.forEach((c) => {
+    if (c.pattern !== "pta" && c.pattern !== "bundling") return;
+    if (daysBetween(c.remitDate, TODAY) < 50) return;
+    const exp = r2(expectedLines(c, CANON[c.contractId], ON_ALL).reduce((s, x) => s + (x || 0), 0));
+    if (exp - c.paid < 0.01) return;
+    if (rr() > 0.55) return;
+    const on = addDays(c.remitDate, 14 + Math.floor(rr() * 26));
+    if (on > TODAY) return;
+    let status = "Submitted", resp = null;
+    if (daysBetween(on, TODAY) > 30) { status = rr() < (c.pattern === "pta" ? 0.8 : 0.25) ? "Won" : "Denied"; resp = addDays(on, 16 + Math.floor(rr() * 14)); }
+    out[c.id] = { id: "APL-" + n++, status, on, resp };
+  });
+  return out;
+})();
 
 const PATTERN = {
   escalator: { prob: 0.92, short: "Escalator not applied", carc: "CO-45" },
@@ -218,7 +244,7 @@ function derive(claim, contracts, ruleOn, appeals) {
   d.lineExp = expectedLines(claim, contract, ruleOn);
   d.expected = r2(d.lineExp.reduce((s, x) => s + (x || 0), 0));
   const v = r2(d.expected - claim.paid);
-  d.status = v > 0.5 ? "underpaid" : "ok";
+  d.status = v >= 0.01 ? "underpaid" : "ok";
   d.deadline = addDays(claim.remitDate, contract.disputeDays || 180);
   d.daysLeft = daysBetween(TODAY, d.deadline);
   if (d.status === "underpaid") {
@@ -236,10 +262,10 @@ function derive(claim, contracts, ruleOn, appeals) {
   return d;
 }
 
-/* ---------- Claude calls ---------- */
-async function callClaude(system, content) {
-  // In this repo the browser never holds an API key: requests go to the serverless function in /api/claude.js
-  const r = await fetch("/api/claude", {
+/* ---------- AI calls ---------- */
+async function callAI(system, content) {
+  // In this repo the browser never holds an API key: requests go to the serverless function in /api/ai.js
+  const r = await fetch("/api/ai", {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1000, system, messages: [{ role: "user", content }] }),
   });
@@ -253,7 +279,7 @@ function parseJSON(t) {
 }
 const SYS_PARSE = "You extract structured data from healthcare provider and payer contracts. Reply with minified JSON only. No markdown, no commentary.";
 const PROMPT_A = `Extract the compensation structure from this contract. Return JSON with this exact shape: {"contract":{"masterPayer":string,"provider":string,"effectiveStart":"YYYY-MM-DD","effectiveEnd":"YYYY-MM-DD","escalatorPct":number or null,"escalatorStart":"YYYY-MM-DD" or null,"ptaPct":number or null,"disputeDays":number or null},"plans":[{"payer":string,"payerGroup":"Commercial" or "Medicare" or "Medicaid","planType":string,"plan":string,"method":"percent_of_fee_schedule" or "per_visit" or "per_unit","discountPct":number or null,"flatRate":number or null,"maxUnits":number or null,"feeSchedule":"B" or "C" or null,"facilities":string,"states":string,"escalates":boolean,"source":"an exact phrase of 5 to 9 words copied from the contract"}],"feeSchedules":{"B":{"97110":number,"97140":number,"97530":number,"97112":number,"97161":number},"C":{"97110":number,"97140":number,"97530":number,"97112":number,"97161":number}}}. The feeSchedule field is the exhibit letter whose amounts the plan uses. The plan field is the short plan name without the payer prefix, for example Choice PPO.`;
-const PROMPT_B = `List the contract terms that affect payment, authorization, licensure, state rules or disputes. Return JSON: {"terms":[{"section":string,"category":"Rate" or "License" or "State" or "Authorization" or "Appeals","summary":"under 15 words","when":"under 14 words, the condition","then":"under 14 words, the action","source":"an exact phrase of 4 to 8 words copied from the contract"}]}. Include at most 6 terms.`;
+const PROMPT_B = `List the contract terms that adjust or restrict payment: rate increases, modifier rules, state or license requirements, authorization limits and dispute deadlines. Do not list the base payment rates themselves (percent of a fee schedule, flat visit rates, per unit rates), because those are captured separately. Return JSON: {"terms":[{"section":string,"category":"Rate" or "License" or "State" or "Authorization" or "Appeals","summary":"under 15 words","when":"under 14 words, the condition","then":"under 14 words, the action","source":"an exact phrase of 4 to 8 words copied from the contract"}]}. Include at most 6 terms.`;
 
 function validA(a) {
   try {
@@ -319,7 +345,7 @@ function DocPane({ text, marks = [], activeIdx = -1, shownIdx = [], nonce = 0, t
     if (c.scrollTo) c.scrollTo({ top: Math.max(0, top), behavior: "smooth" }); else c.scrollTop = Math.max(0, top);
   }, [activeIdx, nonce]);
   if (text == null) return (
-    <div className="docscroll" ref={cont}><div className="paper pdfcard"><FileText size={28} /><div className="b">{pdfName}</div><div className="muted">PDF sent to Claude for reading. Page preview is not available in this prototype, so selecting a row cannot scroll the document.</div></div></div>
+    <div className="docscroll" ref={cont}><div className="paper pdfcard"><FileText size={28} /><div className="b">{pdfName}</div><div className="muted">PDF sent to Athelas AI for reading. Page preview is not available in this prototype, so selecting a row cannot scroll the document.</div></div></div>
   );
   const parts = []; let pos = 0;
   marks.forEach((m, k) => {
@@ -645,7 +671,7 @@ function qaFor(contract, has) {
   checks.push({ id: "p", label: "Rate range check", detail: odd.length ? "Outside expected range: " + odd.map((p) => p.plan).join(", ") : "All rates fall inside the expected range for outpatient PT", ok: !odd.length, anchor: { needle: (odd[0] || contract.plans[0]).source, nth: 0 } });
   checks.push({ id: "d", label: "Effective dates", detail: `${fmtDate(contract.effectiveStart)} to ${fmtDate(contract.effectiveEnd)}`, ok: !!contract.effectiveStart && !!contract.effectiveEnd && contract.effectiveEnd > contract.effectiveStart, anchor: { needle: "Effective Date", nth: 0 } });
   contract.plans.forEach((p) => {
-    if (p.method === "per_visit") reviews.push({ id: "v" + p.plan, label: `${p.plan}: flat visit rate`, detail: `Claude read ${fmt(p.flatRate)} per visit with a ${p.maxUnits || 4} unit cap. Confirm it replaces per-unit rates.`, anchor: { needle: p.source, nth: 0 } });
+    if (p.method === "per_visit") reviews.push({ id: "v" + p.plan, label: `${p.plan}: flat visit rate`, detail: `Athelas AI read ${fmt(p.flatRate)} per visit with a ${p.maxUnits || 4} unit cap. Confirm it replaces per-unit rates.`, anchor: { needle: p.source, nth: 0 } });
     else if (has && p.source && !has(p.source)) reviews.push({ id: "s" + p.plan, label: `${p.plan}: source passage not found`, detail: "The quoted source could not be located in the document. Verify the rate by hand.", anchor: null });
   });
   return { checks, reviews };
@@ -653,13 +679,32 @@ function qaFor(contract, has) {
 
 const STEP_NAMES = ["Upload", "Review and publish"];
 const GEN_STEPS = ["Opening the PDF", "Reading the text on every page", "Finding the rate and term pages", "Reading the contract header", "Reading rate pages", "Reading terms and notice periods"];
+const isRuleable = (t) => !!(t.when && t.then) && ["Rate", "License", "State", "Authorization"].includes(t.category) && (t.category !== "Rate" || !!t.ruleKey);
+const ruleIsOn = (c, t, ruleOn, created) => (t.ruleKey ? !!ruleOn[c.id + ":" + t.ruleKey] : !!created[t.id]);
+const ruleIds = (c) => c.terms.filter(isRuleable).map((t) => t.id);
+function ruleEffect(c, t) {
+  const mine = CLAIMS.filter((x) => x.contractId === c.id);
+  if (t.ruleKey === "escalator") { const plans = new Set(c.rows.filter((r) => r.escalates).map((r) => r.plan)); const n = mine.filter((x) => plans.has(x.plan) && c.escalatorStart && x.dos >= c.escalatorStart).length; return `Changes expected allowed on ${n} claims with service dates from ${fmtDate(c.escalatorStart)}. Without it, those payments look correct when they are not.`; }
+  if (t.ruleKey === "pta") { const n = mine.filter((x) => x.lines.some((l) => l.cq)).length; return `Changes expected allowed on ${n} claims with a PTA. Without it, valid ${c.ptaPct}% payments would look underpaid.`; }
+  if (t.category === "State") return `Applies in claim edits to ${mine.filter((x) => x.state === "MA").length} Massachusetts claims.`;
+  if (t.category === "Authorization") return "Applies in scheduling and authorization for Select HMO visits.";
+  return "";
+}
+const sentence = (s) => { const x = String(s || "").trim().replace(/\.$/, ""); return x ? x.charAt(0).toUpperCase() + x.slice(1) : x; };
+function ruleTitle(c, t) {
+  if (t.ruleKey === "escalator") return `Apply the ${c.escalatorPct}% annual escalator`;
+  if (t.ruleKey === "pta") return `Pay PTA services at ${c.ptaPct}% of the rate`;
+  if (t.category === "State") return "Check the state requirement on each claim line";
+  if (t.category === "Authorization") return "Require authorization at the visit limit";
+  const s = sentence(t.summary); return s.length > 72 ? s.slice(0, 69).trim() + "..." : s;
+}
 const SAMPLES = [
   { name: "Cascadia_Participation_Agreement_2025.pdf", size: 4509, b64: SAMPLE_PDF_B64, main: true },
   { name: "Northwind_Provider_Agreement_2025.pdf", size: 3413, b64: SAMPLE_PDF_NW },
   { name: "Harbor_Medicaid_Addendum_2026.pdf", size: 3301, b64: SAMPLE_PDF_HB },
 ];
 let itemSeq = 0;
-const mkItem = (f) => ({ id: "f" + ++itemSeq + "-" + Date.now(), name: f.name, size: f.size || 0, bytes: f.bytes || null, text: f.text != null ? f.text : null, sample: !!f.sample, status: "queued", steps: [], stage: 0, viewer: null, result: null, error: null, accepted: {}, more: false });
+const mkItem = (f) => ({ id: "f" + ++itemSeq + "-" + Date.now(), name: f.name, size: f.size || 0, bytes: f.bytes || null, text: f.text != null ? f.text : null, sample: !!f.sample, status: "queued", steps: [], stage: 0, viewer: null, result: null, error: null, accepted: {}, rules: {}, more: false });
 
 function Disclosure({ title, count, open, onToggle, children }) {
   return (
@@ -744,7 +789,7 @@ function AddContractFlow({ mode = "pdf", onCancel, onPublish, setAiHook }) {
     patch(id, { steps: STAGES, stage: 0 });
     const timer = setInterval(() => patch(id, (x) => ({ stage: Math.min(x.stage + 1, STAGES.length - 1) })), 700);
     const doc = { type: "text", text: "CONTRACT DOCUMENT:\n" + text };
-    const ask = async (p) => { try { return { ok: true, data: parseJSON(await callClaude(SYS_PARSE, [doc, { type: "text", text: p }])) }; } catch (e) { return { ok: false }; } };
+    const ask = async (p) => { try { return { ok: true, data: parseJSON(await callAI(SYS_PARSE, [doc, { type: "text", text: p }])) }; } catch (e) { return { ok: false }; } };
     const [a, b] = await Promise.all([ask(PROMPT_A), ask(PROMPT_B)]);
     const okA = a.ok && validA(a.data), okB = b.ok && validB(b.data);
     const rawA = okA ? normA(a.data) : CASCADIA_RAW;
@@ -758,7 +803,7 @@ function AddContractFlow({ mode = "pdf", onCancel, onPublish, setAiHook }) {
     let done = 0;
     await pool(pages.map((n) => async () => {
       let j = null;
-      try { j = parseLoose(await callClaude(SYS_GEN, [{ type: "text", text: "PAGE " + n + " OF THE CONTRACT:\n" + g.pageTexts[n - 1].slice(0, 9000) }, { type: "text", text: P_RATES }])); } catch (e) { j = null; }
+      try { j = parseLoose(await callAI(SYS_GEN, [{ type: "text", text: "PAGE " + n + " OF THE CONTRACT:\n" + g.pageTexts[n - 1].slice(0, 9000) }, { type: "text", text: P_RATES }])); } catch (e) { j = null; }
       if (j && Array.isArray(j.rows)) {
         j.rows.forEach((a) => {
           const r = rowFrom(a, j.sched, n); if (!r) return;
@@ -781,7 +826,7 @@ function AddContractFlow({ mode = "pdf", onCancel, onPublish, setAiHook }) {
     const g = { header: null, rows: [], terms: [], seen: new Set(), pageTexts, meta: { pageCount: pageTexts.length, rateCands: rank.rate, readRate: [], failedRate: [], stateAddenda, termPages } };
     gens.current[id] = g;
     patch(id, { stage: 3 });
-    try { g.header = parseLoose(await callClaude(SYS_GEN, [{ type: "text", text: "OPENING PAGES OF THE CONTRACT:\n" + pageTexts.slice(0, 3).join("\n\n").slice(0, 9000) }, { type: "text", text: P_HEADER }])); } catch (e) { g.header = null; }
+    try { g.header = parseLoose(await callAI(SYS_GEN, [{ type: "text", text: "OPENING PAGES OF THE CONTRACT:\n" + pageTexts.slice(0, 3).join("\n\n").slice(0, 9000) }, { type: "text", text: P_HEADER }])); } catch (e) { g.header = null; }
     const first = rank.rate.slice(0, 8);
     patch(id, (x) => ({ stage: 4, steps: x.steps.map((v, k) => (k === 4 ? `Reading rate pages (0 of ${first.length})` : v)) }));
     await readRatePages(g, first, (d, t) => patch(id, (x) => ({ steps: x.steps.map((v, k) => (k === 4 ? `Reading rate pages (${d} of ${t})` : v)) })));
@@ -789,7 +834,7 @@ function AddContractFlow({ mode = "pdf", onCancel, onPublish, setAiHook }) {
     const chunks = []; for (let i = 0; i < termPages.length; i += 2) chunks.push(termPages.slice(i, i + 2));
     await pool(chunks.map((ps) => async () => {
       try {
-        const j = parseLoose(await callClaude(SYS_GEN, [{ type: "text", text: ps.map((n) => "PAGE " + n + ":\n" + pageTexts[n - 1].slice(0, 7000)).join("\n\n") }, { type: "text", text: P_TERMS }]));
+        const j = parseLoose(await callAI(SYS_GEN, [{ type: "text", text: ps.map((n) => "PAGE " + n + ":\n" + pageTexts[n - 1].slice(0, 7000)).join("\n\n") }, { type: "text", text: P_TERMS }]));
         (j && j.terms ? j.terms : []).forEach((a) => {
           if (!Array.isArray(a) || !a[2]) return;
           const nsrc = normStr(a[3]); const pg = ps.find((n) => normStr(pageTexts[n - 1]).includes(nsrc)) || ps[0];
@@ -891,7 +936,7 @@ function AddContractFlow({ mode = "pdf", onCancel, onPublish, setAiHook }) {
 
   useEffect(() => {
     if (!contract) {
-      setAiHook({ context: "The user is adding one or more contracts in Air. They can upload several PDFs at once. Claude reads each one: payer, provider, rates (case rates, per diems, flat rates per code, percent of a fee schedule, percent of billed charges), and terms such as timely filing, dispute windows, termination, escalators, license and state rules. For each contract the user reviews QA checks and accepts suggested actions next to the document, then publishes the contracts to the repository together.", prompts: [{ q: "What can I upload here?" }, { q: "What happens after I upload?" }] });
+      setAiHook({ context: "The user is adding one or more contracts in Air. They can upload several PDFs at once. Athelas AI reads each one: payer, provider, rates (case rates, per diems, flat rates per code, percent of a fee schedule, percent of billed charges), and terms such as timely filing, dispute windows, termination, escalators, license and state rules. For each contract the user reviews QA checks and accepts suggested actions next to the document, chooses which proposed rules to create as drafts on the Rules page, then publishes the contracts to the repository together.", prompts: [{ q: "What can I upload here?" }, { q: "What happens after I upload?" }] });
       return;
     }
     if (isGen) {
@@ -918,10 +963,16 @@ function AddContractFlow({ mode = "pdf", onCancel, onPublish, setAiHook }) {
   const doneItems = items.filter((i) => i.status === "done");
   const included = doneItems.filter((i) => !excluded[i.id]);
   const blocking = included.filter((i) => pendingOf(i) > 0);
+  const rulesOf = (it) => (it.result ? it.result.contract.terms.filter(isRuleable) : []);
+  const rulesOpen = included.reduce((s, i) => s + rulesOf(i).filter((x) => !i.rules[x.id]).length, 0);
+  const approveAllEverywhere = () => setItems((p) => p.map((i) => (included.includes(i) ? { ...i, rules: { ...i.rules, ...Object.fromEntries(rulesOf(i).map((x) => [x.id, true])) } } : i)));
+  const ruleList = contract ? contract.terms.filter(isRuleable) : [];
+  const approvedN = cur ? ruleList.filter((x) => cur.rules[x.id]).length : 0;
   const canContinue = settled && doneItems.length > 0;
   const canPublish = included.length > 0 && blocking.length === 0;
   const idle = items.length === 0;
   const label = (it) => (it.result ? it.result.contract.number : it.name);
+  const sub = (it) => (it.status === "error" ? "Could not be read" : it.status === "queued" ? "Waiting to start" : it.status === "reading" ? "Reading the contract" : it.result.contract.masterPayer + " | " + it.name);
   const statusIcon = (it) => {
     if (it.status === "queued" || it.status === "reading") return <Loader2 size={16} className="spin" />;
     if (it.status === "error") return <AlertTriangle size={16} className="neg" />;
@@ -948,7 +999,7 @@ function AddContractFlow({ mode = "pdf", onCancel, onPublish, setAiHook }) {
         <span className="vdiv" />
         <button className="cancel" onClick={onCancel}>Cancel</button>
         {!idle && step === 1 && <button className="btn primary" disabled={!canContinue} onClick={() => setStep(2)}>Continue</button>}
-        {!idle && step === 2 && <button className="btn primary" disabled={!canPublish} title={canPublish ? "" : "Accept the suggested actions for every contract you are publishing"} onClick={() => onPublish(included.map((i) => i.result.contract))}>Publish {included.length} contract{included.length === 1 ? "" : "s"}</button>}
+        {!idle && step === 2 && <button className="btn primary" disabled={!canPublish} title={canPublish ? "" : "Accept the suggested actions for every contract you are publishing"} onClick={() => onPublish(included.map((i) => ({ contract: i.result.contract, approved: Object.keys(i.rules).filter((k) => i.rules[k]) })))}>Publish {included.length} contract{included.length === 1 ? "" : "s"}</button>}
       </div>
     </div>
   );
@@ -959,7 +1010,7 @@ function AddContractFlow({ mode = "pdf", onCancel, onPublish, setAiHook }) {
       <div className="emptyfull" onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); addFiles(e.dataTransfer.files); }}>
         <div className="emptyicon"><FileText size={28} /></div>
         <div className="h2">{mode === "csv" ? "Import a fee schedule CSV" : "Add contracts to the repository"}</div>
-        <p className="muted emptycopy">{mode === "csv" ? "Claude maps the columns in your CSV to rate rows. You review everything next to the source before it is published." : "Drop one or several payer contract PDFs. You see the pages as you scan them, Claude pulls out each payer, the rates and the terms, and you review every contract next to its document before publishing them together."}</p>
+        <p className="muted emptycopy">{mode === "csv" ? "Athelas AI maps the columns in your CSV to rate rows. You review everything next to the source before it is published." : "Drop one or several payer contract PDFs. You see the pages as you scan them, Athelas AI pulls out each payer, the rates and the terms, and you review every contract next to its document before publishing them together."}</p>
         <div className="dropbox">
           <Upload size={22} />
           <div className="b">{mode === "csv" ? "Drop a CSV file here" : "Drop contract PDFs here"}</div>
@@ -981,10 +1032,11 @@ function AddContractFlow({ mode = "pdf", onCancel, onPublish, setAiHook }) {
           <div className="aibanner">
             <Sparkles size={16} />
             <div className="grow"><div className="b">{canPublish ? `${included.length} contract${included.length === 1 ? " is" : "s are"} ready to publish` : blocking.length ? `${blocking.length} contract${blocking.length === 1 ? " needs" : "s need"} a decision before you publish` : "Select the contracts you want to publish"}</div>
-              <div className="muted small">Publishing adds each contract to the repository with its rates and terms. Select a row to go back and review that contract.</div></div>
+              <div className="muted small">Publishing adds each contract to the repository with its rates and terms. Select a row to go back and review that contract.{rulesOpen > 0 ? ` ${rulesOpen} proposed rule${rulesOpen === 1 ? " is" : "s are"} not being created, so ${rulesOpen === 1 ? "it" : "they"} will not affect expected allowed.` : ""}</div></div>
+            {rulesOpen > 0 && <button className="btn primary approve-all" onClick={approveAllEverywhere}>Create all</button>}
           </div>
           <div className="tblwrap"><table className="tbl">
-            <thead><tr><th style={{ width: 36 }}></th><th>Contract</th><th>Payer</th><th>File</th><th className="r">Pages</th><th className="r">Rates</th><th className="r">Terms</th><th>Status</th></tr></thead>
+            <thead><tr><th style={{ width: 36 }}></th><th>Contract</th><th>Payer</th><th>File</th><th className="r">Pages</th><th className="r">Rates</th><th className="r">Terms</th><th>Rules</th><th>Status</th></tr></thead>
             <tbody>{items.map((it) => {
               const c = it.result ? it.result.contract : null; const pn = pendingOf(it);
               return (
@@ -992,6 +1044,7 @@ function AddContractFlow({ mode = "pdf", onCancel, onPublish, setAiHook }) {
                   <td onClick={(e) => e.stopPropagation()}><input type="checkbox" aria-label={"Include " + it.name} disabled={it.status !== "done"} checked={it.status === "done" && !excluded[it.id]} onChange={(e) => setExcluded({ ...excluded, [it.id]: !e.target.checked })} /></td>
                   <td className="b">{c ? c.number : "n/a"}</td><td>{c ? c.masterPayer : ""}</td><td><Cut w={230}>{it.name}</Cut></td>
                   <td className="r">{it.viewer && it.viewer.kind === "pdf" ? it.viewer.index.pages.length : "n/a"}</td><td className="r">{c ? c.rows.length : "n/a"}</td><td className="r">{c ? c.terms.length : "n/a"}</td>
+                  <td>{it.status !== "done" ? "" : rulesOf(it).length ? (rulesOf(it).every((x) => it.rules[x.id]) ? <Chip tone="grey">{rulesOf(it).length} as drafts</Chip> : <Chip tone="grey">{rulesOf(it).filter((x) => it.rules[x.id]).length} of {rulesOf(it).length} as drafts</Chip>) : <span className="muted">None</span>}</td>
                   <td>{it.status === "error" ? <Chip tone="rust">Could not be read</Chip> : pn > 0 ? <Chip tone="amber">{pn} to review</Chip> : <Chip tone="moss">Ready</Chip>}</td>
                 </tr>
               );
@@ -1003,12 +1056,14 @@ function AddContractFlow({ mode = "pdf", onCancel, onPublish, setAiHook }) {
             <div className="clist-h">Contracts <span className="cnt">{items.length}</span></div>
             {items.map((it) => (
               <div key={it.id} className={"citem" + (sel === it.id ? " on" : "")}>
-                <button className="citem-b" title={it.name} onClick={() => setSel(it.id)}>{statusIcon(it)}<span className="ellip">{label(it)}</span></button>
+                <button className="citem-b" title={it.name} onClick={() => setSel(it.id)}>{statusIcon(it)}<span className="ct"><span className="c1 ellip">{label(it)}</span><span className="c2">{sub(it)}</span></span></button>
                 <button className="citem-x" aria-label={"Remove " + it.name} onClick={() => removeItem(it.id)}><X size={14} /></button>
               </div>
             ))}
-            <input ref={moreRef} type="file" multiple accept=".pdf,.csv,.txt" hidden onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
-            <button className="btn clist-add" onClick={() => moreRef.current.click()}><Plus size={14} />Add contracts</button>
+            <div className="clist-foot">
+              <input ref={moreRef} type="file" multiple accept=".pdf,.csv,.txt" hidden onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
+              <button className="clist-add" onClick={() => moreRef.current.click()}><Plus size={16} />Add contracts</button>
+            </div>
           </div>
 
           <div className="cmid">
@@ -1020,7 +1075,7 @@ function AddContractFlow({ mode = "pdf", onCancel, onPublish, setAiHook }) {
               <>
                 <div className="chead">{cur.name}</div>
                 <div className="card stages">
-                  <div className="h3">{cur.status === "queued" ? "Waiting to start" : "Claude is reading the contract"}</div>
+                  <div className="h3">{cur.status === "queued" ? "Waiting to start" : "Athelas AI is reading the contract"}</div>
                   {cur.steps.map((s, i) => (
                     <div key={i} className={"stage" + (i < cur.stage ? " done" : i === cur.stage ? " cur" : "")}>
                       {i < cur.stage ? <CheckCircle2 size={16} /> : i === cur.stage ? <Loader2 size={16} className="spin" /> : <span className="dot" />}{s}
@@ -1039,7 +1094,7 @@ function AddContractFlow({ mode = "pdf", onCancel, onPublish, setAiHook }) {
                     <div>
                       {isGen
                         ? `Athelas AI found ${contract.rows.length} rates and ${contract.terms.length} terms, reading ${contract.meta.readRate.length} of ${contract.meta.rateCands.length} rate pages. `
-                        : `Athelas AI found ${contract.plans.length} plans, ${contract.rows.length} rate rows and ${contract.terms.length} terms. ${cur.result.liveA && cur.result.liveB ? `Read live by Claude in ${(cur.result.ms / 1000).toFixed(1)}s.` : "Live read unavailable, showing the cached extraction."} `}
+                        : `Athelas AI found ${contract.plans.length} plans, ${contract.rows.length} rate rows and ${contract.terms.length} terms. ${cur.result.liveA && cur.result.liveB ? `Read live by Athelas AI in ${(cur.result.ms / 1000).toFixed(1)}s.` : "Live read unavailable, showing the cached extraction."} `}
                       Select anything below to see where it comes from in the document.
                     </div>
                     <div className="row gap">
@@ -1075,6 +1130,37 @@ function AddContractFlow({ mode = "pdf", onCancel, onPublish, setAiHook }) {
                     {isGen && <div className="note"><Info size={14} /><span>Claims in this demo are synthetic and tied to the Cascadia sample, so rates from this contract appear in the repository but are not applied to those claims.</span></div>}
                   </div>
                 </div>
+
+                {ruleList.length > 0 && (
+                  <div className="rules-card" aria-label="Rules to create">
+                    <div className="rc-h">
+                      <div><div className="b15">Rules to create</div><div className="muted small">{approvedN} of {ruleList.length} created. Created rules go to your Rules page as drafts when you publish, and you activate and edit them there.</div></div>
+                      {approvedN === ruleList.length ? <span className="tagc draft"><Check size={12} />Added as drafts</span> : <button className="btn primary approve-all" onClick={() => patch(cur.id, (x) => ({ rules: { ...x.rules, ...Object.fromEntries(ruleList.map((r) => [r.id, true])) } }))}>Create all</button>}
+                    </div>
+                    {ruleList.map((r, i) => {
+                      const on = !!cur.rules[r.id];
+                      const eff = ruleEffect(contract, r);
+                      return (
+                        <div key={r.id} className={"rule-row" + (on ? " on" : "") + (focus && focus.termId === r.id ? " focus" : "")}>
+                          <div className="rr-h">
+                            <div className="rr-t"><b>Rule {i + 1}:</b> {ruleTitle(contract, r)}</div>
+                            {on
+                              ? <div className="rr-s"><span className="tagc draft"><Check size={12} />Added as draft</span><button className="link" onClick={() => patch(cur.id, (x) => ({ rules: { ...x.rules, [r.id]: false } }))}>Undo</button></div>
+                              : <button className="btn tert" aria-label={"Create draft rule: " + r.summary} onClick={() => patch(cur.id, (x) => ({ rules: { ...x.rules, [r.id]: true } }))}>Create</button>}
+                          </div>
+                          <div className="rr-k">If</div>
+                          <div className="rr-c"><span className="rr-line" />
+                            <div className="rr-item"><span className="rr-ic cond"><ListFilter size={16} /></span><span className="rr-tx">{sentence(r.when)}</span>
+                              <button className="srcchip" aria-label={"Show the clause for rule " + (i + 1)} onClick={() => point(r.source, 0, { termId: r.id, page: r.page })}><FileText size={14} />{r.section ? "Section " + r.section : "Page " + r.page}</button></div>
+                          </div>
+                          <div className="rr-k">Then</div>
+                          <div className="rr-item"><span className="rr-ic act"><ArrowRight size={16} /></span><span className="rr-tx">{sentence(r.then)}</span></div>
+                          {eff && <div className="rr-eff muted small"><Info size={14} /><span>{eff}</span></div>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
 
                 <Disclosure title="Rates" count={`${contract.rows.length} found`} open={open.rates} onToggle={() => setOpen({ ...open, rates: !open.rates })}>
                   <RatesTable rows={ratesShown} contractMap={cmap} ruleOn={ruleOnPreview} compact activeId={focus && focus.rowId} onRow={(r) => { const a = rowAnchor(r); point(a.needle, a.nth, { toEol: a.toEol, rowId: r.id, page: a.page }); }} />
@@ -1167,12 +1253,13 @@ function CalcHover({ r, c, on }) {
           {calc.steps.map((s, i) => (
             <span key={i} className={"cp-row" + (s.rule && !s.active ? " off" : "")}>
               <span className="cp-l"><span className="b">{s.label}</span><span className="muted">{s.note}</span></span>
-              {s.rule && <Chip tone={s.active ? "moss" : "grey"}>{s.active ? "Rule on" : "Rule off"}</Chip>}
+              {s.rule && <Chip tone={s.active && !s.draft ? "moss" : "grey"}>{s.active ? (s.draft ? "Draft rule" : "Rule on") : "Rule off"}</Chip>}
               <span className="cp-v">{fmt(s.value)}</span>
             </span>
           ))}
           <span className="cp-t"><span>Expected allowed</span><span>{fmt(calc.amount)}</span></span>
           {note && <span className="cp-n">{note}</span>}
+          {calc.steps.some((s) => s.draft) && <span className="cp-n">Draft rules are included in this estimate until you activate or remove them in Rules.</span>}
           <span className="cp-n">Select the row to try other service dates or a PTA.</span>
         </span>
       )}
@@ -1575,7 +1662,6 @@ function ContractsPage({ contracts, ruleOn, setRuleOn, createdTerms, setCreatedT
   const [draft, setDraft] = useState(null);
   const [showHist, setShowHist] = useState(false);
   const [pv, setPv] = useState("root");
-  const [termsFor, setTermsFor] = useState(null);
   const close = () => setPop(null);
   const sRef = usePop(pop === "settings", close);
 
@@ -1624,7 +1710,6 @@ function ContractsPage({ contracts, ruleOn, setRuleOn, createdTerms, setCreatedT
     ["method", "Method", [...new Set(allRows.map((r) => r.method))].map((v) => [v, METHOD[v]])],
   ];
   const drow = drawerRow ? allRows.find((r) => r.id === drawerRow) : null;
-  const tcon = termsFor ? cmap[termsFor] : null;
   const nSel = rows.filter((r) => selected[r.id]).length;
   const allOn = rows.length > 0 && nSel === rows.length;
   const toggleAll = () => setSelected(allOn ? {} : Object.fromEntries(rows.map((r) => [r.id, true])));
@@ -1697,17 +1782,17 @@ function ContractsPage({ contracts, ruleOn, setRuleOn, createdTerms, setCreatedT
                       <button className="gcol" aria-label={collapsed[g.key] ? "Expand group" : "Collapse group"} aria-expanded={!collapsed[g.key]} onClick={() => setCollapsed({ ...collapsed, [g.key]: !collapsed[g.key] })}>{collapsed[g.key] ? <ChevronDown size={18} /> : <ChevronUp size={18} />}</button>
                       <span className="gname">{g.name}</span>
                       <span className="ginfo">{g.contract ? `${g.contract.masterPayer}, ${g.contract.effectiveStart ? (g.contract.effectiveEnd ? fmtDate(g.contract.effectiveStart) + " to " + fmtDate(g.contract.effectiveEnd) : "from " + fmtDate(g.contract.effectiveStart)) : "dates not stated"}, ${g.rows.length} rates` : `${g.rows.length} rates`}</span>
-                      {g.contract && (
+                                            {g.contract && (
                         <span className="gact">
                           <button className="gbtn" aria-label={"Open " + g.contract.file} title={g.contract.file} onClick={() => openDoc(g.contract.id, null)}><FileText size={14} /></button>
-                          <button className="gbtn" aria-label={"Terms for " + g.name} title="Contract terms" onClick={() => { setDrawerRow(null); setTermsFor(g.contract.id); }}><ListChecks size={14} /></button>
+                          
                         </span>
                       )}
                     </div>
                   </td></tr>
                 )}
                 {!collapsed[g.key] && g.rows.map((r) => (
-                  <tr key={r.id} className={"drow clickrow" + (drawerRow === r.id ? " active" : "")} onClick={() => { setTermsFor(null); setDrawerRow(r.id); }} tabIndex={0} onKeyDown={(e) => e.key === "Enter" && setDrawerRow(r.id)}>
+                  <tr key={r.id} className={"drow clickrow" + (drawerRow === r.id ? " active" : "")} onClick={() => setDrawerRow(r.id)} tabIndex={0} onKeyDown={(e) => e.key === "Enter" && setDrawerRow(r.id)}>
                     <td className="sel" onClick={(e) => e.stopPropagation()}><input type="checkbox" aria-label={"Select " + r.svc} checked={!!selected[r.id]} onChange={(e) => setSelected({ ...selected, [r.id]: e.target.checked })} /></td>
                     {vcols.map(([k]) => <td key={k} className={RIGHT[k] ? "r" : ""}>{CELLS[k](r, cmap[r.contractId], ruleOn)}</td>)}
                   </tr>
@@ -1720,7 +1805,6 @@ function ContractsPage({ contracts, ruleOn, setRuleOn, createdTerms, setCreatedT
       </div>
 
       {drow && <ExpectedDrawer row={drow} contract={cmap[drow.contractId]} ruleOn={ruleOn} setRuleOn={setRuleOn} onClose={() => setDrawerRow(null)} openDoc={openDoc} claims={claims} />}
-      {tcon && <TermsDrawer contract={tcon} ruleOn={ruleOn} createdTerms={createdTerms} onClose={() => setTermsFor(null)} openDoc={openDoc} />}
     </div>
   );
 }
@@ -1869,27 +1953,6 @@ function DocumentsPage({ contracts, openDoc, onUpload }) {
   );
 }
 
-function TermsDrawer({ contract, ruleOn, createdTerms, onClose, openDoc }) {
-  return (
-    <div className="drawer" role="dialog" aria-label="Contract terms">
-      <div className="drawer-head"><div><div className="crumb">Contract terms</div><div className="h2">{contract.number}</div><div className="muted">{contract.masterPayer}</div></div><button className="icon" onClick={onClose} aria-label="Close"><X size={18} /></button></div>
-      <div className="drawer-body">
-        {contract.terms.map((t) => {
-          const active = t.ruleKey ? !!ruleOn[contract.id + ":" + t.ruleKey] : !!createdTerms[t.id];
-          return (
-            <div key={t.id} className="term">
-              <div className="term-top"><Chip tone="grey">{t.category}</Chip><span className="b">{t.section ? "Section " + t.section : t.category}</span><span className="grow" />{(t.ruleKey || t.when) ? (active ? <Chip tone="moss"><Check size={12} />Rule on</Chip> : <Chip tone="grey">Rule off</Chip>) : (t.page ? <span className="muted">Page {t.page}</span> : null)}</div>
-              <div>{t.summary}</div>
-              {t.when && <div className="muted small mt4">When: {t.when}. Then: {t.then}.</div>}
-              {t.source && (contract.id === "cascadia" || contract.bytes) && <button className="link" onClick={() => openDoc(contract.id, t.source, t.page)}>View in contract</button>}
-            </div>
-          );
-        })}
-        <div className="note"><Info size={14} /><span>Rules are managed in the table settings, behind the gear icon above the contracts table.</span></div>
-      </div>
-    </div>
-  );
-}
 
 function ExpectedDrawer({ row, contract, ruleOn, setRuleOn, onClose, openDoc, claims }) {
   const [year, setYear] = useState("2026-08-14");
@@ -1912,7 +1975,7 @@ function ExpectedDrawer({ row, contract, ruleOn, setRuleOn, onClose, openDoc, cl
           {r.steps.map((s, i) => (
             <div key={i} className={"node" + (s.rule ? " rule" : "") + (s.rule && !s.active ? " off" : "")}>
               <div className="node-main"><div className="b">{s.label}</div><div className="muted">{s.note}</div></div>
-              {s.rule && <Chip tone={s.active ? "moss" : "grey"}>{s.active ? "Rule on" : "Rule off"}</Chip>}
+              {s.rule && <Chip tone={s.active && !s.draft ? "moss" : "grey"}>{s.active ? (s.draft ? "Draft rule" : "Rule on") : "Rule off"}</Chip>}
               <div className="node-v">{fmt(s.value)}</div>
             </div>
           ))}
@@ -1961,64 +2024,248 @@ const statusChip = (d) => {
   return <Chip tone="grey">Paid as expected</Chip>;
 };
 
-function ClaimsPage({ claims, view, setView, sel, setSel, openClaim, setOpenClaim, startAppeal, loaded, goLoad }) {
-  const underpaid = claims.filter((c) => c.status === "underpaid");
-  const appealed = claims.filter((c) => c.appeal);
-  const noContract = claims.filter((c) => c.status === "no_contract");
-  let list = view === "all" ? [...claims].sort((a, b) => (a.dos < b.dos ? 1 : -1)) : view === "appealed" ? appealed : [...underpaid].sort((a, b) => b.recover - a.recover || b.variance - a.variance);
-  const shown = list.slice(0, 60);
-  const closing = underpaid.filter((c) => !c.appeal && c.daysLeft >= 0 && c.daysLeft <= 30);
-  const eligible = underpaid.filter((c) => !c.appeal && c.daysLeft >= 0);
+/* ============================================================
+   Claims: same structure as the current Claims page, with Underpayments as a custom view
+   ============================================================ */
+const CL_COLS = [["id", "Claim ID", 112], ["status", "Status", 168], ["tis", "Time in Status", 118], ["stage", "Stage", 118], ["patient", "Patient", 150], ["provider", "Provider", 150], ["dos", "Date of Service", 138], ["ins", "Insurances", 218],
+  ["expected", "Expected", 92], ["paid", "Paid (835)", 92], ["variance", "Variance", 92], ["recover", "Recoverability", 168], ["by", "Appeal by", 92], ["asg", "Assignee", 84]];
+const CL_DEFAULT = ["id", "status", "tis", "stage", "patient", "provider", "dos", "ins", "asg"];
+const CL_UNDER = ["id", "status", "patient", "provider", "dos", "ins", "expected", "paid", "variance", "recover", "by", "asg"];
+const CL_SORT = { dos: "Date of Service", recover: "Recoverability", variance: "Variance", tis: "Time in Status", id: "Claim ID" };
+const CL_METHOD = { "Cascadia Mutual Health": "WAYSTAR", "Summit Care Alliance": "FAX", "Keystone Health Partners": "PORTAL" };
+function claimStatus(d) {
+  if (d.appeal) {
+    if (d.appeal.status === "Won") return { key: "recovered", label: "Recovered", Icon: CheckCircle2, workable: false };
+    if (d.appeal.status === "Denied") return { key: "denied", label: "Appeal Denied", Icon: Ban, workable: true };
+    return { key: "pending", label: "Appeal Pending", Icon: ArrowLeftRight, workable: true };
+  }
+  if (d.status === "underpaid") return { key: "underpaid", label: "Underpaid", Icon: TrendingDown, workable: true };
+  return { key: "paid", label: "Paid", Icon: CheckCircle2, workable: false };
+}
+function nextStep(d, st) {
+  if (st.key === "underpaid") return d.daysLeft < 0 ? "Appeal window closed" : d.pattern === "escalator" ? "Appeal: contract escalator not applied" : d.pattern === "pta" ? "Appeal: PTA rate reduced" : "Review payer edit (CO-97)";
+  if (st.key === "paid" && d.status === "no_contract") return "Check this payment against a contract";
+  return { pending: "Waiting on payer response", recovered: "Post recovered payment", denied: "Review the denial", paid: "No action needed" }[st.key];
+}
+const StatusPill = ({ st }) => { const I = st.Icon; return <span className={"pill st-" + st.key}><I size={16} />{st.label}</span>; };
+const Ring = ({ n }) => (
+  <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="#d6d6d6" strokeWidth="2" /><circle cx="8" cy="8" r="6" fill="none" stroke="#2b5fd9" strokeWidth="2" strokeDasharray={`${(n / 4) * 37.7} 37.7`} transform="rotate(-90 8 8)" strokeLinecap="round" /></svg>
+);
+const CL_BUILTIN = ["all", "workable", "mine"];
+const CL_UNDER_COLS = ["expected", "paid", "variance", "recover", "by"];
+const colsToMap = (arr) => Object.fromEntries(CL_COLS.map(([k]) => [k, arr.includes(k)]));
+function ClaimsPage({ claims, view, setView, sel, setSel, setOpenClaim, startAppeal, loaded, goLoad, onAssign, toast, onAnalytics, customViews, onSaveView, onUpdateView, onDeleteView, preset, onPresetUsed }) {
+  const custom = customViews.find((v) => v.id === view) || null;
+  const kind = custom ? view : CL_BUILTIN.includes(view) ? view : "workable";
+  const cfgOf = (v) => { const c = customViews.find((x) => x.id === v); return c ? { filters: c.filters, grouping: c.grouping, cols: c.cols, sort: c.sort } : { filters: [], grouping: "status", cols: CL_DEFAULT, sort: { k: "dos", dir: -1 } }; };
+  const init = cfgOf(kind);
+  const [filters, setFilters] = useState(init.filters);
+  const [fOpen, setFOpen] = useState(false);
+  const [dOpen, setDOpen] = useState(false);
+  const [sOpen, setSOpen] = useState(false);
+  const [saveName, setSaveName] = useState("");
+  const [saveCols, setSaveCols] = useState(true);
+  const [grouping, setGrouping] = useState(init.grouping);
+  const [cols, setCols] = useState(() => colsToMap(init.cols));
+  const [collapsed, setCollapsed] = useState({});
+  const [limits, setLimits] = useState({});
+  const [sort, setSort] = useState(init.sort);
+  const fRef = usePop(fOpen, () => setFOpen(false)), dRef = usePop(dOpen, () => setDOpen(false)), sRef = usePop(sOpen, () => setSOpen(false));
+  useEffect(() => { if (preset) { setFilters(preset.filters); setCollapsed({}); onPresetUsed(); } }, [preset]);
+  const prev = useRef(kind);
+  useEffect(() => {
+    if (prev.current === kind) return;
+    prev.current = kind;
+    const c = cfgOf(kind); setFilters(c.filters); setGrouping(c.grouping); setCols(colsToMap(c.cols)); setSort(c.sort); setCollapsed({}); setSel([]);
+  }, [kind]);
+
+  const all = useMemo(() => claims.map((d) => { const st = claimStatus(d); return { d, st, ins: (d.plan.toLowerCase().includes(d.master.split(" ")[0].toLowerCase()) ? d.plan : d.master.split(" ")[0] + " " + d.plan).toUpperCase(), next: nextStep(d, st), method: CL_METHOD[d.master] || "PORTAL", stage: d.appeal ? (d.appeal.status === "Won" ? { label: "Closed", n: 4 } : { label: "Appeal", n: 2 }) : st.key === "paid" ? { label: "Closed", n: 4 } : { label: "Payer 1", n: 1 }, tis: daysBetween(d.appeal ? d.appeal.on : d.remitDate, TODAY) }; }), [claims]);
+  const inView = (x) => (kind === "workable" ? x.st.workable : kind === "mine" ? x.d.assignee === "LR" : true);
+  const base = all.filter(inView);
+  const kinds = [...new Set(filters.map((f) => f.k))];
+  const matchF = (k, v, x) => (k === "status" ? x.st.label === v : k === "payer" ? x.d.master === v : k === "facility" ? x.d.facility === v : k === "group" ? x.d.group === v : x.next === v);
+  const items = base.filter((x) => kinds.every((k) => filters.filter((f) => f.k === k).some((f) => matchF(k, f.v, x))));
+  const underMode = filters.some((f) => f.k === "status" && f.v === "Underpaid");
+  const fopts = [["status", "Status", [...new Set(all.map((x) => x.st.label))]], ["payer", "Payer", [...new Set(all.map((x) => x.d.master))]], ["group", "Payer group", [...new Set(all.map((x) => x.d.group))]], ["facility", "Facility", [...new Set(all.map((x) => x.d.facility))]], ["next", "Next step", [...new Set(all.map((x) => x.next))]]];
+  const sortVal = (x) => (sort.k === "dos" ? x.d.dos : sort.k === "recover" ? x.d.recover : sort.k === "variance" ? x.d.variance : sort.k === "tis" ? x.tis : x.d.id);
+  const sorted = [...items].sort((a, b) => (sortVal(a) < sortVal(b) ? -1 : sortVal(a) > sortVal(b) ? 1 : 0) * sort.dir);
+  const amountOf = (x) => (underMode ? x.d.variance : x.d.billed);
+  const groups = [];
+  if (grouping === "none") groups.push({ key: "all", head: null, items: sorted });
+  else sorted.forEach((x) => {
+    const key = grouping === "payer" ? x.d.master : [x.st.key, x.ins, x.next, x.method].join("|");
+    let g = groups.find((y) => y.key === key);
+    if (!g) { g = { key, head: x, items: [] }; groups.push(g); }
+    g.items.push(x);
+  });
+  groups.forEach((g) => { g.amount = r2(g.items.reduce((s, x) => s + amountOf(x), 0)); g.rec = g.items.reduce((s, x) => s + (x.d.recover || 0), 0); });
+  groups.sort((a, b) => (underMode ? b.rec - a.rec : 0) || b.amount - a.amount);
+  const vcols = CL_COLS.filter(([k]) => cols[k]);
+  const eligible = (x) => x.d.status === "underpaid" && !x.d.appeal && x.d.daysLeft >= 0;
+  const nSel = items.filter((x) => sel.includes(x.d.id)).length;
+  const allOn = items.length > 0 && nSel === items.length;
+  const toggleAll = () => setSel(allOn ? sel.filter((id) => !items.some((x) => x.d.id === id)) : [...new Set([...sel, ...items.map((x) => x.d.id)])]);
   const toggle = (id) => setSel(sel.includes(id) ? sel.filter((x) => x !== id) : [...sel, id]);
-  const selectable = shown.filter((c) => !c.appeal && c.daysLeft >= 0);
-  const allOn = selectable.length > 0 && selectable.every((c) => sel.includes(c.id));
-  const someOn = selectable.some((c) => sel.includes(c.id));
-  const toggleAll = () => setSel(allOn ? sel.filter((id) => !selectable.some((c) => c.id === id)) : [...new Set([...sel, ...selectable.map((c) => c.id)])]);
-  const high = eligible.filter((c) => c.level === "High");
+  const chosen = all.filter((x) => sel.includes(x.d.id));
+  const appealable = chosen.filter(eligible);
+  const high = items.filter((x) => eligible(x) && x.d.level === "High");
+  const noContract = all.filter((x) => x.d.status === "no_contract");
+  const baseCols = custom ? custom.cols : CL_DEFAULT;
+  const colKey = vcols.map(([k]) => k).join();
+  const changed = grouping !== (custom ? custom.grouping : "status") || colKey !== CL_COLS.filter(([k]) => baseCols.includes(k)).map(([k]) => k).join();
+  const dirty = !!custom && (JSON.stringify(filters) !== JSON.stringify(custom.filters) || changed || sort.k !== custom.sort.k || sort.dir !== custom.sort.dir);
+  const sortBy = (k) => { if (!CL_SORT[k]) return; setSort(sort.k === k ? { k, dir: -sort.dir } : { k, dir: -1 }); };
+  const exportCsv = () => { downloadCsv("claims.csv", vcols.map(([, l]) => l), sorted.map((x) => vcols.map(([k]) => (k === "id" ? x.d.id : k === "status" ? x.st.label : k === "tis" ? x.tis + "d" : k === "stage" ? x.stage.label : k === "patient" ? x.d.name : k === "provider" ? x.d.provider : k === "dos" ? mdy(x.d.dos) : k === "ins" ? x.ins : k === "expected" ? fmt(x.d.expected) : k === "paid" ? fmt(x.d.paid) : k === "variance" ? fmt(x.d.variance) : k === "recover" ? x.d.level || "" : k === "by" ? (x.d.status === "underpaid" ? x.d.daysLeft + " days" : "") : x.d.assignee || "")))); toast(`Exported ${sorted.length} claims to claims.csv`); };
+  const openSave = () => { setSaveName(underMode ? "Underpayments" : "New view"); setSaveCols(true); setSOpen(true); };
+  const doSave = () => {
+    const keys = vcols.map(([k]) => k);
+    const withUnder = underMode && saveCols;
+    const colArr = CL_COLS.map(([k]) => k).filter((k) => keys.includes(k) || (withUnder && CL_UNDER_COLS.includes(k)));
+    onSaveView({ name: saveName.trim() || "New view", filters, grouping, cols: colArr, sort: withUnder ? { k: "recover", dir: -1 } : sort });
+    setSOpen(false);
+  };
+  const cell = (k, x) => {
+    const d = x.d;
+    switch (k) {
+      case "id": return <span className="clid">{d.id}</span>;
+      case "status": return <StatusPill st={x.st} />;
+      case "tis": return x.tis + "d";
+      case "stage": return <span className="pill"><Ring n={x.stage.n} />{x.stage.label}</span>;
+      case "patient": return <button className="plink" onClick={(e) => { e.stopPropagation(); setOpenClaim(d.id); }}>{d.name}</button>;
+      case "provider": return d.provider;
+      case "dos": return mdy(d.dos);
+      case "ins": return <span className="pill">{d.status === "no_contract" ? <AlertTriangle size={14} className="warnc" aria-label="No contract on file" /> : <span className="insdot" />}{x.ins}</span>;
+      case "expected": return d.expected == null ? <span className="muted">n/a</span> : fmt(d.expected);
+      case "paid": return fmt(d.paid);
+      case "variance": return d.variance ? <span className="neg b">-{fmt(d.variance)}</span> : fmt(0);
+      case "recover": return d.status === "underpaid" ? <span><Chip tone={levelTone[d.level]}>{d.level}</Chip><span className="sub">{d.level === "Closed" ? "Window closed" : "Expect " + fmt(d.recover)}</span></span> : "";
+      case "by": return d.status === "underpaid" ? <span className={d.daysLeft < 0 ? "neg" : d.daysLeft <= 30 ? "warn" : ""}>{d.daysLeft < 0 ? "Closed" : d.daysLeft + " days"}</span> : "";
+      default: return (
+        <span onClick={(e) => e.stopPropagation()}>
+          {d.assignee ? <button className="asg on" aria-label={"Assigned to " + d.assignee + ", select to unassign"} onClick={() => onAssign([d.id], null)}>{d.assignee}</button> : <button className="asg" aria-label={"Assign " + d.id + " to me"} onClick={() => onAssign([d.id], "LR")}><UserPlus size={16} /></button>}
+        </span>
+      );
+    }
+  };
+  const tabs = [["all", "All Claims"], ["workable", "Workable Claims"], ["mine", "My Claims"]];
 
   return (
-    <div className="page">
-      <div className="pagehead"><div><div className="crumb">Revenue cycle</div><h1>Claims</h1></div></div>
-      {!loaded && noContract.length > 0 && (
-        <div className="banner amber"><AlertTriangle size={16} /><span><b>{noContract.length} Cascadia claims</b> have no contract on file, so expected allowed cannot be calculated and underpayments are invisible.</span><button className="btn" onClick={goLoad}>Load the contract</button></div>
-      )}
-      <div className="tabs page-tabs">
-        <button className={view === "all" ? "on" : ""} onClick={() => setView("all")}>All claims <span className="cnt">{claims.length}</span></button>
-        <button className={view === "underpaid" ? "on" : ""} onClick={() => setView("underpaid")}>Underpaid <Chip tone="grey">Custom view</Chip> <span className="cnt">{underpaid.length}</span></button>
-        <button className={view === "appealed" ? "on" : ""} onClick={() => setView("appealed")}>Appealed <span className="cnt">{appealed.length}</span></button>
-      </div>
-      {view === "underpaid" && (
-        <div className="summary">
-          <div><div className="kv">{fmt(underpaid.reduce((s, c) => s + c.variance, 0))}</div><div className="kl">underpaid across {underpaid.length} claims</div></div>
-          <div><div className="kv">{fmt(eligible.reduce((s, c) => s + c.recover, 0))}</div><div className="kl">expected recovery, open windows</div></div>
-          <div><div className="kv">{closing.length}</div><div className="kl">appeal windows close within 30 days ({fmt(closing.reduce((s, c) => s + c.variance, 0))})</div></div>
-          <div className="grow" />
-          <div className="row gap">
-            <button className="btn" disabled={!high.length} onClick={() => setSel(high.map((c) => c.id))}>Select high recoverability ({high.length})</button>
-            <button className="btn primary" disabled={!sel.length} onClick={() => startAppeal(sel)}><Send size={14} />Appeal {sel.length || ""} selected</button>
-          </div>
+    <div className="clpage">
+      <div className="cl-top">
+        <div className="cl-tabs" role="tablist">
+          {tabs.map(([k, l]) => <button key={k} role="tab" aria-selected={kind === k} className={"cl-tab" + (kind === k ? " on" : "")} onClick={() => setView(k)}>{l}{kind === k ? ` (${items.length.toLocaleString()})` : ""}</button>)}
+          {customViews.length > 0 && <span className="cl-div" />}
+          {customViews.map((v) => (
+            <span key={v.id} className={"cl-tab cv" + (kind === v.id ? " on" : "")}>
+              <button role="tab" aria-selected={kind === v.id} className="cv-b" onClick={() => setView(v.id)}>{v.name}{kind === v.id ? ` (${items.length.toLocaleString()})` : ""}</button>
+              {kind === v.id && <button className="cv-x" aria-label={"Delete view " + v.name} onClick={() => onDeleteView(v.id)}><X size={13} /></button>}
+            </span>
+          ))}
         </div>
+        <div className="cl-act">
+          <button className="tgl" aria-label="History" disabled title="History"><History size={18} /></button>
+          <button className="tgl" aria-label="Export claims" onClick={exportCsv}><Download size={18} /></button>
+          <button className="tgl" aria-label="Analytics" onClick={onAnalytics}><BarChart3 size={18} /></button>
+          <button className="tgl" aria-label="Help" onClick={() => toast("Not part of this demo")}><CircleHelp size={18} /></button>
+          <button className="btn primary" onClick={() => toast("Not part of this demo")}><Plus size={16} />Create Claim</button>
+        </div>
+      </div>
+      <div className="cl-filter">
+        <div className="popwrap" ref={fRef}>
+          <button className="pillbtn" aria-haspopup="menu" aria-expanded={fOpen} onClick={() => setFOpen(!fOpen)}><ListFilter size={16} />Filter</button>
+          {fOpen && (
+            <div className="menu fmenu" role="menu">
+              {fopts.map(([k, l, vals]) => (
+                <div key={k}><div className="menu-h">{l}</div>
+                  {vals.map((v) => <button key={v} role="menuitem" className="menu-i" onClick={() => { if (!filters.some((f) => f.k === k && f.v === v)) setFilters([...filters, { k, v }]); setFOpen(false); }}>{v}</button>)}</div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="row gap wrap">{filters.map((f) => <span key={f.k + f.v} className="fchip"><span className="fk">{fopts.find((o) => o[0] === f.k)[1]} is</span>{f.v}<button aria-label={"Remove filter " + f.v} onClick={() => setFilters(filters.filter((y) => y !== f))}><X size={12} /></button></span>)}</div>
+        {!custom && filters.length > 0 && (
+          <div className="popwrap" ref={sRef}>
+            <button className="pillbtn accent" aria-haspopup="dialog" aria-expanded={sOpen} onClick={() => (sOpen ? setSOpen(false) : openSave())}><Plus size={14} />Save as view</button>
+            {sOpen && (
+              <div className="pop savev" role="dialog" aria-label="Save as new view">
+                <div className="sv-h">Save as new view</div>
+                <label className="fld wide"><span>View name</span><input autoFocus value={saveName} onChange={(e) => setSaveName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && doSave()} /></label>
+                <div className="sv-f">{filters.map((f) => <span key={f.k + f.v} className="sv-chip">{fopts.find((o) => o[0] === f.k)[1]} is {f.v}</span>)}</div>
+                {underMode && <label className="sv-c"><input type="checkbox" checked={saveCols} onChange={(e) => setSaveCols(e.target.checked)} />Add Expected, Paid, Variance, Recoverability and Appeal by columns</label>}
+                <div className="sv-b"><button className="btn" onClick={() => setSOpen(false)}>Cancel</button><button className="btn primary" onClick={doSave}>Save view</button></div>
+              </div>
+            )}
+          </div>
+        )}
+        {custom && dirty && <button className="pillbtn accent" onClick={() => onUpdateView(custom.id, { filters, grouping, cols: CL_COLS.map(([k]) => k).filter((k) => cols[k]), sort })}>Save changes</button>}
+        <span className="grow" />
+        {underMode && (
+          <>
+            <span className="clsum"><b>{fmt(items.reduce((s, x) => s + x.d.variance, 0))}</b> underpaid, <b>{fmt(items.filter(eligible).reduce((s, x) => s + x.d.recover, 0))}</b> expected recovery, <b>{items.filter((x) => eligible(x) && x.d.daysLeft <= 30).length}</b> windows close within 30 days</span>
+            <button className="pillbtn" disabled={!high.length} onClick={() => setSel([...new Set([...sel, ...high.map((x) => x.d.id)])])}>Select high recoverability ({high.length})</button>
+          </>
+        )}
+        <div className="popwrap" ref={dRef}>
+          <button className="pillbtn" aria-haspopup="dialog" aria-expanded={dOpen} onClick={() => setDOpen(!dOpen)}><SlidersHorizontal size={16} />Display{changed && <span className="reddot" aria-label="Display changed" />}</button>
+          {dOpen && (
+            <div className="pop dsp" role="dialog" aria-label="Display options">
+              <div className="cfg-s"><div className="dprow"><span>Grouping</span><select className="fsel" aria-label="Grouping" value={grouping} onChange={(e) => { setGrouping(e.target.value); setCollapsed({}); }}><option value="status">Status and payer</option><option value="payer">Payer</option><option value="none">None</option></select></div></div>
+              <div className="cfg-b"><div className="k">Columns</div>{CL_COLS.map(([k, l]) => <label key={k} className="crowc"><input type="checkbox" checked={!!cols[k]} disabled={cols[k] && vcols.length === 1} onChange={(e) => setCols({ ...cols, [k]: e.target.checked })} />{l}</label>)}</div>
+              <div className="pfoot"><button className="link" onClick={() => { const c = cfgOf(kind); setGrouping(c.grouping); setCols(colsToMap(c.cols)); }}>Reset</button></div>
+            </div>
+          )}
+        </div>
+      </div>
+      {underMode && !loaded && noContract.length > 0 && (
+        <div className="banner amber clb"><AlertTriangle size={16} /><span><b>{noContract.length} claims</b> have no contract on file, so their underpayments cannot be detected.</span><button className="btn" onClick={goLoad}>Load the contract</button></div>
       )}
-      <div className="tblwrap tall">
-        <table className="tbl claims">
-          <thead><tr>{view === "underpaid" && <th><input type="checkbox" aria-label="Select all claims with an open appeal window" title="Select all claims that can still be appealed" ref={(el) => { if (el) el.indeterminate = someOn && !allOn; }} checked={allOn} disabled={!selectable.length} onChange={toggleAll} /></th>}<th>Claim</th><th>Service date</th><th>Facility</th><th>Payer and plan</th><th className="r">Billed</th><th className="r">Expected</th><th className="r">Paid (835)</th><th className="r">Variance</th><th>Recoverability</th><th>Appeal by</th><th>Status</th></tr></thead>
-          <tbody>
-            {shown.map((c) => (
-              <tr key={c.id} className="clickrow" onClick={() => setOpenClaim(c.id)} tabIndex={0} onKeyDown={(e) => e.key === "Enter" && setOpenClaim(c.id)}>
-                {view === "underpaid" && <td onClick={(e) => e.stopPropagation()}><input type="checkbox" aria-label={"Select " + c.id} disabled={!!c.appeal || c.daysLeft < 0} checked={sel.includes(c.id)} onChange={() => toggle(c.id)} /></td>}
-                <td className="b nowrap">{c.id}</td><td className="nowrap">{fmtDate(c.dos)}</td><td>{c.facility}, {c.state}</td><td>{c.master}<span className="sub">{c.plan}</span></td>
-                <td className="r">{fmt(c.billed)}</td><td className="r">{c.expected == null ? <span className="muted">n/a</span> : fmt(c.expected)}</td><td className="r">{fmt(c.paid)}</td>
-                <td className={"r b" + (c.variance ? " neg" : "")}>{c.variance ? "-" + fmt(c.variance) : c.status === "no_contract" ? "" : fmt(0)}</td>
-                <td>{c.status === "underpaid" ? <span><Chip tone={levelTone[c.level]}>{c.level}</Chip><span className="sub">{c.level === "Closed" ? "Window closed" : "Expect " + fmt(c.recover)}</span></span> : ""}</td>
-                <td className="nowrap">{c.status === "underpaid" ? <span className={c.daysLeft < 0 ? "neg" : c.daysLeft <= 30 ? "warn" : ""}>{c.daysLeft < 0 ? "Closed" : c.daysLeft + " days"}</span> : ""}</td>
-                <td>{statusChip(c)}</td>
-              </tr>
+      <div className="clwrap">
+        <table className="cltbl">
+          <thead><tr>
+            <th className="sel"><input type="checkbox" aria-label="Select all claims" ref={(el) => { if (el) el.indeterminate = nSel > 0 && !allOn; }} checked={allOn} disabled={!items.length} onChange={toggleAll} /></th>
+            {vcols.map(([k, l, w]) => (
+              <th key={k} className={(k === "asg" ? "asg-h " : "") + (CL_SORT[k] ? "sortable" : "")} style={{ minWidth: w }} onClick={() => sortBy(k)} aria-sort={sort.k === k ? (sort.dir < 0 ? "descending" : "ascending") : undefined}>
+                {l}{sort.k === k && <span className="sarrow">{sort.dir < 0 ? "\u2193" : "\u2191"}</span>}
+              </th>
             ))}
-            {shown.length === 0 && <tr><td colSpan={12} className="empty">{view === "appealed" ? "No appeals yet. Select underpaid claims and choose Appeal." : "Nothing here."}</td></tr>}
+          </tr></thead>
+          <tbody>
+            {groups.map((g) => {
+              const open = g.head === null || collapsed[g.key] === false || (collapsed[g.key] === undefined && (underMode || g === groups[0]));
+              const h = g.head;
+              return (
+                <React.Fragment key={g.key}>
+                  {h && (
+                    <tr className="clgrp"><td colSpan={vcols.length + 1}>
+                      <div className="clgin">
+                        <button className="gcol" aria-label={open ? "Collapse group" : "Expand group"} aria-expanded={open} onClick={() => setCollapsed({ ...collapsed, [g.key]: !open ? false : true })}>{open ? <ChevronUp size={18} /> : <ChevronDown size={18} />}</button>
+                        {grouping === "payer" ? <span className="gchip">{h.d.master}</span> : <><StatusPill st={h.st} /><span className="gchip">{h.ins}</span><span className="gchip">{h.next}</span><span className="gchip">{h.method}</span></>}
+                        <span className="gchip amt"><b>{fmt(g.amount)}</b><span className="gsep">|</span>{g.items.length}</span>
+                      </div>
+                    </td></tr>
+                  )}
+                  {open && g.items.slice(0, limits[g.key] || 150).map((x) => (
+                    <tr key={x.d.id} className={"clrow" + (sel.includes(x.d.id) ? " picked" : "")} onClick={() => setOpenClaim(x.d.id)}>
+                      <td className="sel" onClick={(e) => e.stopPropagation()}><input type="checkbox" aria-label={"Select " + x.d.id} checked={sel.includes(x.d.id)} onChange={() => toggle(x.d.id)} /></td>
+                      {vcols.map(([k]) => <td key={k} className={k === "asg" ? "asg-c" : ""}>{cell(k, x)}</td>)}
+                    </tr>
+                  ))}
+                  {open && g.items.length > (limits[g.key] || 150) && <tr className="clmore"><td colSpan={vcols.length + 1}><button className="link" onClick={() => setLimits({ ...limits, [g.key]: (limits[g.key] || 150) + 300 })}>Show {Math.min(300, g.items.length - (limits[g.key] || 150))} more of {g.items.length - (limits[g.key] || 150)} remaining</button></td></tr>}
+                </React.Fragment>
+              );
+            })}
+            {!items.length && <tr><td colSpan={vcols.length + 1} className="empty">{kind === "mine" ? "No claims are assigned to you." : "No claims match."}</td></tr>}
           </tbody>
         </table>
-        {list.length > shown.length && <div className="muted pad">Showing the first {shown.length} of {list.length} claims.</div>}
       </div>
+      {sel.length > 0 && (
+        <div className="bulkbar" role="region" aria-label="Bulk actions">
+          <span className="bb-n">{sel.length} selected</span>
+          <button className="bb-btn primary" disabled={!appealable.length} title={appealable.length ? "" : "None of the selected claims can be appealed"} onClick={() => startAppeal(appealable.map((x) => x.d.id))}><Send size={14} />Appeal {appealable.length} {appealable.length === 1 ? "claim" : "claims"}</button>
+          <button className="bb-btn" onClick={() => onAssign(sel, "LR")}>Assign to me</button>
+          <button className="bb-btn" onClick={() => setSel([])}>Clear</button>
+        </div>
+      )}
     </div>
   );
 }
@@ -2192,7 +2439,7 @@ function AppealPackageFlow({ ids, claims, onCancel, onSubmit, setAiHook, onViewA
     const base = groupTemplate(g);
     let text = base, live = false;
     try {
-      const out = await callClaude("You write concise, professional payer appeal letters for physical therapy underpayments. Plain text, under 190 words, no markdown, no bullet symbols. Keep the Re: line and the sign-off. Do not invent facts.", "Rewrite this appeal letter so it is polished and firm while keeping every number and fact exactly as given:\n\n" + base);
+      const out = await callAI("You write concise, professional payer appeal letters for physical therapy underpayments. Plain text, under 190 words, no markdown, no bullet symbols. Keep the Re: line and the sign-off. Do not invent facts.", "Rewrite this appeal letter so it is polished and firm while keeping every number and fact exactly as given:\n\n" + base);
       if (out && out.length > 150) { text = out.trim(); live = true; }
     } catch (e) { /* keep template */ }
     setLetters((p) => (p[g.key] && p[g.key].sig === s ? { ...p, [g.key]: { sig: s, text, busy: false, live } } : p));
@@ -2356,8 +2603,8 @@ function AppealPackageFlow({ ids, claims, onCancel, onSubmit, setAiHook, onViewA
                 <ACard title="Document text">
                   <AiBanner title="Athelas AI suggested a cover letter based on the contract and the remittance variance" />
                   <label className="fld wide area"><span>Edit document content here</span>
-                    <textarea value={letterOk ? L.text : ""} disabled={!letterOk || L.busy} placeholder={letterOk && L.busy ? "Claude is drafting the letter" : ""} onChange={(e) => setLetters((p) => ({ ...p, [active.key]: { ...p[active.key], text: e.target.value } }))} rows={14} /></label>
-                  {letterOk && !L.busy && <div className="muted small">{L.live ? "Drafted by Claude from the claim and contract data." : "Drafted from a template because the live draft was unavailable."}</div>}
+                    <textarea value={letterOk ? L.text : ""} disabled={!letterOk || L.busy} placeholder={letterOk && L.busy ? "Athelas AI is drafting the letter" : ""} onChange={(e) => setLetters((p) => ({ ...p, [active.key]: { ...p[active.key], text: e.target.value } }))} rows={14} /></label>
+                  {letterOk && !L.busy && <div className="muted small">{L.live ? "Drafted by Athelas AI from the claim and contract data." : "Drafted from a template because the live draft was unavailable."}</div>}
                 </ACard>
               </>
             ) : (
@@ -2451,20 +2698,159 @@ function AppealPackageFlow({ ids, claims, onCancel, onSubmit, setAiHook, onViewA
 /* ============================================================
    Appeals tracking
    ============================================================ */
-function AppealsPage({ claims, respond }) {
-  const list = claims.filter((c) => c.appeal).sort((a, b) => (a.appeal.on < b.appeal.on ? 1 : -1));
-  const inDispute = list.filter((c) => c.appeal.status === "Submitted").reduce((s, c) => s + c.variance, 0);
-  const won = list.filter((c) => c.appeal.status === "Won"), lost = list.filter((c) => c.appeal.status === "Denied");
-  const rec = won.reduce((s, c) => s + c.variance, 0);
+const AP2_COLS = [["id", "Appeal ID", 130], ["status", "Status", 170], ["tis", "Time in Status", 118], ["patient", "Patient", 150], ["claim", "Claim ID", 130], ["ins", "Insurances", 218], ["filed", "Filed", 112], ["due", "Response due", 132], ["dispute", "In dispute", 110], ["recovered", "Recovered", 110], ["asg", "Assignee", 84]];
+const AP2_SORT = { filed: "Filed", dispute: "In dispute", id: "Appeal ID" };
+function AppealsPage({ claims, respond, setOpenClaim, onAssign, toast, goClaims }) {
+  const [view, setView] = useState("all");
+  const [filters, setFilters] = useState([]);
+  const [fOpen, setFOpen] = useState(false);
+  const [dOpen, setDOpen] = useState(false);
+  const [grouping, setGrouping] = useState("status");
+  const [cols, setCols] = useState(() => Object.fromEntries(AP2_COLS.map(([k]) => [k, true])));
+  const [collapsed, setCollapsed] = useState({});
+  const [sort, setSort] = useState({ k: "filed", dir: -1 });
+  const [sel, setSel] = useState([]);
+  const fRef = usePop(fOpen, () => setFOpen(false)), dRef = usePop(dOpen, () => setDOpen(false));
+
+  const all = useMemo(() => claims.filter((c) => c.appeal).map((d) => { const st = claimStatus(d); return { d, st, ins: (d.plan.toLowerCase().includes(d.master.split(" ")[0].toLowerCase()) ? d.plan : d.master.split(" ")[0] + " " + d.plan).toUpperCase(), next: nextStep(d, st), method: CL_METHOD[d.master] || "PORTAL", tis: daysBetween(d.appeal.on, TODAY), due: addDays(d.appeal.on, 30) }; }), [claims]);
+  const base = all.filter((x) => (view === "open" ? x.st.key === "pending" : view === "mine" ? x.d.assignee === "LR" : true));
+  const kinds = [...new Set(filters.map((f) => f.k))];
+  const matchF = (k, v, x) => (k === "status" ? x.st.label === v : k === "payer" ? x.d.master === v : x.next === v);
+  const items = base.filter((x) => kinds.every((k) => filters.filter((f) => f.k === k).some((f) => matchF(k, f.v, x))));
+  const fopts = [["status", "Status", [...new Set(all.map((x) => x.st.label))]], ["payer", "Payer", [...new Set(all.map((x) => x.d.master))]], ["next", "Next step", [...new Set(all.map((x) => x.next))]]];
+  const sortVal = (x) => (sort.k === "filed" ? x.d.appeal.on : sort.k === "dispute" ? x.d.variance : x.d.appeal.id);
+  const sorted = [...items].sort((a, b) => (sortVal(a) < sortVal(b) ? -1 : sortVal(a) > sortVal(b) ? 1 : 0) * sort.dir);
+  const groups = [];
+  if (grouping === "none") groups.push({ key: "all", head: null, items: sorted });
+  else sorted.forEach((x) => {
+    const key = grouping === "payer" ? x.d.master : [x.st.key, x.ins, x.next, x.method].join("|");
+    let g = groups.find((y) => y.key === key);
+    if (!g) { g = { key, head: x, items: [] }; groups.push(g); }
+    g.items.push(x);
+  });
+  groups.forEach((g) => { g.amount = r2(g.items.reduce((s, x) => s + x.d.variance, 0)); });
+  groups.sort((a, b) => b.amount - a.amount);
+  const vcols = AP2_COLS.filter(([k]) => cols[k]);
+  const nSel = items.filter((x) => sel.includes(x.d.id)).length;
+  const allOn = items.length > 0 && nSel === items.length;
+  const toggleAll = () => setSel(allOn ? sel.filter((id) => !items.some((x) => x.d.id === id)) : [...new Set([...sel, ...items.map((x) => x.d.id)])]);
+  const toggle = (id) => setSel(sel.includes(id) ? sel.filter((x) => x !== id) : [...sel, id]);
+  const changed = grouping !== "status" || vcols.length !== AP2_COLS.length;
+  const won = all.filter((x) => x.d.appeal.status === "Won"), lost = all.filter((x) => x.d.appeal.status === "Denied");
+  const inDispute = all.filter((x) => x.d.appeal.status === "Submitted").reduce((s, x) => s + x.d.variance, 0);
+  const recovered = won.reduce((s, x) => s + x.d.variance, 0);
+  const openN = all.filter((x) => x.st.key === "pending").length;
+  const sortBy = (k) => { if (!AP2_SORT[k]) return; setSort(sort.k === k ? { k, dir: -sort.dir } : { k, dir: -1 }); };
+  const exportCsv = () => { downloadCsv("appeals.csv", vcols.map(([, l]) => l), sorted.map((x) => vcols.map(([k]) => (k === "id" ? x.d.appeal.id : k === "status" ? x.st.label : k === "tis" ? x.tis + "d" : k === "patient" ? x.d.name : k === "claim" ? x.d.id : k === "ins" ? x.ins : k === "filed" ? mdy(x.d.appeal.on) : k === "due" ? mdy(x.due) : k === "dispute" ? fmt(x.d.variance) : k === "recovered" ? (x.d.appeal.status === "Won" ? fmt(x.d.variance) : "") : x.d.assignee || "")))); toast(`Exported ${sorted.length} appeals to appeals.csv`); };
+  const cell = (k, x) => {
+    const d = x.d;
+    switch (k) {
+      case "id": return <span className="clid">{d.appeal.id}</span>;
+      case "status": return <StatusPill st={x.st} />;
+      case "tis": return x.tis + "d";
+      case "patient": return <button className="plink" onClick={(e) => { e.stopPropagation(); setOpenClaim(d.id); }}>{d.name}</button>;
+      case "claim": return d.id;
+      case "ins": return <span className="pill"><span className="insdot" />{x.ins}</span>;
+      case "filed": return mdy(d.appeal.on);
+      case "due": return mdy(x.due);
+      case "dispute": return fmt(d.variance);
+      case "recovered": return d.appeal.status === "Won" ? <b>{fmt(d.variance)}</b> : <span className="muted">n/a</span>;
+      default: return (
+        <span onClick={(e) => e.stopPropagation()}>
+          {d.assignee ? <button className="asg on" aria-label={"Assigned to " + d.assignee + ", select to unassign"} onClick={() => onAssign([d.id], null)}>{d.assignee}</button> : <button className="asg" aria-label={"Assign " + d.id + " to me"} onClick={() => onAssign([d.id], "LR")}><UserPlus size={16} /></button>}
+        </span>
+      );
+    }
+  };
+  const tabs = [["all", "All Appeals"], ["open", "Open Appeals"], ["mine", "My Appeals"]];
   return (
-    <div className="page">
-      <div className="pagehead"><div><div className="crumb">Revenue cycle</div><h1>Appeals</h1></div>
-        <button className="btn" disabled={!list.some((c) => c.appeal.status === "Submitted")} onClick={respond}><Clock size={14} />Simulate payer responses</button></div>
-      <div className="summary"><div><div className="kv">{list.length}</div><div className="kl">appeals filed</div></div><div><div className="kv">{fmt(inDispute)}</div><div className="kl">in dispute</div></div><div><div className="kv moss">{fmt(rec)}</div><div className="kl">recovered</div></div>
-        <div><div className="kv">{won.length + lost.length ? Math.round((won.length / (won.length + lost.length)) * 100) + "%" : "n/a"}</div><div className="kl">win rate</div></div></div>
-      <div className="tblwrap tall"><table className="tbl"><thead><tr><th>Appeal</th><th>Claim</th><th>Payer and plan</th><th>Reason</th><th>Filed</th><th>Response due</th><th className="r">In dispute</th><th>Status</th></tr></thead>
-        <tbody>{list.map((c) => <tr key={c.id}><td className="b">{c.appeal.id}</td><td>{c.id}</td><td>{c.master}<span className="sub">{c.plan}</span></td><td>{PATTERN[c.pattern] ? PATTERN[c.pattern].short : "Underpaid"}</td><td className="nowrap">{fmtDate(c.appeal.on)}</td><td className="nowrap">{fmtDate(addDays(c.appeal.on, 30))}</td><td className="r">{fmt(c.variance)}</td><td>{statusChip(c)}</td></tr>)}
-          {!list.length && <tr><td colSpan={8} className="empty">No appeals yet. Start from the Underpaid view on Claims.</td></tr>}</tbody></table></div>
+    <div className="clpage">
+      <div className="cl-top">
+        <div className="cl-tabs" role="tablist">
+          {tabs.map(([k, l]) => <button key={k} role="tab" aria-selected={view === k} className={"cl-tab" + (view === k ? " on" : "")} onClick={() => { setView(k); setSel([]); }}>{l}{view === k ? ` (${items.length.toLocaleString()})` : ""}</button>)}
+        </div>
+        <div className="cl-act">
+          <button className="tgl" aria-label="History" disabled title="History"><History size={18} /></button>
+          <button className="tgl" aria-label="Export appeals" onClick={exportCsv}><Download size={18} /></button>
+          <button className="tgl" aria-label="Help" onClick={() => toast("Not part of this demo")}><CircleHelp size={18} /></button>
+          <button className="btn primary" disabled={!openN} title="Demo control: the payer answers every open appeal" onClick={respond}><Clock size={16} />Simulate payer responses</button>
+        </div>
+      </div>
+      <div className="cl-filter">
+        <div className="popwrap" ref={fRef}>
+          <button className="pillbtn" aria-haspopup="menu" aria-expanded={fOpen} onClick={() => setFOpen(!fOpen)}><ListFilter size={16} />Filter</button>
+          {fOpen && (
+            <div className="menu fmenu" role="menu">
+              {fopts.map(([k, l, vals]) => (
+                <div key={k}><div className="menu-h">{l}</div>
+                  {vals.map((v) => <button key={v} role="menuitem" className="menu-i" onClick={() => { if (!filters.some((f) => f.k === k && f.v === v)) setFilters([...filters, { k, v }]); setFOpen(false); }}>{v}</button>)}</div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="row gap wrap">{filters.map((f) => <span key={f.k + f.v} className="fchip"><span className="fk">{fopts.find((o) => o[0] === f.k)[1]} is</span>{f.v}<button aria-label={"Remove filter " + f.v} onClick={() => setFilters(filters.filter((y) => y !== f))}><X size={12} /></button></span>)}</div>
+        <span className="grow" />
+        {all.length > 0 && <span className="clsum"><b>{fmt(inDispute)}</b> in dispute, <b>{fmt(recovered)}</b> recovered, win rate <b>{won.length + lost.length ? Math.round((won.length / (won.length + lost.length)) * 100) + "%" : "n/a"}</b></span>}
+        <div className="popwrap" ref={dRef}>
+          <button className="pillbtn" aria-haspopup="dialog" aria-expanded={dOpen} onClick={() => setDOpen(!dOpen)}><SlidersHorizontal size={16} />Display{changed && <span className="reddot" aria-label="Display changed" />}</button>
+          {dOpen && (
+            <div className="pop dsp" role="dialog" aria-label="Display options">
+              <div className="cfg-s"><div className="dprow"><span>Grouping</span><select className="fsel" aria-label="Grouping" value={grouping} onChange={(e) => { setGrouping(e.target.value); setCollapsed({}); }}><option value="status">Status and payer</option><option value="payer">Payer</option><option value="none">None</option></select></div></div>
+              <div className="cfg-b"><div className="k">Columns</div>{AP2_COLS.map(([k, l]) => <label key={k} className="crowc"><input type="checkbox" checked={!!cols[k]} disabled={cols[k] && vcols.length === 1} onChange={(e) => setCols({ ...cols, [k]: e.target.checked })} />{l}</label>)}</div>
+              <div className="pfoot"><button className="link" onClick={() => { setGrouping("status"); setCols(Object.fromEntries(AP2_COLS.map(([k]) => [k, true]))); }}>Reset</button></div>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="clwrap">
+        <table className="cltbl">
+          <thead><tr>
+            <th className="sel"><input type="checkbox" aria-label="Select all appeals" ref={(el) => { if (el) el.indeterminate = nSel > 0 && !allOn; }} checked={allOn} disabled={!items.length} onChange={toggleAll} /></th>
+            {vcols.map(([k, l, w]) => (
+              <th key={k} className={(k === "asg" ? "asg-h " : "") + (AP2_SORT[k] ? "sortable" : "")} style={{ minWidth: w }} onClick={() => sortBy(k)} aria-sort={sort.k === k ? (sort.dir < 0 ? "descending" : "ascending") : undefined}>
+                {l}{sort.k === k && <span className="sarrow">{sort.dir < 0 ? "\u2193" : "\u2191"}</span>}
+              </th>
+            ))}
+          </tr></thead>
+          <tbody>
+            {groups.map((g) => {
+              const open = g.head === null || collapsed[g.key] === false || (collapsed[g.key] === undefined && g === groups[0]);
+              const h = g.head;
+              return (
+                <React.Fragment key={g.key}>
+                  {h && (
+                    <tr className="clgrp"><td colSpan={vcols.length + 1}>
+                      <div className="clgin">
+                        <button className="gcol" aria-label={open ? "Collapse group" : "Expand group"} aria-expanded={open} onClick={() => setCollapsed({ ...collapsed, [g.key]: !open ? false : true })}>{open ? <ChevronUp size={18} /> : <ChevronDown size={18} />}</button>
+                        {grouping === "payer" ? <span className="gchip">{h.d.master}</span> : <><StatusPill st={h.st} /><span className="gchip">{h.ins}</span><span className="gchip">{h.next}</span><span className="gchip">{h.method}</span></>}
+                        <span className="gchip amt"><b>{fmt(g.amount)}</b><span className="gsep">|</span>{g.items.length}</span>
+                      </div>
+                    </td></tr>
+                  )}
+                  {open && g.items.map((x) => (
+                    <tr key={x.d.id} className={"clrow" + (sel.includes(x.d.id) ? " picked" : "")} onClick={() => setOpenClaim(x.d.id)}>
+                      <td className="sel" onClick={(e) => e.stopPropagation()}><input type="checkbox" aria-label={"Select " + x.d.appeal.id} checked={sel.includes(x.d.id)} onChange={() => toggle(x.d.id)} /></td>
+                      {vcols.map(([k]) => <td key={k} className={k === "asg" ? "asg-c" : ""}>{cell(k, x)}</td>)}
+                    </tr>
+                  ))}
+                </React.Fragment>
+              );
+            })}
+            {!items.length && (
+              <tr><td colSpan={vcols.length + 1} className="empty">
+                {all.length ? "No appeals match." : <>No appeals yet. Filter Claims by Underpaid, then appeal them in bulk. <button className="link" onClick={goClaims}>Go to Claims</button></>}
+              </td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      {sel.length > 0 && (
+        <div className="bulkbar" role="region" aria-label="Bulk actions">
+          <span className="bb-n">{sel.length} selected</span>
+          <button className="bb-btn" onClick={() => onAssign(all.filter((x) => sel.includes(x.d.id)).map((x) => x.d.id), "LR")}>Assign to me</button>
+          <button className="bb-btn" onClick={() => setSel([])}>Clear</button>
+        </div>
+      )}
     </div>
   );
 }
@@ -2473,78 +2859,323 @@ function AppealsPage({ claims, respond }) {
    Analytics
    ============================================================ */
 const BENCH = { "Cascadia Mutual Health": { lo: 2.8, med: 4.6, hi: 7.4 }, "Summit Care Alliance": { lo: 3.5, med: 5.9, hi: 9.2 }, "Keystone Health Partners": { lo: 5.0, med: 8.4, hi: 12.5 } };
-const DIMS = { master: "Payer", facility: "Facility", group: "Payer group", apptType: "Appointment type" };
-function AnalyticsPage({ claims, openFromAnalytics }) {
-  const [dim, setDim] = useState("master");
-  const [drill, setDrill] = useState(null);
-  const base = claims.filter((c) => c.status !== "no_contract");
-  const under = base.filter((c) => c.status === "underpaid");
-  const groupBy = (arr, key) => { const m = {}; arr.forEach((c) => { const k = typeof key === "function" ? key(c) : c[key]; (m[k] = m[k] || []).push(c); }); return m; };
-  const tot = groupBy(base, dim);
-  const data = Object.entries(tot).map(([k, arr]) => ({ name: k, rate: r2((arr.filter((c) => c.status === "underpaid").length / arr.length) * 100), dollars: r2(arr.reduce((s, c) => s + c.variance, 0)), n: arr.length })).sort((a, b) => b.rate - a.rate);
-  const overall = base.length ? (under.length / base.length) * 100 : 0;
-  const avgVar = under.length ? under.reduce((s, c) => s + c.variance, 0) / under.length : 0;
-  const perPct = 0.01 * 6750000 * avgVar;
-  const drillClaims = drill ? base.filter((c) => c[dim] === drill) : [];
-  const months = ["2026-05", "2026-06", "2026-07", "2026-08", "2026-09", "2026-10", "2026-11"];
-  const trend = months.map((m) => { const arr = drillClaims.filter((c) => c.remitDate.slice(0, 7) === m); return { m: new Date(m + "-15").toLocaleDateString("en-US", { month: "short" }), rate: arr.length ? r2((arr.filter((c) => c.status === "underpaid").length / arr.length) * 100) : null }; });
-  const reasons = Object.entries(groupBy(drillClaims.filter((c) => c.status === "underpaid"), (c) => (PATTERN[c.pattern] ? PATTERN[c.pattern].short : "Other"))).map(([k, a]) => ({ k, n: a.length, d: r2(a.reduce((s, c) => s + c.variance, 0)) }));
-  const payerRows = Object.entries(groupBy(base, "master")).map(([k, a]) => ({ k, rate: (a.filter((c) => c.status === "underpaid").length / a.length) * 100, b: BENCH[k] })).filter((x) => x.b);
-  const maxScale = Math.max(40, ...payerRows.map((x) => x.rate + 5));
-
-  if (!base.length) return <div className="page"><div className="pagehead"><div><div className="crumb">Revenue cycle</div><h1>Analytics</h1></div></div><div className="empty pad">Load a contract to see underpayment trends.</div></div>;
+const PEER_RATE = 5.9;
+const PEER_PCT_MEDICARE = { Commercial: 112, Medicare: 98, Medicaid: 76 };
+const D_RANGES = [["30", "Last 30 days"], ["90", "Last 90 days"], ["180", "Last 6 months"], ["365", "Last 12 months"]];
+const D_TEAL = "#9AE0D2", D_GREY = "#D6D6D6";
+const CAUSES = [["escalator", "Escalator not applied", "#9AE0D2"], ["pta", "PTA rate reduced", "#F2B66D"], ["bundling", "Payer edit (CO-97)", "#B7A6E8"]];
+const REASON_NEXT = { escalator: "Appeal: contract escalator not applied", pta: "Appeal: PTA rate reduced", bundling: "Review payer edit (CO-97)" };
+const fmtK = (n) => (n >= 1e6 ? "$" + (n / 1e6).toFixed(1) + "M" : n >= 1e4 ? "$" + Math.round(n / 1e3) + "K" : n >= 1e3 ? "$" + (n / 1e3).toFixed(1) + "K" : "$" + Math.round(n));
+const shortDate = (s) => new Date(s + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+const monthEndOf = (s) => `${s.slice(0, 8)}${String(new Date(+s.slice(0, 4), +s.slice(5, 7), 0).getDate()).padStart(2, "0")}`;
+function bucketize(start, end, gran, withYear) {
+  const out = []; let cur = start;
+  while (cur <= end) {
+    if (gran === "month") {
+      const me = monthEndOf(cur), e = me < end ? me : end, d = new Date(cur + "T12:00:00");
+      out.push({ s: cur, e, label: d.toLocaleDateString("en-US", { month: "short" }) + (withYear ? " '" + String(d.getFullYear()).slice(2) : ""), partial: false });
+      cur = addDays(me, 1);
+    } else {
+      const dow = new Date(cur + "T12:00:00").getDay(), toMon = ((8 - dow) % 7) || 7;
+      let e = addDays(cur, toMon - 1); if (e > end) e = end;
+      out.push({ s: cur, e, label: shortDate(cur), partial: false });
+      cur = addDays(e, 1);
+    }
+  }
+  const l = out[out.length - 1];
+  if (l) l.partial = gran === "month" ? l.e < monthEndOf(l.s) : daysBetween(l.s, l.e) < 6;
+  return out;
+}
+function computeDash(claims, cfg) {
+  const end = TODAY, start = addDays(end, -(cfg.days - 1)), pEnd = addDays(start, -1), pStart = addDays(pEnd, -(cfg.days - 1));
+  const dateOf = (d) => (cfg.basis === "dos" ? d.dos : d.remitDate);
+  const kinds = [...new Set(cfg.filters.map((f) => f.k))];
+  const pass = (d) => kinds.every((k) => cfg.filters.filter((f) => f.k === k).some((f) => (k === "payer" ? d.master === f.v : k === "group" ? d.group === f.v : d.facility === f.v)));
+  const pool = claims.filter((d) => d.status !== "no_contract").filter(pass);
+  const inR = (d, s, e) => { const x = dateOf(d); return x >= s && x <= e; };
+  const cur = pool.filter((d) => inR(d, start, end)), prv = pool.filter((d) => inR(d, pStart, pEnd));
+  const under = (a) => a.filter((d) => d.status === "underpaid");
+  const rate = (a) => (a.length ? (under(a).length / a.length) * 100 : null);
+  const dollars = (a) => r2(under(a).reduce((s, d) => s + d.variance, 0));
+  const cb = bucketize(start, end, cfg.gran, cfg.days > 200), pb = bucketize(pStart, pEnd, cfg.gran, cfg.days > 200);
+  const n = cb.length;
+  const series = Array.from({ length: n }, (_, i) => {
+    const c = cb[i], p = pb[i];
+    const ca = c ? cur.filter((d) => inR(d, c.s, c.e)) : [], pa = p ? prv.filter((d) => inR(d, p.s, p.e)) : [];
+    return { label: c.label, rateCur: c && ca.length >= (c.partial ? 1 : 8) ? r2(rate(ca)) : null, ratePrev: p && pa.length >= (p.partial ? 1 : 8) ? r2(rate(pa)) : null, dolCur: c ? dollars(ca) : null, dolPrev: p ? dollars(pa) : null, partial: !!c && c.partial && i === cb.length - 1 };
+  });
+  // recovery pipeline over its own range
+  const pDays = cfg.pipeDays || cfg.days, pStartD = addDays(end, -(pDays - 1));
+  const pc = pool.filter((d) => inR(d, pStartD, end));
+  const u = under(pc), appealed = u.filter((d) => d.appeal), won = appealed.filter((d) => d.appeal.status === "Won"), denied = appealed.filter((d) => d.appeal.status === "Denied"), pending = appealed.filter((d) => d.appeal.status === "Submitted");
+  const unworked = u.filter((d) => !d.appeal), lost = unworked.filter((d) => d.daysLeft < 0), open = unworked.filter((d) => d.daysLeft >= 0);
+  const sum = (a) => r2(a.reduce((s, d) => s + d.variance, 0));
+  const pipeline = { detected: [u.length, sum(u)], appealed: [appealed.length, sum(appealed)], won: [won.length, sum(won)], pending: [pending.length, sum(pending)], denied: [denied.length, sum(denied)], lost: [lost.length, sum(lost)], open: [open.length, sum(open)], winRate: won.length + denied.length ? (won.length / (won.length + denied.length)) * 100 : null };
+  // deadlines, for everything still open today
+  const openNow = under(pool).filter((d) => !d.appeal);
+  const within = (n2) => openNow.filter((d) => d.daysLeft >= 0 && d.daysLeft <= n2);
+  const weeks = Array.from({ length: 12 }, (_, w) => { const a = openNow.filter((d) => d.daysLeft >= 0 && Math.floor(d.daysLeft / 7) === w); return { label: w === 0 ? "This week" : "In " + w + "w", n: a.length, dollars: sum(a) }; });
+  const deadlines = { d30: [within(30).length, sum(within(30))], d60: [within(60).length, sum(within(60))], d90: [within(90).length, sum(within(90))], lost: [openNow.filter((d) => d.daysLeft < 0).length, sum(openNow.filter((d) => d.daysLeft < 0))], weeks };
+  // by dimension
+  const dims = {
+    payer: (d) => d.master, group: (d) => d.group, facility: (d) => d.facility, reason: (d) => (CAUSES.find((c) => c[0] === d.pattern) || [0, "Other"])[1],
+  };
+  const byDim = {};
+  Object.entries(dims).forEach(([k, fn]) => {
+    const m = {};
+    cur.forEach((d) => { const key = fn(d); const o = m[key] || (m[key] = { name: key, escalator: 0, pta: 0, bundling: 0, total: 0, claims: 0, under: 0 }); o.claims++; if (d.status === "underpaid") { o.under++; o.total = r2(o.total + d.variance); o[d.pattern] = r2((o[d.pattern] || 0) + d.variance); } });
+    byDim[k] = Object.values(m).filter((o) => o.total > 0).sort((a, b) => b.total - a.total).map((o) => ({ ...o, rate: r2((o.under / o.claims) * 100) }));
+  });
+  const peers = Object.entries(cur.reduce((m, d) => { (m[d.master] = m[d.master] || []).push(d); return m; }, {})).map(([k, a]) => ({ k, rate: rate(a), n: a.length, b: BENCH[k] })).filter((x) => x.b);
+  const avgVar = u.length ? sum(u) / u.length : 0;
+  return { start, end, cur, prv, pipeStart: pStartD, series, hasPrev: prv.length > 0, rateCur: rate(cur), ratePrev: rate(prv), dolCur: dollars(cur), dolPrev: dollars(prv), pipeline, deadlines, byDim, peers, perPct: 0.01 * 6750000 * avgVar, pool };
+}
+const InfoTip = ({ text }) => <span className="infotip" tabIndex={0} role="img" aria-label={text} data-tip={text}><Info size={14} /></span>;
+function GoalPop({ value, unit, onSave }) {
+  const [open, setOpen] = useState(false);
+  const [v, setV] = useState("");
+  const ref = usePop(open, () => setOpen(false));
   return (
-    <div className="page">
-      <div className="pagehead"><div><div className="crumb">Revenue cycle</div><h1>Analytics</h1></div><Chip tone="grey">Illustrative sample data</Chip></div>
-      <div className="summary">
-        <div><div className="kv">{overall.toFixed(1)}%</div><div className="kl">of claims underpaid</div></div>
-        <div><div className="kv">{fmt(under.reduce((s, c) => s + c.variance, 0))}</div><div className="kl">underpaid in this sample</div></div>
-        <div><div className="kv">{fmt(avgVar)}</div><div className="kl">average per underpaid claim</div></div>
-        <div className="scale"><div className="kv">{"$" + (perPct / 1e6).toFixed(2) + "M"}</div><div className="kl">per year for every 1% of claims underpaid by this average, at ATI volume of about 6.75M claims a year</div></div>
-      </div>
-      <div className="panel">
-        <div className="row between"><div className="h3">Underpayment rate</div><div className="seg">{Object.entries(DIMS).map(([k, v]) => <button key={k} className={dim === k ? "on" : ""} onClick={() => { setDim(k); setDrill(null); }}>{v}</button>)}</div></div>
-        <div className="muted">Share of claims paid below the contracted amount. Select a bar to drill in.</div>
-        <div style={{ height: Math.max(180, data.length * 46 + 30) }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} layout="vertical" margin={{ left: 30, right: 40, top: 10 }}>
-              <CartesianGrid horizontal={false} stroke="rgba(0,0,0,0.08)" />
-              <XAxis type="number" unit="%" tick={{ fontSize: 12, fill: "#737373" }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="name" width={170} tick={{ fontSize: 12, fill: "#1f1f1f" }} axisLine={false} tickLine={false} />
-              <Tooltip formatter={(v, n, p) => [v + "% (" + fmt(p.payload.dollars) + " underpaid, " + p.payload.n + " claims)", "Rate"]} cursor={{ fill: "#f5f5f5" }} />
-              <Bar dataKey="rate" radius={[0, 3, 3, 0]} onClick={(d) => setDrill(d.name === drill ? null : d.name)} cursor="pointer">
-                {data.map((d) => <Cell key={d.name} fill={drill && drill !== d.name ? "#b9c3f8" : "#1132ee"} />)}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-      {drill && (
-        <div className="panel">
-          <div className="h3">{drill}</div>
-          <div className="two">
-            <div><div className="muted">Underpayment rate by remittance month</div>
-              <div style={{ height: 190 }}><ResponsiveContainer width="100%" height="100%"><LineChart data={trend} margin={{ left: 0, right: 20, top: 10 }}><CartesianGrid stroke="rgba(0,0,0,0.08)" vertical={false} /><XAxis dataKey="m" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} /><YAxis unit="%" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} width={42} /><Tooltip formatter={(v) => [v + "%", "Rate"]} /><Line type="monotone" dataKey="rate" stroke="#1132ee" strokeWidth={2} dot={{ r: 3 }} connectNulls /></LineChart></ResponsiveContainer></div></div>
-            <div><div className="muted">What is driving it</div>
-              {reasons.map((r) => <div key={r.k} className="reason"><span>{r.k}</span><span className="b">{r.n} claims, {fmt(r.d)}</span></div>)}
-              {!reasons.length && <div className="muted">No underpaid claims.</div>}
-              <div className="b mt">Largest recoveries</div>
-              {drillClaims.filter((c) => c.status === "underpaid").sort((a, b) => b.recover - a.recover).slice(0, 4).map((c) => <button key={c.id} className="linkrow" onClick={() => openFromAnalytics(c.id)}><span>{c.id}</span><span className="muted">{c.plan}</span><span className="neg b">-{fmt(c.variance)}</span></button>)}
-            </div>
-          </div>
+    <div className="popwrap" ref={ref}>
+      <button className="link" onClick={() => { setV(value != null ? String(value) : ""); setOpen(!open); }}>{value != null ? "Edit goal" : "Set goal"}</button>
+      {open && (
+        <div className="pop goalp" role="dialog" aria-label="Set goal">
+          <label className="fld wide"><span>Goal ({unit})</span><input autoFocus inputMode="decimal" value={v} onChange={(e) => setV(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { const n = parseFloat(v); onSave(isNaN(n) ? null : n); setOpen(false); } }} /></label>
+          <div className="sv-b"><button className="btn" onClick={() => { onSave(null); setOpen(false); }}>Clear</button><button className="btn primary" onClick={() => { const n = parseFloat(v); onSave(isNaN(n) ? null : n); setOpen(false); }}>Save goal</button></div>
         </div>
       )}
-      <div className="panel">
-        <div className="h3">How you compare with similar practices</div>
-        <div className="muted">Underpayment rate by payer against outpatient PT groups of similar size. Benchmark values are illustrative. The shaded band is the middle half of the cohort.</div>
-        <div className="cohort">
-          {payerRows.map((x) => (
-            <div key={x.k} className="crow"><div className="cname">{x.k}</div>
-              <div className="ctrack"><div className="cband" style={{ left: (x.b.lo / maxScale) * 100 + "%", width: ((x.b.hi - x.b.lo) / maxScale) * 100 + "%" }} /><div className="cmed" style={{ left: (x.b.med / maxScale) * 100 + "%" }} /><div className={"cyou" + (x.rate > x.b.hi ? " hot" : "")} style={{ left: (x.rate / maxScale) * 100 + "%" }} /></div>
-              <div className="cval"><span className="b">{x.rate.toFixed(1)}%</span><span className="muted"> vs {x.b.med}% median</span></div>
-              <div className="cflag">{x.rate > x.b.hi ? <Chip tone="rust">{(x.rate / x.b.med).toFixed(1)}x the median</Chip> : x.rate > x.b.med ? <Chip tone="amber">Above median</Chip> : <Chip tone="moss">In line with peers</Chip>}</div></div>
-          ))}
+    </div>
+  );
+}
+function DCard({ title, info, subtitle, right, children, wide, id }) {
+  return (
+    <section className={"dcard" + (wide ? " wide" : "")} aria-label={title} data-card={id}>
+      <div className="dc-h"><div><div className="dc-t">{title}{info && <InfoTip text={info} />}</div><div className="dc-s">{subtitle}</div></div>{right}</div>
+      <div className="dc-b">{children}</div>
+    </section>
+  );
+}
+const DLegend = ({ items }) => <div className="dlegend">{items.map(([c, l]) => <span key={l}><i style={{ background: c }} />{l}</span>)}</div>;
+const ChartTip = ({ active, payload, label, f, names }) => (active && payload && payload.length ? (
+  <div className="ctip"><div className="b">{label}</div>{payload.filter((p) => p.value != null).map((p) => <div key={p.dataKey} className="crow3"><i style={{ background: p.color || p.fill }} />{(names && names[p.dataKey]) || p.name}<b>{f(p.value)}</b></div>)}</div>
+) : null);
+const HatchDefs = () => <defs><pattern id="hatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)"><rect width="3" height="6" fill={D_TEAL} /></pattern></defs>;
+const dChange = (cur, prev, kind, label) => {
+  if (cur == null || prev == null) return { dir: null, text: "No earlier data to compare" };
+  const d = kind === "pts" ? cur - prev : prev ? ((cur - prev) / prev) * 100 : 0;
+  const unit = kind === "pts" ? "points" : "%";
+  return { dir: d < 0 ? "down" : "up", text: `${Math.abs(d).toFixed(1)}${kind === "pts" ? " " : ""}${unit} ${d < 0 ? "decrease" : "increase"} vs ${label}` };
+};
+const Chg = ({ c }) => <div className="dc-chg">{c.dir === "down" ? <ArrowDown size={14} /> : c.dir === "up" ? <ArrowUp size={14} /> : null}{c.text}</div>;
+const PillSelect = ({ value, onChange, options, label }) => (
+  <label className="dpill" aria-label={label}><select value={value} onChange={(e) => onChange(e.target.value)} aria-label={label}>{options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select><ChevronDown size={14} /></label>
+);
+
+const DASHES = [["underpayments", "Underpayments", "Underpayment rate and dollars over time, recovery, deadlines, and how you compare with similar practices."], ["financial", "Financial Health", "Days in A/R, gross charges, payments posted, and payments by CPT code."], ["operations", "Practice Operations", "Visits, cancellations, and provider utilization."]];
+
+function DashboardsPage({ claims, contracts, goals, setGoals, dash, setDash, onOpenClaims, toast }) {
+  const [days, setDays] = useState("180");
+  const [basis, setBasis] = useState("post");
+  const [gran, setGran] = useState("month");
+  const [compare, setCompare] = useState("prev");
+  const [dim, setDim] = useState("payer");
+  const [pipeDays, setPipeDays] = useState("180");
+  const [filters, setFilters] = useState([]);
+  const [fOpen, setFOpen] = useState(false);
+  const fRef = usePop(fOpen, () => setFOpen(false));
+  const nDays = parseInt(days, 10);
+  const granOk = nDays <= 30 ? ["week"] : nDays <= 90 ? ["week", "month"] : ["month"];
+  const g = granOk.includes(gran) ? gran : granOk[0];
+  const D = useMemo(() => computeDash(claims, { days: nDays, basis, gran: g, filters, pipeDays: parseInt(pipeDays, 10) }), [claims, nDays, basis, g, filters, pipeDays]);
+
+  if (!dash) return (
+    <div className="dpage">
+      <div className="dhead"><div className="dbc"><span className="b">Dashboards</span></div></div>
+      <div className="dlist">
+        {DASHES.map(([k, l, d]) => <button key={k} className="dli" onClick={() => (k === "underpayments" ? setDash(k) : toast("Not part of this demo"))}><div className="b15">{l}</div><div className="muted">{d}</div></button>)}
+      </div>
+    </div>
+  );
+
+  const rangeLabel = (D_RANGES.find((r) => r[0] === days) || D_RANGES[0])[1];
+  const sub = `${rangeLabel} \u00b7 ${shortDate(D.start)} \u2014 ${shortDate(D.end)}`;
+  const prevLabel = nDays <= 31 ? "previous month" : "previous period";
+  const peersMode = compare === "peers";
+  const series = D.series.map((s) => ({ ...s, ratePrev: peersMode ? PEER_RATE : s.ratePrev }));
+  const rateChg = peersMode ? dChange(D.rateCur, PEER_RATE, "pts", "peer median") : dChange(D.rateCur, D.ratePrev, "pts", prevLabel);
+  const dolChg = dChange(D.dolCur, D.dolPrev, "pct", prevLabel);
+  const showPrev = peersMode || D.hasPrev;
+  const rateName = peersMode ? "Peer median" : prevLabel[0].toUpperCase() + prevLabel.slice(1);
+  const goalR = goals.rate, goalD = goals.dollars;
+  const addFilter = (k, v) => { if (!filters.some((f) => f.k === k && f.v === v)) setFilters([...filters, { k, v }]); setFOpen(false); };
+  const fopts = [["group", "Payer class", [...new Set(claims.map((c) => c.group))]], ["payer", "Payer", [...new Set(claims.map((c) => c.master))]], ["facility", "Facility", [...new Set(claims.map((c) => c.facility))]]];
+  const fLabel = (k) => (fopts.find((o) => o[0] === k) || [0, k])[1];
+  const P = D.pipeline, DL = D.deadlines;
+  const openDim = (name) => {
+    const f = [{ k: "status", v: "Underpaid" }];
+    if (dim === "payer") f.push({ k: "payer", v: name }); else if (dim === "group") f.push({ k: "group", v: name }); else if (dim === "facility") f.push({ k: "facility", v: name });
+    else { const c = CAUSES.find((x) => x[1] === name); if (c) f.push({ k: "next", v: REASON_NEXT[c[0]] }); }
+    onOpenClaims(f);
+  };
+  const dimOpts = [["payer", "Payer"], ["group", "Payer class"], ["facility", "Facility"], ["reason", "Reason"]];
+  const rows = D.byDim[dim] || [];
+  const escTot = D.cur.filter((d) => d.status === "underpaid" && d.pattern === "escalator").reduce((s, d) => s + d.variance, 0);
+  const escShare = D.dolCur ? (escTot / D.dolCur) * 100 : 0;
+  // contract terms against what is actually paid
+  const terms = [];
+  contracts.filter((c) => c.kind !== "generic").forEach((c) => c.plans.forEach((p) => {
+    const rs = c.rows.filter((r) => r.plan === p.plan && /^\d{5}$/.test(r.cpt) && r.base != null);
+    const on = { [c.id + ":escalator"]: true, [c.id + ":pta"]: true };
+    const pct = rs.length ? (rs.reduce((s, r) => s + calcUnit(r, c, TODAY, on, false).amount / FS_MEDICARE[r.cpt], 0) / rs.length) * 100 : null;
+    const cl = D.cur.filter((d) => d.contractId === c.id && d.plan === p.plan);
+    const exp = cl.reduce((s, d) => s + (d.expected || 0), 0), paid = cl.reduce((s, d) => s + d.paid, 0);
+    const peer = PEER_PCT_MEDICARE[p.payerGroup];
+    const chips = []; if (c.escalatorPct && rs.some((r) => r.escalates)) chips.push(`Escalator +${c.escalatorPct}%`); if (c.ptaPct != null && c.ptaPct < 100) chips.push(`PTA at ${c.ptaPct}%`); 
+    terms.push({ key: c.id + p.plan, payer: c.masterPayer, plan: p.plan, group: p.payerGroup, number: c.number, pct, peer, chips, exp, paid, real: exp ? (paid / exp) * 100 : null, n: cl.length });
+  }));
+  const termTone = (x) => (x.pct == null ? ["grey", "Per visit rate"] : x.pct >= x.peer + 2 ? ["moss", "Above peers"] : x.pct >= x.peer - 2 ? ["grey", "In line"] : ["rust", "Below peers"]);
+
+  return (
+    <div className="dpage">
+      <div className="dhead">
+        <div className="dbc"><button className="dbc-l" onClick={() => setDash(null)}>Dashboards</button><span className="bc-sep">/</span><span className="b">Underpayments</span>
+          <button className="icon" aria-label="Copy link" onClick={() => { try { navigator.clipboard && navigator.clipboard.writeText(window.location.href); } catch (e) { /* ignore */ } toast("Link copied"); }}><Link2 size={16} /></button></div>
+        <div className="row gap">
+          <button className="pillbtn accent" onClick={() => { try { navigator.clipboard && navigator.clipboard.writeText(window.location.href); } catch (e) { /* ignore */ } toast("Link copied"); }}><Share2 size={14} />Share</button>
+          <button className="tgl" aria-label="Export the claims behind this dashboard" onClick={() => { downloadCsv("underpayments_dashboard.csv", ["Claim", "Payer", "Plan", "Date of service", "Remit date", "Status", "Variance"], D.cur.map((d) => [d.id, d.master, d.plan, mdy(d.dos), mdy(d.remitDate), claimStatus(d).label, d.variance])); toast(`Exported ${D.cur.length} claims`); }}><Download size={18} /></button>
         </div>
+      </div>
+      <div className="dbar">
+        <div className="popwrap" ref={fRef}>
+          <button className="pillbtn" aria-haspopup="menu" aria-expanded={fOpen} onClick={() => setFOpen(!fOpen)}><ListFilter size={16} />Filter</button>
+          {fOpen && <div className="menu fmenu" role="menu">{fopts.map(([k, l, vals]) => <div key={k}><div className="menu-h">{l}</div>{vals.map((v) => <button key={v} role="menuitem" className="menu-i" onClick={() => addFilter(k, v)}>{v}</button>)}</div>)}</div>}
+        </div>
+        {filters.map((f) => <span key={f.k + f.v} className="fchip"><span className="fk">{fLabel(f.k)} is</span>{f.v}<button aria-label={"Remove filter " + f.v} onClick={() => setFilters(filters.filter((y) => y !== f))}><X size={12} /></button></span>)}
+        <span className="fpill"><Calendar size={14} /><span>Date</span><span className="fis">is</span><PillSelect label="Date range" value={days} onChange={setDays} options={D_RANGES} /></span>
+        <span className="fpill"><Calendar size={14} /><span>Date basis</span><span className="fis">is</span><PillSelect label="Date basis" value={basis} onChange={setBasis} options={[["post", "By post date"], ["dos", "By date of service"]]} /></span>
+        <span className="grow" />
+        <span className="drefresh"><RefreshCw size={14} />Data last refreshed: less than 30 mins ago</span>
+      </div>
+
+      <h2 className="dsec">Underpayment summary</h2>
+      <div className="dgrid">
+        <DCard id="rate" title="Underpayment rate" info="Claims paid below the contracted amount, divided by claims that could be checked against a contract on file." subtitle={sub} right={<GoalPop value={goalR} unit="%" onSave={(v) => setGoals({ ...goals, rate: v })} />}>
+          <div className="dc-top">
+            <div><div className="dc-big">{D.rateCur == null ? "n/a" : D.rateCur.toFixed(1) + "%"}</div><Chg c={rateChg} />{goalR != null && D.rateCur != null && <div className="dc-goal">Goal {goalR}%: {D.rateCur <= goalR ? "on track" : (D.rateCur - goalR).toFixed(1) + " points above"}</div>}</div>
+            <div className="dc-pills"><PillSelect label="Group by" value={g} onChange={setGran} options={granOk.map((x) => [x, x === "week" ? "Weekly" : "Monthly"])} /><PillSelect label="Compare with" value={compare} onChange={setCompare} options={[["prev", "vs " + prevLabel], ["peers", "vs peer median"]]} /></div>
+          </div>
+          <div className="dc-ct">Underpayment rate trend</div>
+          <DLegend items={[...(showPrev ? [[D_GREY, rateName]] : []), [D_TEAL, rangeLabel]]} />
+          <div className="dchart">
+            <ResponsiveContainer width="100%" height={230}>
+              <BarChart data={series} margin={{ top: 8, right: 8, left: 0, bottom: 0 }} barGap={2} barCategoryGap="24%">
+                <HatchDefs /><CartesianGrid vertical={false} stroke="rgba(0,0,0,.08)" />
+                <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#737373" }} />
+                <YAxis tickLine={false} axisLine={false} width={40} tick={{ fontSize: 12, fill: "#737373" }} tickFormatter={(v) => v + "%"} />
+                <Tooltip cursor={{ fill: "#f5f5f5" }} content={<ChartTip f={(v) => v.toFixed(1) + "%"} names={{ ratePrev: rateName, rateCur: rangeLabel }} />} />
+                {goalR != null && <ReferenceLine y={goalR} stroke="#1f1f1f" strokeDasharray="4 4" />}
+                {showPrev && <Bar dataKey="ratePrev" fill={D_GREY} radius={[2, 2, 0, 0]} isAnimationActive={false} />}
+                <Bar dataKey="rateCur" fill={D_TEAL} radius={[2, 2, 0, 0]} isAnimationActive={false}>{series.map((s, i) => <Cell key={i} fill={s.partial ? "url(#hatch)" : D_TEAL} stroke={s.partial ? D_TEAL : undefined} />)}</Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="dc-note">{escShare > 0 ? `Cascadia not applying its ${(contracts.find((c) => c.id === "cascadia") || {}).escalatorPct || 2.5}% rate increase is ${escShare.toFixed(0)}% of the shortfall in this period.` : "Rate is claims paid below the contracted amount over claims that could be checked against a contract."}</div>
+        </DCard>
+
+        <DCard id="dollars" title="Underpaid dollars" info="The shortfall between the contracted amount and what the payer paid, summed across underpaid claims." subtitle={sub} right={<GoalPop value={goalD} unit="$" onSave={(v) => setGoals({ ...goals, dollars: v })} />}>
+          <div className="dc-top">
+            <div><div className="dc-big">{fmt(D.dolCur, 0)}</div><Chg c={dolChg} />{goalD != null && <div className="dc-goal">Goal {fmt(goalD, 0)}: {D.dolCur <= goalD ? "on track" : fmt(D.dolCur - goalD, 0) + " above"}</div>}</div>
+            <div className="dc-pills"><PillSelect label="Group by" value={g} onChange={setGran} options={granOk.map((x) => [x, x === "week" ? "Weekly" : "Monthly"])} /></div>
+          </div>
+          <div className="dc-ct">Underpaid dollars trend</div>
+          <DLegend items={[...(D.hasPrev ? [[D_GREY, prevLabel[0].toUpperCase() + prevLabel.slice(1)]] : []), [D_TEAL, rangeLabel]]} />
+          <div className="dchart">
+            <ResponsiveContainer width="100%" height={230}>
+              <BarChart data={D.series} margin={{ top: 8, right: 8, left: 0, bottom: 0 }} barGap={2} barCategoryGap="24%">
+                <HatchDefs /><CartesianGrid vertical={false} stroke="rgba(0,0,0,.08)" />
+                <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#737373" }} />
+                <YAxis tickLine={false} axisLine={false} width={48} tick={{ fontSize: 12, fill: "#737373" }} tickFormatter={fmtK} />
+                <Tooltip cursor={{ fill: "#f5f5f5" }} content={<ChartTip f={(v) => fmt(v)} names={{ dolPrev: prevLabel[0].toUpperCase() + prevLabel.slice(1), dolCur: rangeLabel }} />} />
+                {goalD != null && <ReferenceLine y={goalD} stroke="#1f1f1f" strokeDasharray="4 4" />}
+                {D.hasPrev && <Bar dataKey="dolPrev" fill={D_GREY} radius={[2, 2, 0, 0]} isAnimationActive={false} />}
+                <Bar dataKey="dolCur" fill={D_TEAL} radius={[2, 2, 0, 0]} isAnimationActive={false}>{D.series.map((s, i) => <Cell key={i} fill={s.partial ? "url(#hatch)" : D_TEAL} stroke={s.partial ? D_TEAL : undefined} />)}</Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="dc-note amber2">At ATI volume of about 6.75M claims a year, each 1% of claims underpaid by this average ({fmt(D.cur.length ? D.cur.filter((d) => d.status === "underpaid").reduce((s, d) => s + d.variance, 0) / Math.max(1, D.cur.filter((d) => d.status === "underpaid").length) : 0)}) is worth about {fmtK(D.perPct)} a year. Illustrative.</div>
+        </DCard>
+      </div>
+
+      <h2 className="dsec">Recovery</h2>
+      <div className="dgrid">
+        <DCard id="pipeline" title="Recovery pipeline" info="What happened to the underpayments found in this period: appealed, recovered, denied, still waiting, or lost because the appeal window closed." subtitle={`Underpayments found ${shortDate(D.pipeStart)} \u2014 ${shortDate(D.end)}`} right={<PillSelect label="Pipeline range" value={pipeDays} onChange={setPipeDays} options={D_RANGES.slice(1)} />}>
+          <div className="dc-top"><div><div className="dc-big">{fmt(P.won[1], 0)}</div><div className="dc-chg">recovered{P.winRate != null ? `, ${P.winRate.toFixed(0)}% win rate on decided appeals` : ""}</div></div></div>
+          <div className="pipe">
+            {[["Underpaid found", P.detected, "#B8CFCF"], ["Appealed", P.appealed, "#9AE0D2"], ["Recovered", P.won, "#58B88F"], ["Waiting on payer", P.pending, "#F2D08A"], ["Denied", P.denied, "#E7A3A3"], ["Open, not appealed", P.open, "#D6D6D6"], ["Lost, window closed", P.lost, "#CFA9A0"]].map(([l, v, c]) => (
+              <div key={l} className="prow4"><span className="pl">{l}</span><span className="pbar"><i style={{ width: P.detected[1] ? Math.max(2, (v[1] / P.detected[1]) * 100) + "%" : "0%", background: c }} /></span><span className="pv">{fmt(v[1], 0)}</span><span className="pn muted">{v[0]} claims</span></div>
+            ))}
+          </div>
+        </DCard>
+
+        <DCard id="deadlines" title="Appeal deadlines" info="Underpayments not yet appealed, by when their appeal window closes. Money here is lost if nobody acts." subtitle="All open underpayments, as of today" right={<button className="link" onClick={() => onOpenClaims([{ k: "status", v: "Underpaid" }])}>Open in Claims</button>}>
+          <div className="dc-top"><div><div className="dc-big">{fmt(DL.d30[1], 0)}</div><div className="dc-chg">{DL.d30[0]} claims close within 30 days</div></div>
+            <div className="dstats"><div><b>{fmt(DL.d60[1], 0)}</b><span>within 60 days</span></div><div><b>{fmt(DL.d90[1], 0)}</b><span>within 90 days</span></div><div className="neg"><b>{fmt(DL.lost[1], 0)}</b><span>already lost</span></div></div></div>
+          <div className="dc-ct">Dollars by week the window closes</div>
+          <div className="dchart">
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={DL.weeks} margin={{ top: 8, right: 8, left: 0, bottom: 0 }} barCategoryGap="24%">
+                <CartesianGrid vertical={false} stroke="rgba(0,0,0,.08)" />
+                <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#737373" }} interval={0} />
+                <YAxis tickLine={false} axisLine={false} width={44} tick={{ fontSize: 12, fill: "#737373" }} tickFormatter={fmtK} />
+                <Tooltip cursor={{ fill: "#f5f5f5" }} content={<ChartTip f={(v) => fmt(v)} names={{ dollars: "Closing" }} />} />
+                <Bar dataKey="dollars" radius={[2, 2, 0, 0]} isAnimationActive={false}>{DL.weeks.map((w, i) => <Cell key={i} fill={i < 5 ? "#F2B66D" : D_TEAL} />)}</Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="dc-note">Amber bars close within 30 days.</div>
+        </DCard>
+      </div>
+
+      <h2 className="dsec">Where it comes from</h2>
+      <div className="dgrid">
+        <DCard id="by" title="Underpaid dollars by cause" info="Each bar is the shortfall for one group, split by why the payer paid less. Select a bar to open those claims." subtitle={sub}
+          right={<div className="seg">{dimOpts.map(([k, l]) => <button key={k} className={dim === k ? "on" : ""} onClick={() => setDim(k)}>{l}</button>)}</div>}>
+          <DLegend items={CAUSES.map(([, l, c]) => [c, l])} />
+          <div className="dchart">
+            <ResponsiveContainer width="100%" height={Math.max(150, rows.length * 44 + 30)}>
+              <BarChart data={rows} layout="vertical" margin={{ top: 4, right: 16, left: 8, bottom: 0 }} barCategoryGap="28%">
+                <CartesianGrid horizontal={false} stroke="rgba(0,0,0,.08)" />
+                <XAxis type="number" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#737373" }} tickFormatter={fmtK} />
+                <YAxis type="category" dataKey="name" width={150} tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#1f1f1f" }} />
+                <Tooltip cursor={{ fill: "#f5f5f5" }} content={<ChartTip f={(v) => fmt(v)} names={{ escalator: "Escalator not applied", pta: "PTA rate reduced", bundling: "Payer edit (CO-97)" }} />} />
+                {CAUSES.map(([k, , c]) => <Bar key={k} dataKey={k} stackId="a" fill={c} isAnimationActive={false} cursor="pointer" onClick={(d) => openDim(d.payload ? d.payload.name : d.name)} />)}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          {!rows.length && <div className="empty">No underpayments in this period.</div>}
+        </DCard>
+
+        <DCard id="peers" title="How you compare with similar practices" info="Underpayment rate by payer against outpatient PT groups of similar size. The shaded band is the middle half of the cohort." subtitle={sub + " \u00b7 Illustrative benchmark"}>
+          <div className="cohort">
+            {D.peers.map((x) => { const mx = Math.max(40, ...D.peers.map((y) => (y.rate || 0) + 5)); return (
+              <div key={x.k} className="crow2"><div className="cname">{x.k}</div>
+                <div className="ctrack"><div className="cband" style={{ left: (x.b.lo / mx) * 100 + "%", width: ((x.b.hi - x.b.lo) / mx) * 100 + "%" }} /><div className="cmed" style={{ left: (x.b.med / mx) * 100 + "%" }} /><div className={"cyou" + (x.rate > x.b.hi ? " hot" : "")} style={{ left: ((x.rate || 0) / mx) * 100 + "%" }} /></div>
+                <div className="cval"><b>{(x.rate || 0).toFixed(1)}%</b><span className="muted"> vs {x.b.med}%</span></div>
+                <div className="cflag">{x.rate > x.b.hi ? <Chip tone="rust">{(x.rate / x.b.med).toFixed(1)}x the median</Chip> : x.rate > x.b.med ? <Chip tone="amber">Above median</Chip> : <Chip tone="moss">In line</Chip>}</div></div>
+            ); })}
+          </div>
+        </DCard>
+      </div>
+
+      <div className="dgrid one">
+        <DCard id="terms" wide title="Contract terms and what you actually collect" info="The contracted rate as a percent of the Medicare fee schedule, against similar practices, and the share of the contracted amount that payers actually paid." subtitle={sub + " \u00b7 Peer figures are illustrative"}>
+          <div className="tblwrap"><table className="tbl">
+            <thead><tr><th>Payer and plan</th><th>Contract</th><th className="r">% of Medicare</th><th className="r">Peers</th><th>Terms</th><th className="r">Paid vs contract</th><th>Result</th></tr></thead>
+            <tbody>{terms.map((x) => { const [tone, label] = termTone(x); const under2 = x.real != null && x.real < 99; return (
+              <tr key={x.key}><td className="b">{x.payer}<span className="sub">{x.plan}</span></td><td>{x.number}</td><td className="r">{x.pct == null ? "n/a" : x.pct.toFixed(0) + "%"}</td><td className="r">{x.peer}%</td>
+                <td>{x.chips.map((c) => <Chip key={c} tone="grey">{c}</Chip>)}</td><td className="r">{x.real == null ? "n/a" : x.real.toFixed(1) + "%"}</td>
+                <td><Chip tone={tone}>{label}</Chip>{under2 && <Chip tone="rust">Paid below contract</Chip>}</td></tr>); })}</tbody></table></div>
+        </DCard>
       </div>
     </div>
   );
@@ -2560,7 +3191,7 @@ function ConnectionsPage({ contracts, claims, createdTerms, ruleOn }) {
   const stateTerm = c && c.terms.find((t) => t.category === "State");
   const under = claims.filter((x) => x.status === "underpaid" && x.contractId === "cascadia" && !x.appeal);
   const hmoAmt = c && hmo ? calcUnit(hmo, c, TODAY, ruleOn, false).amount : null;
-  const st = (t) => (t && createdTerms[t.id] ? <Chip tone="moss"><Check size={12} />Rule active</Chip> : <Chip tone="grey">Suggested</Chip>);
+  const st = (t) => (t && createdTerms[t.id] === "draft" ? <Chip tone="grey">Draft rule</Chip> : t && createdTerms[t.id] ? <Chip tone="moss"><Check size={12} />Rule active</Chip> : <Chip tone="grey">Suggested</Chip>);
   if (!c) return <div className="page"><div className="pagehead"><div><div className="crumb">Practice data</div><h1>Destination</h1></div></div><div className="empty pad">Load the Cascadia contract to see it feed the rest of the platform.</div></div>;
   return (
     <div className="page">
@@ -2579,7 +3210,7 @@ function ConnectionsPage({ contracts, claims, createdTerms, ruleOn }) {
       <div className="tblwrap"><table className="tbl answer"><thead><tr><th>Tool</th><th>What it does today</th><th>With the contract repository</th><th>Recommendation</th></tr></thead>
         <tbody>
           <tr><td className="b">Billing calculator</td><td>Clinicians pick CPT codes from treatment minutes.</td><td>Folds into the new EMR charge capture. Expected allowed comes from the repository.</td><td><Chip tone="rust">Retire</Chip></td></tr>
-          <tr><td className="b">Excel Contract Grid and manual validation</td><td>Two people validate contracts for the whole company.</td><td>Claude reads the contract, a reviewer approves flagged items, and the QA record is kept.</td><td><Chip tone="rust">Retire</Chip></td></tr>
+          <tr><td className="b">Excel Contract Grid and manual validation</td><td>Two people validate contracts for the whole company.</td><td>Athelas AI reads the contract, a reviewer approves flagged items, and the QA record is kept.</td><td><Chip tone="rust">Retire</Chip></td></tr>
           <tr><td className="b">Syntellis Axiom, claim level</td><td>Models expected reimbursement from payer contracts. Waystar pushes CPTs to it.</td><td>Expected allowed is calculated per claim line at posting and compared with the 835.</td><td><Chip tone="rust">Not needed</Chip></td></tr>
           <tr><td className="b">Syntellis Axiom, planning</td><td>Budgeting and forecasting for finance.</td><td>Receives expected allowed and variance as a feed. Finance keeps its tool.</td><td><Chip tone="teal">Keep, integrate</Chip></td></tr>
         </tbody></table></div>
@@ -2606,12 +3237,13 @@ const CHAPTERS = [
   { k: "understand", label: "Understand", line: "Every expected allowed amount shows its math.", page: "contracts" },
   { k: "catch", label: "Catch", line: "Each 835 is checked against the contract at posting.", page: "claims" },
   { k: "recover", label: "Recover", line: "From variance to appeal in a few clicks.", page: "claims" },
-  { k: "learn", label: "Learn", line: "See patterns by payer, site, and against peers.", page: "analytics" },
+  { k: "learn", label: "Learn", line: "See patterns by payer, site, and against peers.", page: "dashboards" },
   { k: "connect", label: "Connect", line: "Load once. Scheduling, auth, and AR use it too.", page: "connections" },
 ];
 const PD_PAGES = ["contracts", "fees", "hierarchy", "documents", "connections"];
 const NAV = [
-  { g: "Revenue Cycle", icon: Receipt, items: [["claims", "Claims", ["claims"]], ["appeals", "Appeals", ["appeals"]], ["analytics", "Analytics", ["analytics"]]] },
+  { g: "Revenue Cycle", icon: Receipt, items: [["claims", "Claims", ["claims"]], ["appeals", "Appeals", ["appeals"]]] },
+  { g: "Reporting", icon: BarChart3, items: [["dashboards", "Dashboards", ["dashboards"]]] },
   { g: "Admin Panel", icon: BookOpen, items: [["contracts", "Practice Data", PD_PAGES]] },
 ];
 const CM_ITEMS = [["contracts", "Contracts"], ["fees", "Fee schedules"], ["hierarchy", "Payer Hierarchy"], ["documents", "Documents"], ["connections", "Destination"]];
@@ -2633,7 +3265,7 @@ function PracticeNav({ page, onGo, onInert }) {
     </aside>
   );
 }
-const CRUMBS = { claims: ["Revenue Cycle", "Claims"], appeals: ["Revenue Cycle", "Appeals"], analytics: ["Revenue Cycle", "Analytics"], contracts: ["Practice Data", "Contracts"], fees: ["Practice Data", "Fee schedules"], hierarchy: ["Practice Data", "Payer Hierarchy"], documents: ["Practice Data", "Documents"], connections: ["Practice Data", "Destination"] };
+const CRUMBS = { claims: ["Claims"], appeals: ["Appeals"], dashboards: ["Dashboards"], contracts: ["Practice Data", "Contracts"], fees: ["Practice Data", "Fee schedules"], hierarchy: ["Practice Data", "Payer Hierarchy"], documents: ["Practice Data", "Documents"], connections: ["Practice Data", "Destination"] };
 
 function AssistantPanel({ context, prompts = [], onClose }) {
   const [msgs, setMsgs] = useState([]);
@@ -2650,7 +3282,7 @@ function AssistantPanel({ context, prompts = [], onClose }) {
     setMsgs((m) => [...m, { r: "u", t: question }]); setQ(""); setBusy(true);
     let answer;
     try {
-      answer = await callClaude("You are Athelas AI, the assistant inside Air, a healthcare revenue cycle platform. Answer in under 80 words, plain text, no markdown. Use only the context provided. If the answer is not in the context, say so.", `Context:\n${context}\n\nQuestion: ${question}`);
+      answer = await callAI("You are Athelas AI, the assistant inside Air, a healthcare revenue cycle platform. Answer in under 80 words, plain text, no markdown. Use only the context provided. If the answer is not in the context, say so.", `Context:\n${context}\n\nQuestion: ${question}`);
     } catch (e) { answer = "I could not reach the assistant just now. Try again in a moment."; }
     setMsgs((m) => [...m, { r: "a", t: answer.trim() }]); setBusy(false);
   }
@@ -2694,44 +3326,52 @@ export default function App() {
   const contracts = useMemo(() => resolveContracts(rawContracts, schedules), [rawContracts, schedules]);
   const [ruleOn, setRuleOn] = useState({ "summit:pta": true, "keystone:pta": true });
   const [createdTerms, setCreatedTerms] = useState({});
-  const [appeals, setAppeals] = useState({});
+  const [appeals, setAppeals] = useState(SEED_APPEALS);
   const [upload, setUpload] = useState(false);
   const [drawerRow, setDrawerRow] = useState(null);
   const [doc, setDoc] = useState(null);
-  const [view, setView] = useState("underpaid");
+  const [view, setView] = useState("workable");
+  const [assign, setAssign] = useState({});
+  const [customViews, setCustomViews] = useState([]);
+  const [goals, setGoals] = useState({ rate: null, dollars: null });
+  const [dash, setDash] = useState("underpayments");
+  const [claimsPreset, setClaimsPreset] = useState(null);
   const [openClaim, setOpenClaim] = useState(null);
   const [appealIds, setAppealIds] = useState(null);
   const [sel, setSel] = useState([]);
   const [msg, setMsg] = useState("");
   const [pending, setPending] = useState(null);
-  const [presenter, setPresenter] = useState(true);
+  const [presenter, setPresenter] = useState(false);
+  useEffect(() => { const h = (e) => { if (e.altKey && (e.code === "KeyP" || e.key === "p")) { e.preventDefault(); setPresenter((v) => !v); } }; window.addEventListener("keydown", h); return () => window.removeEventListener("keydown", h); }, []);
   const [aiOpen, setAiOpen] = useState(false);
+  const [navOff, setNavOff] = useState(false);
   const [aiHook, setAiHook] = useState(null);
   const [ruleLog, setRuleLog] = useState([{ d: "Mar 12, 2026", t: "Apply PTA (CQ) services at the contract percentage: on" }]);
 
   useEffect(() => { if (!upload && !appealIds && !feeFlow) setAiHook(null); }, [upload, appealIds, feeFlow]);
   const loaded = contracts.some((c) => c.id === "cascadia");
-  const claims = useMemo(() => CLAIMS.map((c) => derive(c, contracts, ruleOn, appeals)), [contracts, ruleOn, appeals]);
+  const claims = useMemo(() => CLAIMS.map((c) => { const d = derive(c, contracts, ruleOn, appeals); if (assign[c.id] !== undefined) d.assignee = assign[c.id]; return d; }), [contracts, ruleOn, appeals, assign]);
   const hero = claims.find((c) => c.id === HERO_ID);
   const toast = (m) => { setMsg(m); setTimeout(() => setMsg(""), 3800); };
 
-  const publish = (c, quiet) => {
+  const publish = (c, quiet, approved = []) => {
     setContracts((prev) => [...prev.filter((x) => x.id !== c.id), c]);
-    setRuleOn((p) => ({ ...p, [c.id + ":escalator"]: !!c.escalatorPct, [c.id + ":pta"]: c.ptaPct != null }));
-    setRuleLog((l) => [{ d: fmtDate(TODAY), t: `Rate rules applied from ${c.number} on publish` }, ...l]);
-    if (!quiet) toast(`Published ${c.masterPayer}: ${c.plans.length} plans, ${c.rows.length} rate rows. Claims are now checked against it.`);
+    setRuleOn((p) => { const n = { ...p }; c.terms.forEach((x) => { if (x.ruleKey) n[c.id + ":" + x.ruleKey] = approved.includes(x.id) ? "draft" : false; }); return n; });
+    setCreatedTerms((p) => { const n = { ...p }; c.terms.forEach((x) => { if (!x.ruleKey && isRuleable(x)) n[x.id] = approved.includes(x.id) ? "draft" : false; }); return n; });
+    setRuleLog((l) => [...approved.map((id) => ({ d: fmtDate(TODAY), t: `Rule added as draft: ${(c.terms.find((x) => x.id === id) || {}).summary} (${c.number})` })), ...l]);
+    if (!quiet) toast(`Published ${c.masterPayer}: ${c.plans.length} plans, ${c.rows.length} rate rows. ${approved.length} of ${ruleIds(c).length} rules added to Rules as drafts.`);
   };
   const go = (k) => {
     const ch = CHAPTERS.find((x) => x.k === k);
     setChapter(k); setUpload(false); setFeeFlow(false); setPage(ch.page); setOpenClaim(null); setAppealIds(null); setDrawerRow(null); setDoc(null);
-    if (["understand", "catch", "recover", "learn"].includes(k) && !loaded) { publish(CASCADIA_CANON, true); toast("Loaded the sample Cascadia contract so this step has data."); }
-    if (k === "catch") { setView("underpaid"); setSel([]); }
+    if (["understand", "catch", "recover", "learn"].includes(k) && !loaded) { publish(CASCADIA_CANON, true, ruleIds(CASCADIA_CANON)); toast("Loaded the sample Cascadia contract and approved its rules so this step has data."); }
+    if (k === "catch") { setView("workable"); setSel([]); }
     setPending(k);
   };
   useEffect(() => {
     if (!pending || !loaded) return;
     if (pending === "understand") { const r = contracts.find((c) => c.id === "cascadia").rows.find((x) => x.plan.toLowerCase().includes("choice") && x.cpt === "97110"); if (r) setDrawerRow(r.id); }
-    if (pending === "recover") { setView("underpaid"); setOpenClaim(HERO_ID); }
+    if (pending === "recover") { setOpenClaim(HERO_ID); }
     setPending(null);
   }, [pending, loaded, contracts]);
 
@@ -2741,14 +3381,14 @@ export default function App() {
     setSel([]);
   };
   const respond = () => { setAppeals((p) => { const n = { ...p }; Object.keys(n).forEach((id) => { if (n[id].status === "Submitted") { const cl = CLAIMS.find((c) => c.id === id); n[id] = { ...n[id], status: cl.pattern === "bundling" ? "Denied" : "Won" }; } }); return n; }); toast("Payer responses received."); };
-  const reset = () => { setContracts([SUMMIT, KEYSTONE]); setSchedules([]); setFeeFlow(false); setRuleOn({ "summit:pta": true, "keystone:pta": true }); setCreatedTerms({}); setAppeals({}); setSel([]); setOpenClaim(null); setAppealIds(null); setDrawerRow(null); setDoc(null); setUpload(false); setAiHook(null); setView("underpaid"); go("load"); };
+  const reset = () => { setContracts([SUMMIT, KEYSTONE]); setSchedules([]); setFeeFlow(false); setRuleOn({ "summit:pta": true, "keystone:pta": true }); setCreatedTerms({}); setAppeals(SEED_APPEALS); setAssign({}); setCustomViews([]); setGoals({ rate: null, dollars: null }); setDash("underpayments"); setClaimsPreset(null); setSel([]); setOpenClaim(null); setAppealIds(null); setDrawerRow(null); setDoc(null); setUpload(false); setAiHook(null); setView("workable"); go("load"); };
   const openDoc = (id, hl, page) => setDoc({ id, hl, page });
   const detail = openClaim ? claims.find((c) => c.id === openClaim) : null;
   const thread = hero ? (hero.appeal ? (hero.appeal.status === "Won" ? `${fmt(hero.variance)} recovered` : "Appeal submitted") : hero.status === "underpaid" ? `${fmt(hero.variance)} underpaid` : hero.status === "no_contract" ? "No contract on file" : "Paid as expected") : "";
   const crumb = appealIds ? ["Claims", appealIds.length === 1 ? appealIds[0] : "Underpaid"] : CRUMBS[page];
   const underAll = claims.filter((c) => c.status === "underpaid");
   const baseContext = `Page: ${CRUMBS[page].join(" / ")}. Contracts on file: ${contracts.map((c) => `${c.masterPayer} (${c.plans.map((p) => p.plan + ", " + METHOD[p.method] + (p.discountPct ? " " + p.discountPct + "%" : "") + (p.flatRate ? " $" + p.flatRate : "")).join("; ")}; appeals due within ${c.disputeDays} days of remittance)`).join(" | ")}. Sample claims: ${claims.length}; underpaid: ${underAll.length} totalling ${fmt(underAll.reduce((s, c) => s + c.variance, 0))}; high recoverability and open: ${underAll.filter((c) => c.level === "High" && !c.appeal).length}; appeals filed: ${claims.filter((c) => c.appeal).length}. Featured claim ${HERO_ID}: ${hero ? hero.reason : ""} Expected allowed is calculated per claim line from the contract (fee schedule x rate, then escalator and PTA rules) and compared with the 835 at posting. Axiom: the billing calculator retires into the new EMR, Axiom is not needed for claim level expected reimbursement, and can stay for planning through a Databricks feed.`;
-  const basePrompts = { contracts: [{ q: "Which payers have contracts on file?" }, { q: "How is expected allowed calculated?" }], connections: [{ q: "Do we still need Axiom?" }, { q: "Which teams use the contract?" }], fees: [{ q: "Which fee schedules are loaded?" }, { q: "Which contracts use the Medicare schedule?" }], hierarchy: [{ q: "Which payers have more than one plan?" }], documents: [{ q: "Which contracts have a document on file?" }], claims: [{ q: "Which underpaid claims should I appeal first?" }, { q: `Why was ${HERO_ID} flagged?` }], appeals: [{ q: "What is in dispute right now?" }], analytics: [{ q: "Which payer is furthest from peers?" }] }[page] || [];
+  const basePrompts = { contracts: [{ q: "Which payers have contracts on file?" }, { q: "How is expected allowed calculated?" }], connections: [{ q: "Do we still need Axiom?" }, { q: "Which teams use the contract?" }], fees: [{ q: "Which fee schedules are loaded?" }, { q: "Which contracts use the Medicare schedule?" }], hierarchy: [{ q: "Which payers have more than one plan?" }], documents: [{ q: "Which contracts have a document on file?" }], claims: [{ q: "Which underpaid claims should I appeal first?" }, { q: `Why was ${HERO_ID} flagged?` }], appeals: [{ q: "What is in dispute right now?" }], dashboards: [{ q: "Which payer is furthest from peers?" }, { q: "How much is at risk this month?" }, { q: "Why did the rate fall in October?" }] }[page] || [];
   const wonTotal = claims.filter((c) => c.appeal && c.appeal.status === "Won").reduce((s, c) => s + c.variance, 0);
 
   return (
@@ -2773,8 +3413,8 @@ export default function App() {
           <button className="pbtn" onClick={() => setPresenter(false)} aria-label="Hide presenter bar">Hide</button>
         </div>
       )}
-      {!presenter && <button className="showp" onClick={() => setPresenter(true)}>Presenter</button>}
-      <div className={"shell" + (upload || appealIds || feeFlow ? " flowing" : "")}>
+      
+      <div className={"shell" + (upload || appealIds || feeFlow ? " flowing" : "") + (navOff ? " navoff" : "")}>
         <nav className="sidecol" aria-label="Main">
           <div className="logo">Air</div>
           <div className="sidescroll">
@@ -2796,13 +3436,13 @@ export default function App() {
         </nav>
         <div className="rightcol">
           <header className="hdr">
-            <div className="hdr-l"><PanelLeft size={16} /><div className="bc"><span className="bc-link">{crumb[0]}</span><span className="bc-sep">/</span><span className="bc-cur">{crumb[1]}</span></div></div>
+            <div className="hdr-l"><button className="icon hbtn" aria-label={navOff ? "Show navigation" : "Hide navigation"} aria-pressed={navOff} onClick={() => setNavOff(!navOff)}><PanelLeft size={16} /></button><div className="bc">{crumb.length > 1 && <><span className="bc-link">{crumb[0]}</span><span className="bc-sep">/</span></>}<span className="bc-cur">{crumb[crumb.length - 1]}</span></div></div>
             <div className="hdr-c"><Bell size={16} /><div className="gsearch"><Search size={16} />Global Search<span className="kbd">⌘K</span></div></div>
             <div className="hdr-r"><span className="aitab"><Mic size={16} />Scribe</span><button className={"aitab" + (aiOpen ? " on" : "")} aria-pressed={aiOpen} onClick={() => setAiOpen(!aiOpen)}><Sparkles size={16} />Athelas AI</button></div>
           </header>
           <div className="workrow">
           <main className={"canvas" + (upload || appealIds || feeFlow ? " flowing" : PD_PAGES.includes(page) ? " pdc" : "")}>
-            {appealIds ? <AppealPackageFlow key={appealIds.join()} ids={appealIds} claims={claims} setAiHook={setAiHook} onCancel={() => setAppealIds(null)} onSubmit={submitAppeals} onViewAppeals={() => { setAppealIds(null); setPage("appeals"); }} /> : upload ? <AddContractFlow key={upload} mode={upload} setAiHook={setAiHook} onCancel={() => setUpload(false)} onPublish={(cs) => { cs.forEach((c) => publish(c, true)); setUpload(false); setChapter("understand"); toast(cs.length === 1 ? `Published ${cs[0].masterPayer}: ${cs[0].plans.length} plans, ${cs[0].rows.length} rate rows.${cs[0].id === "cascadia" ? " Claims are now checked against it." : ""}` : `Published ${cs.length} contracts to the repository.${cs.some((c) => c.id === "cascadia") ? " Claims are now checked against the Cascadia contract." : ""}`); }} /> : feeFlow ? <FeeScheduleFlow key={String(feeFlow.hint)} hint={feeFlow.hint} existing={[...deriveSchedules(rawContracts), ...schedules]} contracts={rawContracts} schedules={schedules} setAiHook={setAiHook} onCancel={() => setFeeFlow(false)} onPublish={(s) => { setSchedules((p) => [...p.filter((x) => x.id !== s.id), s]); setFeeFlow(false); setPage("fees"); toast(`Published ${s.name}: ${s.rows} codes.`); }} /> : <>
+            {appealIds ? <AppealPackageFlow key={appealIds.join()} ids={appealIds} claims={claims} setAiHook={setAiHook} onCancel={() => setAppealIds(null)} onSubmit={submitAppeals} onViewAppeals={() => { setAppealIds(null); setPage("appeals"); }} /> : upload ? <AddContractFlow key={upload} mode={upload} setAiHook={setAiHook} onCancel={() => setUpload(false)} onPublish={(es) => { es.forEach((e) => publish(e.contract, true, e.approved)); setUpload(false); setChapter("understand"); const all = es.reduce((s, e) => s + ruleIds(e.contract).length, 0), ok = es.reduce((s, e) => s + e.approved.length, 0); toast(`Published ${es.length} contract${es.length === 1 ? "" : "s"}. ${all ? (ok === all ? `${ok} rule${ok === 1 ? "" : "s"} added to Rules as drafts. Activate ${ok === 1 ? "it" : "them"} there.` : `${ok} of ${all} rules added to Rules as drafts, ${all - ok} not added.`) : ""}`); }} /> : feeFlow ? <FeeScheduleFlow key={String(feeFlow.hint)} hint={feeFlow.hint} existing={[...deriveSchedules(rawContracts), ...schedules]} contracts={rawContracts} schedules={schedules} setAiHook={setAiHook} onCancel={() => setFeeFlow(false)} onPublish={(s) => { setSchedules((p) => [...p.filter((x) => x.id !== s.id), s]); setFeeFlow(false); setPage("fees"); toast(`Published ${s.name}: ${s.rows} codes.`); }} /> : <>
             {PD_PAGES.includes(page) ? (
               <div className="pd">
                 <PracticeNav page={page} onGo={(k) => { setPage(k); setOpenClaim(null); }} onInert={() => toast("Not part of this demo")} />
@@ -2816,9 +3456,12 @@ export default function App() {
               </div>
             ) : (
               <>
-                {page === "claims" && <ClaimsPage claims={claims} view={view} setView={setView} sel={sel} setSel={setSel} openClaim={openClaim} setOpenClaim={setOpenClaim} startAppeal={startAppeal} loaded={loaded} goLoad={() => go("load")} />}
-                {page === "appeals" && <AppealsPage claims={claims} respond={respond} />}
-                {page === "analytics" && <AnalyticsPage claims={claims} openFromAnalytics={(id) => { setPage("claims"); setView("underpaid"); setOpenClaim(id); }} />}
+                {page === "claims" && <ClaimsPage claims={claims} view={view} setView={setView} sel={sel} setSel={setSel} setOpenClaim={setOpenClaim} startAppeal={startAppeal} loaded={loaded} goLoad={() => go("load")} onAssign={(ids, v) => setAssign((p) => { const n = { ...p }; ids.forEach((id) => { n[id] = v; }); return n; })} toast={toast} onAnalytics={() => { setDash("underpayments"); setPage("dashboards"); }} preset={claimsPreset} onPresetUsed={() => setClaimsPreset(null)} customViews={customViews}
+                  onSaveView={(v) => { const id = "cv" + Date.now(); setCustomViews((p) => [...p, { ...v, id }]); setView(id); toast(`Saved the view "${v.name}"`); }}
+                  onUpdateView={(id, patch) => { setCustomViews((p) => p.map((x) => (x.id === id ? { ...x, ...patch } : x))); toast("View updated"); }}
+                  onDeleteView={(id) => { setCustomViews((p) => p.filter((x) => x.id !== id)); setView("workable"); toast("View deleted"); }} />}
+                {page === "appeals" && <AppealsPage claims={claims} respond={respond} setOpenClaim={setOpenClaim} toast={toast} goClaims={() => setPage("claims")} onAssign={(ids, v) => setAssign((p) => { const n = { ...p }; ids.forEach((id) => { n[id] = v; }); return n; })} />}
+                {page === "dashboards" && <DashboardsPage claims={claims} contracts={contracts} goals={goals} setGoals={setGoals} dash={dash} setDash={setDash} toast={toast} onOpenClaims={(f) => { setClaimsPreset({ filters: f, nonce: Date.now() }); setView("workable"); setSel([]); setPage("claims"); }} />}
               </>
             )}
             </>}
@@ -2827,7 +3470,7 @@ export default function App() {
           </div>
         </div>
       </div>
-      {detail && page === "claims" && <ClaimFlyout d={detail} onClose={() => setOpenClaim(null)} startAppeal={startAppeal} openDoc={openDoc} />}
+      {detail && (page === "claims" || page === "appeals") && <ClaimFlyout d={detail} onClose={() => setOpenClaim(null)} startAppeal={startAppeal} openDoc={openDoc} />}
                   {doc && <DocModal doc={doc} contracts={contracts} onClose={() => setDoc(null)} />}
       {msg && <div className="toast" role="status">{msg}</div>}
     </div>
@@ -3185,6 +3828,7 @@ h1{font-size:18px;font-weight:600;line-height:1.2;margin:0}.h2{font-size:18px;fo
 .fld{position:relative;display:block;border:1px solid var(--bst);border-radius:var(--r-soft);padding:17px 10px 5px;background:var(--base)}
 .fld.wide{grid-column:1 / -1}
 .fld span{position:absolute;top:2px;left:10px;font-size:11px;color:var(--fg3);line-height:1.4}
+.fld input:focus-visible,.fld textarea:focus-visible{outline:none}
 .fld input,.fld textarea{width:100%;border:0;outline:0;background:transparent;font:inherit;color:var(--fg1);resize:vertical;padding:0}
 .fld:focus-within{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
 .fld.ro{background:var(--solid2)}.fld.ro input{color:var(--fg2)}
@@ -3286,17 +3930,22 @@ h1{font-size:18px;font-weight:600;line-height:1.2;margin:0}.h2{font-size:18px;fo
 
 /* multi-contract upload (layout from the ATI Demo design) */
 .cbody{flex:1;min-height:0;display:flex}
-.clist{width:168px;flex:none;border-right:1px solid var(--bs);padding:12px;display:flex;flex-direction:column;gap:4px;overflow:auto}
-.clist-h{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--fg3);padding:0 8px 6px}
-.citem{position:relative;display:flex;align-items:center;border-radius:var(--r-soft)}
+.clist{width:240px;flex:none;border-right:1px solid var(--bs);padding:0;display:flex;flex-direction:column;gap:0;overflow:auto;background:var(--base)}
+.clist-h{display:flex;align-items:center;gap:8px;height:42px;padding:0 16px;font-size:15px;font-weight:600;color:var(--fg1);border-bottom:1px solid var(--bs);flex:none}
+.clist-h .cnt{background:none;color:var(--fg3);font-weight:400;font-size:15px;padding:0;min-width:0;height:auto}
+.clist-h+.citem{margin-top:8px}
+.citem{position:relative;display:flex;align-items:center;margin:2px 8px;border-radius:var(--r-card);flex:none}
 .citem.on{background:var(--accent-sub)}
-.citem-b{flex:1;min-width:0;display:flex;align-items:center;gap:6px;height:28px;padding:0 4px 0 6px;border:0;background:transparent;border-radius:var(--r-soft);color:var(--fg2);text-align:left}
 .citem:hover:not(.on){background:var(--d5)}
-.citem.on .citem-b{color:#0d28bf}
-.citem-b svg{flex:none}
-.citem-x{display:none;width:22px;height:22px;margin-right:2px;border:0;border-radius:50%;background:transparent;place-items:center;color:var(--fg3);padding:0;flex:none}
+.citem-b{flex:1;min-width:0;display:flex;align-items:flex-start;gap:10px;min-height:58px;padding:10px 4px 10px 12px;border:0;background:transparent;border-radius:var(--r-card);color:var(--fg1);text-align:left}
+.citem-b>svg{flex:none;width:20px;height:20px;margin-top:2px}
+.citem .ct{display:flex;flex-direction:column;min-width:0;gap:1px}
+.citem .c1{font-size:15px;line-height:1.4;font-weight:400}
+.citem .c2{font-size:13px;line-height:1.4;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.citem-x{display:none;width:28px;height:28px;margin-right:8px;border:0;border-radius:50%;background:transparent;place-items:center;color:var(--fg1);padding:0;flex:none}
 .citem:hover .citem-x,.citem.on .citem-x,.citem:focus-within .citem-x{display:grid}.citem-x:hover{background:var(--d10)}
-.clist-add{margin-top:8px;align-self:flex-start}
+.clist-foot{margin-top:auto;border-top:1px solid var(--bs);padding:12px;position:sticky;bottom:0;background:var(--base);flex:none}
+.clist-add{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;height:34px;border:2px solid var(--accent);border-radius:var(--r-full);background:var(--base);color:var(--fg-accent);font-weight:500}.clist-add:hover{background:var(--accent-sub-h)}
 .cmid{flex:1;min-width:0;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:12px}
 .cmid>*{flex:none}
 .cdoc{flex:1;min-width:0;border-left:1px solid var(--bs);display:flex;flex-direction:column;min-height:0;background:#fafafa}
@@ -3385,7 +4034,139 @@ h1{font-size:18px;font-weight:600;line-height:1.2;margin:0}.h2{font-size:18px;fo
 .fp-b tr.rm td:last-child{text-decoration:none}
 .pad0{padding:2px 0 6px}
 .emptyicon.bad{background:var(--t-red);color:var(--danger)}
-.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#141414;color:#e5e5e5;padding:8px 16px;border-radius:var(--r-soft);z-index:50;box-shadow:0 6px 8px rgba(0,0,0,.25);max-width:80vw}
+
+/* Claims page: structure of the current Claims page */
+.canvas:has(> .clpage){display:flex;flex-direction:column}
+.clpage{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+.cl-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 12px;flex:none}
+.cl-tabs{display:flex;align-items:center;gap:6px}
+.cl-tab{height:30px;padding:0 12px;border:0;border-radius:var(--r-soft);background:transparent;color:var(--fg1);white-space:nowrap}
+.cl-tab:hover:not(.on){background:var(--d5)}.cl-tab.on{background:var(--accent-sub);color:var(--fg-accent)}
+.cl-div{width:1px;height:24px;background:var(--bs);margin:0 6px}
+.cl-act{display:flex;align-items:center;gap:6px}
+.cl-act .tgl{width:34px;height:34px;border-radius:50%}.cl-act .tgl:disabled{opacity:.35;cursor:not-allowed}
+.cl-filter{display:flex;align-items:center;gap:10px;padding:8px 12px;border-top:1px solid var(--bs);border-bottom:1px solid var(--bs);flex:none;flex-wrap:wrap}
+.pillbtn{position:relative;display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 14px;border:1px solid var(--bs);border-radius:var(--r-full);background:var(--base);font-weight:500;white-space:nowrap}
+.pillbtn:hover:not(:disabled){background:var(--d5)}.pillbtn:disabled{opacity:.4;cursor:not-allowed}
+.reddot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:#e5214b}
+.clsum{color:var(--fg2);font-size:12px;margin-left:auto}.clsum b{color:var(--fg1);font-weight:600}
+.pop.dsp{width:280px;right:0;max-height:70vh;overflow:auto}
+.clb{margin:8px 12px 0;flex:none}
+.clwrap{flex:1;min-height:0;overflow:auto;position:relative}
+.cltbl{border-collapse:separate;border-spacing:0;width:100%;min-width:max-content;font-size:13px}
+.cltbl th{position:sticky;top:0;z-index:3;height:36px;padding:0 10px;background:var(--solid2);text-align:left;font-weight:400;color:var(--fg1);white-space:nowrap;border-bottom:1px solid var(--bs)}
+.cltbl th.sortable{cursor:pointer}.cltbl th.sortable:hover{background:var(--d5)}
+.sarrow{margin-left:8px;font-size:15px;line-height:1}
+.cltbl td{height:42px;padding:0 10px;border-bottom:1px solid var(--bs);background:var(--base);color:var(--fg1);white-space:nowrap}
+.cltbl th.sel,.cltbl td.sel{width:48px;min-width:48px;padding:0 0 0 12px}
+.clrow{cursor:pointer}.clrow:hover td{background:var(--accent-sub-h)}.clrow.picked td{background:var(--accent-sub)}
+.cltbl .asg-h,.cltbl .asg-c{position:sticky;right:0;z-index:2;box-shadow:-6px 0 8px -6px rgba(0,0,0,.12);text-align:center}
+.cltbl th.asg-h{z-index:4}
+.cltbl td.asg-c{background:var(--base)}.clrow:hover td.asg-c{background:#f1f5fd}.clrow.picked td.asg-c{background:#e8ecfd}
+.clgrp td{height:41px;padding:0;background:var(--solid2);border-bottom:1px solid var(--bs)}
+.clgin{position:sticky;left:0;display:flex;align-items:center;gap:8px;height:41px;padding-left:10px;width:max-content;max-width:calc(100vw - 280px)}
+.gchip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border:1px solid var(--bs);border-radius:var(--r-soft);background:var(--base);white-space:nowrap}
+.gchip.amt{border-radius:var(--r-full);background:var(--base)}.gchip.amt b{font-weight:500}.gsep{color:var(--fg3)}
+.pill{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid var(--bs);border-radius:var(--r-full);background:var(--base);font-weight:500;white-space:nowrap}
+.pill.st-underpaid svg{color:var(--danger)}.pill.st-denied svg{color:var(--danger)}.pill.st-pending svg{color:#2b5fd9}.pill.st-recovered svg{color:#2a9953}.pill.st-paid svg{color:var(--fg3)}
+.insdot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--fg3);display:inline-block}
+.clid{font-weight:400}
+.plink{border:0;background:transparent;padding:0;color:var(--fg-accent);font-size:13px;cursor:pointer}.plink:hover{text-decoration:underline}
+.asg{width:30px;height:30px;border-radius:50%;border:1px solid var(--bst);background:var(--base);display:inline-grid;place-items:center;color:var(--fg2);padding:0;font-size:11px;font-weight:600}
+.asg:hover{background:var(--d5)}.asg.on{background:var(--accent-sub);border-color:transparent;color:var(--fg-accent)}
+.bulkbar{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:12;display:flex;align-items:center;gap:8px;background:#141414;color:#e5e5e5;border-radius:var(--r-full);padding:6px 8px 6px 18px;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.bb-n{font-weight:500;margin-right:6px;white-space:nowrap}
+.bb-btn{height:30px;padding:0 14px;border-radius:var(--r-full);border:1px solid rgba(255,255,255,.25);background:transparent;color:#e5e5e5;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.bb-btn:hover:not(:disabled){background:rgba(255,255,255,.1)}.bb-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.bb-btn.primary:hover:not(:disabled){background:var(--accent-h)}.bb-btn:disabled{opacity:.4;cursor:not-allowed}
+.shell.navoff{grid-template-columns:1fr}.shell.navoff .sidecol{display:none}
+.hdr-l .hbtn{width:28px;height:28px;margin:0 0 0 2px}.hdr-l .hbtn svg{margin:0}
+
+/* custom views and Save as view */
+.cl-tab.cv{display:inline-flex;align-items:center;padding:0;gap:0}
+.cl-tab.cv .cv-b{height:30px;padding:0 12px;border:0;background:transparent;color:inherit;border-radius:var(--r-soft);white-space:nowrap}
+.cl-tab.cv.on .cv-b{padding-right:4px}
+.cv-x{width:22px;height:22px;margin-right:4px;border:0;border-radius:50%;background:transparent;color:inherit;display:grid;place-items:center;padding:0}.cv-x:hover{background:var(--d10)}
+.pillbtn.accent{border-color:var(--accent);color:var(--fg-accent)}.pillbtn.accent:hover:not(:disabled){background:var(--accent-sub-h)}
+.fchip .fk{opacity:.7;font-weight:400;margin-right:2px}
+.pop.savev{width:340px;left:0;right:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.pop.savev:before{left:20px;right:auto}
+.sv-h{font-weight:600;font-size:14px}
+.sv-f{display:flex;flex-wrap:wrap;gap:6px}.sv-chip{background:var(--accent-sub);color:var(--fg-accent);border-radius:var(--r-full);padding:2px 10px;font-weight:500}
+.sv-c{display:flex;gap:8px;align-items:flex-start;line-height:1.4}
+.sv-b{display:flex;justify-content:flex-end;gap:8px}
+
+/* Dashboards (layout follows the Financial Health dashboard) */
+.dpage{padding:0 16px 40px;max-width:1500px}
+.dhead{display:flex;align-items:center;justify-content:space-between;padding:12px 4px 10px}
+.dbc{display:flex;align-items:center;gap:8px;font-size:18px}.dbc-l{border:0;background:transparent;color:var(--fg2);font-size:18px;padding:0}.dbc-l:hover{text-decoration:underline}
+.dbc .bc-sep{padding:0 4px}
+.dbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 4px;border-top:1px solid var(--bs);border-bottom:1px solid var(--bs);margin-bottom:6px}
+.fpill{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 6px 0 12px;border:1px solid var(--bs);border-radius:var(--r-full);background:var(--base);white-space:nowrap}
+.fpill .fis{background:var(--d5);border-radius:var(--r-full);padding:0 8px;color:var(--fg2)}
+.dpill{position:relative;display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 8px 0 10px;border:1px solid var(--bs);border-radius:var(--r-full);background:var(--base);font-weight:500}
+.dpill select{appearance:none;-webkit-appearance:none;border:0;background:transparent;font:inherit;color:var(--fg1);padding:0 2px;outline:none;cursor:pointer}
+.dpill:focus-within{box-shadow:0 0 0 2px var(--accent)}
+.dpill svg{color:var(--fg2);pointer-events:none}
+.fpill .dpill{border:0;height:26px;padding:0 6px 0 0;font-weight:500}
+.drefresh{display:inline-flex;align-items:center;gap:6px;color:var(--fg2)}
+.dsec{font-size:18px;font-weight:500;margin:22px 4px 10px}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}.dgrid.one{grid-template-columns:1fr}
+.dcard{border:1px solid var(--bs);border-radius:var(--r-extra);background:var(--base);min-width:0}
+.dc-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:14px 16px 10px;border-bottom:1px solid var(--bs)}
+.dc-t{font-size:15px;font-weight:500;display:flex;align-items:center;gap:6px}.dc-s{color:var(--fg2);margin-top:2px}
+.dc-b{padding:14px 16px 16px}
+.dc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px}
+.dc-big{font-size:28px;font-weight:400;line-height:1.2;letter-spacing:-.01em}
+.dc-chg{display:flex;align-items:center;gap:4px;color:var(--fg2);font-size:13px}
+.dc-goal{color:var(--fg2);font-size:12px;margin-top:2px}
+.dc-pills{display:flex;gap:8px}
+.dc-ct{font-size:15px;font-weight:500;margin:10px 0 4px}
+.dlegend{display:flex;flex-wrap:wrap;gap:14px;color:var(--fg2);margin-bottom:6px}.dlegend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.dchart{width:100%}
+.dc-note{margin-top:12px;border:1px solid #E8C98A;background:#FDF3E1;border-radius:var(--r-soft);padding:6px 10px;color:var(--fg1)}
+.dc-note.amber2{background:#FDF3E1}
+.infotip{position:relative;display:inline-grid;place-items:center;color:var(--fg2);cursor:help;outline:none}
+.infotip:hover::after,.infotip:focus::after{content:attr(data-tip);position:absolute;left:0;top:22px;z-index:30;width:260px;padding:8px 10px;background:#141414;color:#e5e5e5;border-radius:var(--r-soft);font-size:12px;font-weight:400;line-height:1.45;white-space:normal;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.infotip:focus-visible{outline:2px solid var(--accent);border-radius:50%}
+.ctip{background:#fff;border:1px solid var(--bs);border-radius:var(--r-soft);padding:8px 10px;box-shadow:0 4px 16px rgba(0,0,0,.12);font-size:12px}
+.crow3{display:flex;align-items:center;gap:6px;margin-top:2px}.crow3 i{width:8px;height:8px;border-radius:2px}.crow3 b{margin-left:auto;padding-left:14px;font-weight:600}
+.pop.goalp{width:240px;right:0;padding:12px;display:flex;flex-direction:column;gap:10px;top:28px}
+.pipe{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.prow4{display:grid;grid-template-columns:150px 1fr 76px 84px;gap:10px;align-items:center}
+.pbar{height:14px;background:var(--d5);border-radius:3px;overflow:hidden;display:block}.pbar i{display:block;height:100%;border-radius:3px}
+.pv{text-align:right;font-weight:500}.pn{font-size:12px;white-space:nowrap}
+.dstats{display:flex;gap:18px}.dstats div{display:flex;flex-direction:column;align-items:flex-end}.dstats b{font-weight:500;font-size:15px}.dstats span{font-size:12px;color:var(--fg2)}.dstats .neg b,.dstats .neg span{color:var(--danger)}
+.cohort{display:flex;flex-direction:column;gap:16px;margin-top:6px}
+.crow2{display:grid;grid-template-columns:180px 1fr 120px 120px;gap:12px;align-items:center}
+.dlist{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding:16px 4px}
+.dli{text-align:left;border:1px solid var(--bs);border-radius:var(--r-extra);background:var(--base);padding:16px;display:flex;flex-direction:column;gap:6px}.dli:hover{background:var(--accent-sub-h)}
+@media (max-width:1100px){.dgrid{grid-template-columns:1fr}.dlist{grid-template-columns:1fr}.crow2{grid-template-columns:1fr}}
+.clmore td{height:40px;text-align:center;background:var(--solid2);border-bottom:1px solid var(--bs)}
+
+/* rules: each one is approved by the user */
+.rules-card{border:1px solid var(--bs);border-radius:var(--r-extra);background:var(--solid2);padding:12px;display:flex;flex-direction:column;gap:10px}
+.rc-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.gwait{height:26px;padding:0 10px;border:1px solid #E8C98A;border-radius:var(--r-full);background:#FDF3E1;color:#7a5a12;font-weight:500;white-space:nowrap}.gwait:hover{background:#FBE9C4}
+.tagc.draft{display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 8px;border-radius:var(--r-soft);background:var(--d5);color:var(--fg1);font-weight:500;white-space:nowrap}
+
+/* a rule, laid out as If and Then */
+.rule-row{display:flex;flex-direction:column;gap:6px;padding:12px 14px 12px;border:1px solid var(--bs);border-radius:var(--r-card);background:var(--base)}
+.rule-row.focus{box-shadow:0 0 0 2px var(--accent)}
+.rr-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.rr-t{font-size:15px;line-height:1.45;padding-top:3px}.rr-t b{font-weight:600}
+.rr-s{display:flex;align-items:center;gap:10px;flex:none}
+.rr-k{font-size:13px;font-weight:500;color:var(--fg3);margin-top:6px}
+.rr-c{display:flex;gap:10px}
+.rr-line{width:2px;border-radius:2px;background:var(--bst);flex:none;margin-left:15px}
+.rr-item{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.rr-ic{width:32px;height:32px;border-radius:var(--r-soft);display:grid;place-items:center;flex:none}
+.rr-ic.cond{background:#E6E0F3;color:#4B3A85}.rr-ic.act{background:#DDEBDC;color:#2F5F33}
+.rr-tx{flex:1;min-width:0;font-size:14px;line-height:1.4}
+.srcchip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:0;border-radius:var(--r-soft);background:var(--d5);color:var(--fg1);white-space:nowrap;flex:none}
+.srcchip:hover{background:var(--d10)}
+.rr-eff{display:flex;gap:6px;align-items:flex-start;margin-top:8px;padding-top:8px;border-top:1px solid var(--bs);line-height:1.45}
+.rr-eff svg{flex:none;margin-top:2px}
+.toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:#141414;color:#e5e5e5;padding:8px 16px;border-radius:var(--r-soft);z-index:50;box-shadow:0 6px 8px rgba(0,0,0,.25);max-width:80vw}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}.sw span{transition:none}}
 @media (max-width:1000px){.shell{grid-template-columns:1fr}.sidecol{display:none}.cols,.hub,.two{grid-template-columns:1fr}.split{grid-template-columns:1fr}.crow{grid-template-columns:1fr}.hdr-c{display:none}}
 `;
