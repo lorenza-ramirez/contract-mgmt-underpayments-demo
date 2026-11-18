@@ -182,7 +182,9 @@ function makeClaim(i, forced) {
   if (!lineSpec) {
     if (apptType === "Evaluation") lineSpec = [["97161", 1]].concat(rnd() < 0.5 ? [["97140", 1]] : []);
     else {
-      const pool = ["97110", "97140", "97530", "97112"].sort(() => rnd() - 0.5).slice(0, 2 + Math.floor(rnd() * 3));
+      const all4 = ["97110", "97140", "97530", "97112"];
+      for (let k = all4.length - 1; k > 0; k--) { const j = Math.floor(rnd() * (k + 1)); const tmp = all4[k]; all4[k] = all4[j]; all4[j] = tmp; }   // a fixed shuffle, so every browser builds the same claims
+      const pool = all4.slice(0, 2 + Math.floor(rnd() * 3));
       lineSpec = pool.map((c) => [c, c === "97110" ? 1 + Math.floor(rnd() * 3) : 1 + Math.floor(rnd() * 2)]);
     }
   }
@@ -199,9 +201,9 @@ function makeClaim(i, forced) {
   let pattern = null;
   let paid = truth.slice();
   const roll = rnd();
-  if ((planKey === "choice" || planKey === "select") && dos < "2026-10-01" && (f.pattern === "escalator" || roll < 0.3)) { pattern = "escalator"; paid = expectedLines(claim, contract, ON_NOESC); }
-  else if (planKey === "summit" && claim.lines.some((l) => l.cq) && (f.pattern === "pta" || roll < 0.4)) { pattern = "pta"; paid = truth.map((t, k) => (claim.lines[k].cq ? r2(t * 0.85) : t)); }
-  else if (planKey === "keystone" && claim.lines.some((l) => l.cpt === "97110") && claim.lines.some((l) => l.cpt === "97530") && (f.pattern === "bundling" || roll < 0.45)) { pattern = "bundling"; paid = truth.map((t, k) => (claim.lines[k].cpt === "97530" ? 0 : t)); }
+  if ((planKey === "choice" || planKey === "select") && dos < "2026-10-01" && (f.pattern === "escalator" || roll < 0.10)) { pattern = "escalator"; paid = expectedLines(claim, contract, ON_NOESC); }
+  else if (planKey === "summit" && claim.lines.some((l) => l.cq) && (f.pattern === "pta" || roll < 0.20)) { pattern = "pta"; paid = truth.map((t, k) => (claim.lines[k].cq ? r2(t * 0.85) : t)); }
+  else if (planKey === "keystone" && claim.lines.some((l) => l.cpt === "97110") && claim.lines.some((l) => l.cpt === "97530") && (f.pattern === "bundling" || roll < 0.17)) { pattern = "bundling"; paid = truth.map((t, k) => (claim.lines[k].cpt === "97530" ? 0 : t)); }
   claim.lines.forEach((l, k) => { l.paid = paid[k]; });
   claim.pattern = pattern;
   claim.billed = claim.lines.reduce((s, l) => s + l.billed, 0);
