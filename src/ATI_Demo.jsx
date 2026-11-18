@@ -265,15 +265,25 @@ function derive(claim, contracts, ruleOn, appeals) {
 }
 
 /* ---------- AI calls ---------- */
+let LAST_AI_ERROR = "";
 async function callAI(system, content) {
   // In this repo the browser never holds an API key: requests go to the serverless function in /api/ai.js
-  const r = await fetch("/api/ai", {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1000, system, messages: [{ role: "user", content }] }),
-  });
-  if (!r.ok) throw new Error("api " + r.status);
-  const d = await r.json();
-  return (d.content || []).filter((b) => b.type === "text").map((b) => b.text).join("");
+  try {
+    const r = await fetch("/api/ai", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 3000, system, messages: [{ role: "user", content }] }),
+    });
+    if (!r.ok) {
+      let m = ""; try { const j = await r.json(); m = typeof j.error === "string" ? j.error : (j.error && j.error.message) || ""; } catch (e) { /* no body */ }
+      throw new Error(m || "the AI service answered " + r.status);
+    }
+    const d = await r.json();
+    return (d.content || []).filter((b) => b.type === "text").map((b) => b.text).join("");
+  } catch (e) {
+    const m = String((e && e.message) || e);
+    LAST_AI_ERROR = /failed to fetch|networkerror|load failed|abort/i.test(m) ? "the request was blocked or could not reach the AI service" : m;
+    throw e;
+  }
 }
 function parseJSON(t) {
   const c = t.replace(/```json|```/g, "").trim();
@@ -506,6 +516,19 @@ const SYS_GEN = "You extract structured data from healthcare payer and provider 
 const P_HEADER = `Read the opening pages of this contract. Return JSON: {"masterPayer":string,"provider":string,"effectiveStart":"YYYY-MM-DD" or null,"effectiveEnd":"YYYY-MM-DD" or null,"products":[string],"disputeDays":number or null,"filingDays":number or null}. masterPayer is the payer organization or brand, provider is the contracting provider group or facility, products are the lines of business covered, filingDays is the timely filing limit in days, disputeDays is the window in days to dispute a payment.`;
 const P_RATES = `This is one page of a contract. If it contains payment rates, return JSON: {"sched":string or null,"rows":[[service,codes,method,amount,pct,basis,year,product,src]]}. sched is the rate schedule title on the page. service is the service name. codes is the billing codes as written, shortened to 60 characters, or null. method is one of case_rate, per_diem, per_code, per_unit, per_visit, percent_of_fee_schedule, percent_of_billed_charges, other. amount is a dollar number or null. pct is a percent number or null. basis is the named fee schedule a percentage applies to, or null. year is the rate year as an integer if the page says Year 1, 2 or 3, else null. product is the product or line of business, or "All Products". src is an exact phrase of 3 to 8 words copied from the page that identifies the row. Return at most 22 rows. If the page has no rates return {"sched":null,"rows":[]}.`;
 const P_TERMS = `These are pages of a contract. Return JSON: {"terms":[[section,category,summary,src]]}. List terms about timely filing, payment disputes and appeals, term and termination, renewal, rate changes or escalators, license or state rules, authorization, audits and overpayments. category is one of Filing, Appeals, Termination, Rate, License, State, Authorization, Audit, Other. summary is under 18 words and includes any number of days. src is an exact phrase of 4 to 8 words copied from the text. At most 6 terms.`;
+/* The two generic sample contracts keep a saved extraction, so the demo never dead-ends when the AI is unreachable.
+   Real uploads never use this: if the AI is down for them, the app says so. */
+const OFFLINE_SAMPLES = [
+  { id: "northwind", match: (x) => /northwind health plan/i.test(x) && /exhibit a/i.test(x), marker: "EXHIBIT A. NORTHWIND RATES", sched: "Exhibit A. Northwind rates (Year 1)",
+    header: { masterPayer: "Northwind Health Plan", provider: "Ridgeline Physical Therapy Group", effectiveStart: "2025-07-01", effectiveEnd: "2028-06-30", products: ["Northwind PPO", "Northwind EPO"], disputeDays: 120, filingDays: 90 },
+    rows: [["Therapeutic exercise", "97110", "per_unit", 38.5, null, null, 1, "All Products", "CPT 97110 Therapeutic exercise, per unit"], ["Manual therapy", "97140", "per_unit", 36.2, null, null, 1, "All Products", "CPT 97140 Manual therapy, per unit"], ["Therapeutic activities", "97530", "per_unit", 41.8, null, null, 1, "All Products", "CPT 97530 Therapeutic activities, per unit"], ["Neuromuscular re-education", "97112", "per_unit", 40.1, null, null, 1, "All Products", "CPT 97112 Neuromuscular re-education, per unit"], ["Physical therapy evaluation, low complexity", "97161", "per_visit", 118, null, null, 1, "All Products", "CPT 97161 Physical therapy evaluation, low complexity"], ["Physical therapy evaluation, moderate complexity", "97162", "per_visit", 132, null, null, 1, "All Products", "CPT 97162 Physical therapy evaluation, moderate complexity"], ["Outpatient therapy", null, "percent_of_fee_schedule", null, 85, "Northwind Standard Fee Schedule", 1, "All Products", "85% of the Northwind Standard Fee Schedule"]],
+    terms: [["2.2", "Rate", "Rates in Exhibit A increase by 3% on July 1 of each contract year after the first.", "increase by 3% on July 1"], ["2.3", "License", "Services by a PTA billed with modifier CQ are paid at 85% of the Exhibit A rate.", "billed with modifier CQ are paid at 85%"], ["3.1", "Filing", "Claims must be submitted within 90 days of the date of service.", "submit each claim within 90 days"], ["3.2", "Appeals", "Payment disputes must be made in writing within 120 days of the remittance date.", "dispute a payment in writing within 120 days"], ["4.1", "Authorization", "Authorization is required beginning with visit 21 in each plan year.", "Authorization is required beginning with visit 21"], ["5.1", "Termination", "Either party may terminate without cause with 90 days written notice.", "terminate this Agreement without cause with 90 days"]] },
+  { id: "harbor", match: (x) => /harbor state health partners/i.test(x) && /schedule 1/i.test(x), marker: "SCHEDULE 1. HARBOR MEDICAID RATES", sched: "Schedule 1. Harbor Medicaid rates (Year 1)",
+    header: { masterPayer: "Harbor State Health Partners", provider: "Ridgeline Physical Therapy Group", effectiveStart: "2026-01-01", effectiveEnd: "2026-12-31", products: ["Harbor Medicaid"], disputeDays: 60, filingDays: 365 },
+    rows: [["Therapeutic exercise", "97110", "per_unit", 19.8, null, null, 1, "All Products", "CPT 97110 Therapeutic exercise, per unit"], ["Manual therapy", "97140", "per_unit", 18.9, null, null, 1, "All Products", "CPT 97140 Manual therapy, per unit"], ["Therapeutic activities", "97530", "per_unit", 22.6, null, null, 1, "All Products", "CPT 97530 Therapeutic activities, per unit"], ["Neuromuscular re-education", "97112", "per_unit", 21.7, null, null, 1, "All Products", "CPT 97112 Neuromuscular re-education, per unit"], ["Physical therapy evaluation", "97161", "per_visit", 62, null, null, 1, "All Products", "CPT 97161 Physical therapy evaluation, per visit"]],
+    terms: [["2.3", "License", "Services by a PTA are paid at 100% of the Schedule 1 rate.", "physical therapist assistant are paid at 100%"], ["3.1", "Filing", "Claims must be filed within 365 days of the date of service.", "filed within 365 days of the date"], ["3.2", "Appeals", "Payment appeals must be filed within 60 days of the remittance date.", "payment appeal within 60 days of the remittance"], ["4.1", "Authorization", "Prior authorization is required beyond the 24 visit annual limit.", "Prior authorization is required for visits beyond"], ["5.1", "Termination", "Either party may terminate without cause with 60 days written notice.", "terminate this Addendum without cause with 60 days"]] },
+];
+const offlineFor = (pageTexts) => { const all = pageTexts.join("\n"); return OFFLINE_SAMPLES.find((s) => s.match(all)) || null; };
 const GEN_METHODS = ["case_rate", "per_diem", "per_code", "per_unit", "per_visit", "percent_of_fee_schedule", "percent_of_billed_charges", "other"];
 const groupOf = (s) => (/medicare/i.test(s || "") ? "Medicare" : /medicaid/i.test(s || "") ? "Medicaid" : /all products/i.test(s || "") ? "All" : "Commercial");
 const unitSuffix = (r) => ({ per_visit: "per visit", per_diem: "per diem", case_rate: "per case", per_code: "per code per day" }[r.method] || "per unit");
@@ -844,7 +867,17 @@ function AddContractFlow({ mode = "pdf", onCancel, onPublish, setAiHook }) {
         });
       } catch (e) { /* terms are optional */ }
     }), 3);
-    if (!g.rows.length && !g.header) throw new Error("The AI could not read this contract");
+    if (!g.rows.length && !g.header) {
+      const fb = offlineFor(pageTexts);
+      if (!fb) throw new Error("The AI could not read this contract" + (LAST_AI_ERROR ? " (" + LAST_AI_ERROR + ")" : "") + ". Check that the AI is allowed to run, then try again.");
+      g.header = fb.header;
+      const find = (needle) => pageTexts.findIndex((p) => normStr(p).includes(normStr(needle))) + 1;
+      const rp = find(fb.marker) || Math.min(2, pageTexts.length);
+      fb.rows.forEach((a) => { const r = rowFrom(a, fb.sched, rp); if (r) g.rows.push(r); });
+      g.meta.readRate = [rp]; g.meta.failedRate = [];
+      fb.terms.forEach((a) => g.terms.push({ section: a[0], category: a[1], summary: a[2], src: a[3], page: find(a[3]) || 1 }));
+      return { contract: buildGeneric(g, s), kind: "generic", liveA: false, liveB: false };
+    }
     return { contract: buildGeneric(g, s), kind: "generic", liveA: true, liveB: true };
   }
   async function runItem(it) {
@@ -877,6 +910,8 @@ function AddContractFlow({ mode = "pdf", onCancel, onPublish, setAiHook }) {
     const reading = items.filter((i) => i.status === "reading").length;
     items.filter((i) => i.status === "queued" && !started.current.has(i.id)).slice(0, Math.max(0, 2 - reading)).forEach((i) => { started.current.add(i.id); patch(i.id, { status: "reading" }); runItem(i); });
   }, [items]);
+
+  function retryItem(it) { started.current.add(it.id); patch(it.id, { status: "reading", error: null, result: null, stage: 0 }); runItem(it); }
 
   async function readMore(id) {
     const g = gens.current[id]; const it = items.find((x) => x.id === id);
@@ -1071,7 +1106,7 @@ function AddContractFlow({ mode = "pdf", onCancel, onPublish, setAiHook }) {
           <div className="cmid">
             {cur && cur.status === "error" && (
               <div className="errbox card"><AlertTriangle size={18} className="warnc" /><div className="grow"><div className="b">This contract could not be read</div><div className="muted">{cur.name}: {cur.error}</div></div>
-                <button className="btn" onClick={() => removeItem(cur.id)}>Remove</button></div>
+                <div className="row gap"><button className="btn" onClick={() => retryItem(cur)}>Try again</button><button className="btn" onClick={() => removeItem(cur.id)}>Remove</button></div></div>
             )}
             {cur && (cur.status === "queued" || cur.status === "reading") && (
               <>
@@ -1095,7 +1130,7 @@ function AddContractFlow({ mode = "pdf", onCancel, onPublish, setAiHook }) {
                     <div className="b15">{pending ? `${pending} item${pending > 1 ? "s" : ""} need${pending > 1 ? "" : "s"} your review before you publish` : "Everything checks out. This contract is ready to publish"}</div>
                     <div>
                       {isGen
-                        ? `Athelas AI found ${contract.rows.length} rates and ${contract.terms.length} terms, reading ${contract.meta.readRate.length} of ${contract.meta.rateCands.length} rate pages. `
+                        ? `Athelas AI found ${contract.rows.length} rates and ${contract.terms.length} terms, reading ${contract.meta.readRate.length} of ${contract.meta.rateCands.length} rate pages. ${cur.result.liveA ? "" : "Live read unavailable, showing the cached extraction. "}`
                         : `Athelas AI found ${contract.plans.length} plans, ${contract.rows.length} rate rows and ${contract.terms.length} terms. ${cur.result.liveA && cur.result.liveB ? `Read live by Athelas AI in ${(cur.result.ms / 1000).toFixed(1)}s.` : "Live read unavailable, showing the cached extraction."} `}
                       Select anything below to see where it comes from in the document.
                     </div>

@@ -21,3 +21,10 @@ Import the repo in Vercel, add the `ANTHROPIC_API_KEY` environment variable, and
 - The browser never sees the key. `src/ATI_Demo.jsx` calls `/api/ai`, which forwards to the AI model API.
 - PDF pages are drawn with pdf.js, loaded from cdnjs when you first open a PDF.
 - Claims are synthetic and tied to the Cascadia sample contract.
+
+## Troubleshooting
+
+- A contract says "The AI could not read this contract": the message now ends with the reason.
+  "ANTHROPIC_API_KEY is not set" means the environment variable is missing in Vercel. Add it under Settings, Environment Variables, then redeploy.
+- To test the function directly, open `/api/ai` on your deployment. A "POST only" reply means the function is deployed.
+- The two sample contracts (Northwind and Harbor) fall back to a saved extraction when the AI is unavailable. Real uploads do not.

@@ -5,10 +5,11 @@ export default async function handler(req, res) {
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
     const { system, messages } = body || {};
+    const maxTokens = Math.min(Math.max(parseInt(body && body.max_tokens, 10) || 1000, 256), 4000);
     const upstream = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1000, system, messages }),
+      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: maxTokens, system, messages }),
     });
     const text = await upstream.text();
     res.status(upstream.status).setHeader("content-type", "application/json").send(text);
